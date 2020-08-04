@@ -7,6 +7,6 @@ exec @CLANG_BINARY@                             \
      -Xclang -load -Xclang "$PASS"              \
      "$@"                                       \
      -L"$RUNTIME"                               \
-     -lLartRuntime                              \
+     -llart-runtime                              \
      -Wl,-rpath,"$RUNTIME"                      \
      -Qunused-arguments

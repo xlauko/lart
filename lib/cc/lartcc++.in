@@ -24,6 +24,6 @@ exec @CLANGPP_BINARY@                           \
      "$@"                                       \
      $STDLIB_LDFLAGS                            \
      -L"$RUNTIME"                               \
-     -lLartRuntime                              \
+     -llart-runtime                              \
      -Wl,-rpath,"$RUNTIME"                      \
      -Qunused-arguments
