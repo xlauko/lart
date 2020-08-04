@@ -54,5 +54,15 @@ message( STATUS "Using LLVMConfig.cmake from ${LLVM_DIR}" )
 add_definitions( ${LLVM_DEFINITIONS} )
 include_directories( SYSTEM ${LLVM_INCLUDE_DIRS} )
 
+find_program( CLANG_BINARY "clang"
+  HINTS ${LLVM_TOOLS_BINARY_DIR}
+  DOC "The clang binary to use in the lart wrapper script.")
+find_program( CLANGPP_BINARY "clang++"
+  HINTS ${LLVM_TOOLS_BINARY_DIR}
+  DOC "The clang binary to use in the lart++ wrapper script.")
+if ( NOT CLANG_BINARY )
+  message( FATAL_ERROR "Clang not found; please make sure that the version corresponding to your LLVM installation is available." )
+endif()
+
 add_subdirectory( lib )
 add_subdirectory( test )

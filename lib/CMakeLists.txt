@@ -1,1 +1,1 @@
-add_subdirectory( instrumentation )
+add_subdirectory( cc )
