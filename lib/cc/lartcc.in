@@ -1,1 +1,12 @@
 #!/bin/bash
+
+RUNTIME="@LART_RUNTIME_DIR@"
+PASS="@CMAKE_CURRENT_BINARY_DIR@/libcc.so"
+
+exec @CLANG_BINARY@                             \
+     -Xclang -load -Xclang "$PASS"              \
+     "$@"                                       \
+     -L"$RUNTIME"                               \
+     -lLartRuntime                              \
+     -Wl,-rpath,"$RUNTIME"                      \
+     -Qunused-arguments
