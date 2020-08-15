@@ -1,0 +1,3 @@
+[submodule "external/sc"]
+	path = external/sc
+	url = git@github.com:xlauko/llvm-sc.git

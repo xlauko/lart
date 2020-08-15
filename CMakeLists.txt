@@ -64,5 +64,7 @@ if ( NOT CLANG_BINARY )
   message( FATAL_ERROR "Clang not found; please make sure that the version corresponding to your LLVM installation is available." )
 endif()
 
+
+add_subdirectory( external/sc )
 add_subdirectory( lib )
 add_subdirectory( test )

@@ -16,22 +16,15 @@
 
 #pragma once
 
-#include "driver.hpp"
+#include <llvm/IR/Module.h>
 
-#include <llvm/Pass.h>
 namespace lart
 {
-    struct pass : llvm::ModulePass
+    struct driver
     {
-        static char ID;
+        explicit driver( llvm::Module &m ) : module( m ) {}
 
-        pass() : llvm::ModulePass( ID ) {}
-
-        bool doInitialization( llvm::Module &m ) override;
-        bool runOnModule( llvm::Module &m ) override;
-
-    private:
-        std::unique_ptr< driver > _driver;
+        llvm::Module &module;
     };
 
 } // namespace lart

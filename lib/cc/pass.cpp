@@ -16,13 +16,24 @@
 
 #include "pass.hpp"
 
+#include "stats.hpp"
+
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 namespace lart
 {
+    bool pass::doInitialization( llvm::Module &m )
+    {
+        DEBUG_WITH_TYPE( "lart", dbgs() << "initialize lart\n" );
+        _driver = std::make_unique< driver >( m );
+
+        return true;
+    }
+
     bool pass::runOnModule( llvm::Module & )
     {
+        DEBUG_WITH_TYPE( "lart", dbgs() << "run lart\n" );
         return true;
     }
 

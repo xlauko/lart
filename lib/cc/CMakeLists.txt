@@ -3,6 +3,8 @@ add_library( cc MODULE
     pass.cpp
 )
 
+target_link_libraries( cc PRIVATE llvmsc )
+
 if( NOT LLVM_ENABLE_RTTI )
   set_target_properties( instrumentation PROPERTIES COMPILE_FLAGS "-fno-rtti" )
 endif()
