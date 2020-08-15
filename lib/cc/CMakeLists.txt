@@ -1,5 +1,6 @@
 add_library( cc MODULE
-    passes.cpp
+    driver.cpp
+    pass.cpp
 )
 
 if( NOT LLVM_ENABLE_RTTI )
