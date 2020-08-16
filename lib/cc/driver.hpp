@@ -26,6 +26,8 @@ namespace lart
     {
         explicit driver( llvm::Module &m ) : sc::with_context( m ), module( m ) {}
 
+        bool run();
+
         llvm::Module &module;
     };
 

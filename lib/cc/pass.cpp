@@ -34,7 +34,7 @@ namespace lart
     bool pass::runOnModule( llvm::Module & )
     {
         DEBUG_WITH_TYPE( "lart", dbgs() << "run lart\n" );
-        return true;
+        return _driver->run();
     }
 
     void regiter_pass( const llvm::PassManagerBuilder &, llvm::legacy::PassManagerBase &pm )

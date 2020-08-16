@@ -14,5 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "driver.hpp"
 namespace lart
-{} // namespace lart
+{
+    bool driver::run()
+    {
+        return true;
+    }
+
+} // namespace lart
