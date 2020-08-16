@@ -16,13 +16,15 @@
 
 #pragma once
 
+#include "sc/init.hpp"
+
 #include <llvm/IR/Module.h>
 
 namespace lart
 {
-    struct driver
+    struct driver : sc::with_context
     {
-        explicit driver( llvm::Module &m ) : module( m ) {}
+        explicit driver( llvm::Module &m ) : sc::with_context( m ), module( m ) {}
 
         llvm::Module &module;
     };
