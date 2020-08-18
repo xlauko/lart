@@ -15,6 +15,7 @@
  */
 
 #include <cc/annotations.hpp>
+#include <numeric>
 
 namespace lart
 {
@@ -23,5 +24,12 @@ namespace lart
         return _parts.back();
     }
 
-    std::string annotation::str() const {}
+    std::string annotation::str() const
+    {
+        auto delim = []( const auto &a, const auto &b ) {
+            return a + ( a.length() > 0 ? "." : "" ) + b;
+        };
+        return std::accumulate( _parts.begin(), _parts.end(), std::string(), delim );
+    }
+
 } // namespace lart

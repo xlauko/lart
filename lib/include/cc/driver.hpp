@@ -16,9 +16,8 @@
 
 #pragma once
 
-#include "sc/init.hpp"
-
 #include <llvm/IR/Module.h>
+#include <sc/init.hpp>
 
 namespace lart
 {
