@@ -15,14 +15,13 @@
  */
 
 #include <cc/annotations.hpp>
-#include <cc/driver.hpp>
 
 namespace lart
 {
-    bool driver::run()
+    const std::string &annotation::back() const
     {
-        annotations::lower( module );
-        return true;
+        return _parts.back();
     }
 
+    std::string annotation::str() const {}
 } // namespace lart
