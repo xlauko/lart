@@ -1,0 +1,18 @@
+import sys
+
+config.llvm_tools_dir = "@LART_LLVM_INSTALL_DIR@/bin"
+config.llvm_shlib_ext = "@LART_TEST_SHLIBEXT@"
+config.llvm_shlib_dir = "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
+
+config.my_src_root = r'@CMAKE_CURRENT_SOURCE_DIR@'
+config.my_obj_root = r'@CMAKE_CURRENT_BINARY_DIR@'
+
+import lit.llvm
+# lit_config is a global instance of LitConfig
+lit.llvm.initialize(lit_config, config)
+
+# test_exec_root: The root path where tests should be run.
+config.test_exec_root = os.path.join(config.my_obj_root)
+
+# Let the main config do the real work.
+lit_config.load_config(config, os.path.join(config.my_src_root, "lit.cfg.py"))
