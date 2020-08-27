@@ -35,7 +35,8 @@ namespace lart
         return _driver->run();
     }
 
-    void regiter_pass( const llvm::PassManagerBuilder &, llvm::legacy::PassManagerBase &pm )
+    void regiter_pass( const llvm::PassManagerBuilder &,
+                       llvm::legacy::PassManagerBase &pm )
     {
         pm.add( new lart::pass() );
     }
@@ -45,7 +46,7 @@ namespace lart
 } // namespace lart
 
 static llvm::RegisterPass< lart::pass > X( "lart", "Abstraction Pass" );
-static struct llvm::RegisterStandardPasses Y( llvm::PassManagerBuilder::EP_VectorizerStart,
-                                              lart::regiter_pass );
-static struct llvm::RegisterStandardPasses Z( llvm::PassManagerBuilder::EP_EnabledOnOptLevel0,
-                                              lart::regiter_pass );
+static struct llvm::RegisterStandardPasses
+    Y( llvm::PassManagerBuilder::EP_VectorizerStart, lart::regiter_pass );
+static struct llvm::RegisterStandardPasses
+    Z( llvm::PassManagerBuilder::EP_EnabledOnOptLevel0, lart::regiter_pass );
