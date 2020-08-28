@@ -29,7 +29,7 @@ namespace lart
 
     namespace tag
     {
-        constexpr ctag_t none = "lart.none";
+        constexpr ctag_t abstract = "lart.abtract";
 
         namespace noalias
         {
@@ -37,11 +37,6 @@ namespace lart
             constexpr ctag_t arg    = "lart.noalias.arg";
             constexpr ctag_t ret    = "lart.noalias.ret";
         } // namespace noalias
-
-        namespace function
-        {
-            constexpr ctag_t arguments = "lart.function.argument.tags";
-        } // namespace function
 
         namespace transform
         {

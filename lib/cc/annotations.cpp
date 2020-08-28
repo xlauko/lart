@@ -24,7 +24,7 @@ namespace lart
     template< typename Value > void annotation_to_metadata( tag_t ns, llvm::Module &m )
     {
         for ( const auto &[ val, ann ] : sc::annotation::enumerate< Value >( m ) )
-            sc::meta::set( val, ann.str(), tag::none );
+            sc::meta::set( val, ann.str() );
     }
 
     template< typename Value >
@@ -34,6 +34,11 @@ namespace lart
             sc::meta::set( val, ns, ann.name() );
     }
 
-    void annotations::lower( llvm::Module &m ) {}
+    void annotations::lower( llvm::Module &m )
+    {
+        annotation_to_domain_metadata< llvm::Function >( tag::abstract, m );
+        annotation_to_metadata< llvm::Function >( tag::transform::prefix, m );
+        annotation_to_metadata< llvm::Function >( tag::noalias::prefix, m );
+    }
 
 } // namespace lart
