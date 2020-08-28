@@ -16,9 +16,24 @@
 
 #include <cc/annotations.hpp>
 #include <numeric>
+#include <sc/annotation.hpp>
+#include <sc/meta.hpp>
 
 namespace lart
 {
-    void annotations::lower( llvm::Module & ) {}
+    template< typename Value > void annotation_to_metadata( tag_t ns, llvm::Module &m )
+    {
+        for ( const auto &[ val, ann ] : sc::annotation::enumerate< Value >( m ) )
+            sc::meta::set( val, ann.str(), tag::none );
+    }
+
+    template< typename Value >
+    void annotation_to_domain_metadata( tag_t ns, llvm::Module &m )
+    {
+        for ( const auto &[ val, ann ] : sc::annotation::enumerate< Value >( m ) )
+            sc::meta::set( val, ns, ann.name() );
+    }
+
+    void annotations::lower( llvm::Module &m ) {}
 
 } // namespace lart

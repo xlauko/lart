@@ -29,6 +29,8 @@ namespace lart
 
     namespace tag
     {
+        constexpr ctag_t none = "lart.none";
+
         namespace noalias
         {
             constexpr ctag_t prefix = "lart.noalias";
