@@ -4,6 +4,8 @@ add_library( lart
     annotations.cpp
 )
 
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines" )
+
 target_include_directories( lart
   PUBLIC
     ${PROJECT_SOURCE_DIR}/lib/include
