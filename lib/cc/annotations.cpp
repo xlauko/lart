@@ -15,9 +15,12 @@
  */
 
 #include <cc/annotations.hpp>
+#include <llvm/IR/Instructions.h>
 #include <numeric>
+#include <queue>
 #include <sc/annotation.hpp>
 #include <sc/meta.hpp>
+#include <sc/case.hpp>
 
 namespace lart
 {
@@ -39,6 +42,35 @@ namespace lart
         annotation_to_domain_metadata< llvm::Function >( tag::abstract, m );
         annotation_to_metadata< llvm::Function >( tag::transform::prefix, m );
         annotation_to_metadata< llvm::Function >( tag::noalias::prefix, m );
+
+        std::queue< sc::annotated< llvm::Value * > > worklist;
+
+        for ( auto &fn : m )
+            if ( auto meta = sc::meta::get( &fn, tag::abstract ) )
+                for ( auto *user : fn.users() )
+                    worklist.emplace( user, meta.value() );
+
+        while ( !worklist.empty() ) {
+            const auto &[ val, ann ] = worklist.front();
+            sc::llvmcase( val,
+                [ ann = ann, &worklist ]( llvm::CastInst *cst ) {
+                    for ( auto *u : cst->users() )
+                        worklist.emplace( u, ann );
+                },
+                [ ann = ann, &worklist ]( llvm::ConstantExpr *ce ) {
+                    for ( auto *u : ce->users() )
+                        worklist.emplace( u, ann );
+                },
+                [ ann = ann ]( llvm::CallInst *call ) {
+                    sc::meta::set( call, tag::abstract, ann.name() );
+                },
+                [ ann = ann ]( llvm::InvokeInst *call ) {
+                    sc::meta::set( call, tag::abstract, ann.name() );
+                } 
+            );
+
+            worklist.pop();
+        }
     }
 
 } // namespace lart
