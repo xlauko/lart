@@ -56,20 +56,6 @@ namespace lart
 
     } // namespace tag
 
-    struct annotation
-    {
-        template< typename... parts_t > constexpr explicit annotation( parts_t... parts )
-        {
-            ( _parts.push_back( parts ), ... );
-        }
-
-        const std::string &back() const;
-
-        std::string str() const;
-
-        std::vector< std::string > _parts;
-    };
-
     struct annotations
     {
         static void lower( llvm::Module &m );
