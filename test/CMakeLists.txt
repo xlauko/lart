@@ -9,14 +9,12 @@ target_sources( larttests
 )
 
 target_link_libraries( larttests PRIVATE lart )
+target_link_libraries( larttests PRIVATE lart_project_options lart_project_warnings )
 
 target_include_directories( larttests
     PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
             $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
 )
-
-
-target_compile_features( larttests PRIVATE cxx_std_20 )
 
 target_compile_options(
     larttests
