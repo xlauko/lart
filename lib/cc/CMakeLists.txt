@@ -11,9 +11,8 @@ target_include_directories( lart
     ${PROJECT_SOURCE_DIR}/lib/include
 )
 
-target_link_libraries( lart PRIVATE llvmsc )
-
-target_compile_features( lart PRIVATE cxx_std_20 )
+target_link_libraries( lart PRIVATE llvmsc::llvmsc )
+target_link_libraries( lart PRIVATE lart_project_options lart_project_warnings )
 
 if( NOT LLVM_ENABLE_RTTI )
   set_target_properties( lart PROPERTIES COMPILE_FLAGS "-fno-rtti" )
