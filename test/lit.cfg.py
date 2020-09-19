@@ -49,7 +49,7 @@ else:
 llvm_config.add_tool_substitutions(tool_substitutions)
 
 # The list of tools required for testing - prepend them with the path specified
-# during configuration (i.e. LART_LLVM_TOOLS_DIR/bin)
+# during configuration (i.e. LLVM_TOOLS_DIR/bin)
 tools = ["opt", "lli", "not", "FileCheck", "clang"]
 llvm_config.add_tool_substitutions(tools, config.llvm_tools_dir)
 
