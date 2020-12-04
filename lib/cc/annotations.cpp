@@ -24,7 +24,7 @@
 
 namespace lart
 {
-    template< typename Value > void annotation_to_metadata( tag_t ns, llvm::Module &m )
+    template< typename Value > void annotation_to_metadata( tag_t /*ns*/, llvm::Module &m )
     {
         for ( const auto &[ val, ann ] : sc::annotation::enumerate< Value >( m ) )
             sc::meta::set( val, ann.str() );
@@ -66,7 +66,7 @@ namespace lart
                 },
                 [ ann = ann ]( llvm::InvokeInst *call ) {
                     sc::meta::set( call, tag::abstract, ann.name() );
-                } 
+                }
             );
 
             worklist.pop();

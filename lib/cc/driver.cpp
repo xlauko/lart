@@ -22,6 +22,7 @@ namespace lart
     bool driver::run()
     {
         annotations::lower( module );
+        module.dump();
         return true;
     }
 

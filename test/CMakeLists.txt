@@ -8,8 +8,10 @@ target_sources( larttests
     src/annotations.cpp
 )
 
-target_link_libraries( larttests PRIVATE lart )
+target_link_libraries( larttests PRIVATE lart_static )
 target_link_libraries( larttests PRIVATE lart_project_options lart_project_warnings )
+
+enable_sanitizers( larttests )
 
 target_include_directories( larttests
     PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

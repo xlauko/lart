@@ -25,7 +25,6 @@ namespace lart
     {
         DEBUG_WITH_TYPE( "lart", dbgs() << "initialize lart\n" );
         _driver = std::make_unique< driver >( m );
-
         return true;
     }
 

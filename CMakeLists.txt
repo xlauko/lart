@@ -35,8 +35,8 @@ include( cmake/compiler_warnings.cmake )
 set_project_warnings( lart_project_warnings )
 
 # sanitizer options if supported by compiler
-include( cmake/sanitizers.cmake )
-enable_sanitizers( lart_project_options )
+# include( cmake/sanitizers.cmake )
+# enable_sanitizers( lart_project_options )
 
 # clang time profiling
 if ( CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" )
@@ -101,4 +101,4 @@ enable_testing()
 
 add_subdirectory( external/sc )
 add_subdirectory( lib )
-add_subdirectory( test )
+# add_subdirectory( test )
