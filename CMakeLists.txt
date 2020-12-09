@@ -73,7 +73,7 @@ endif()
 # find_package can locate it)
 list( APPEND CMAKE_PREFIX_PATH "${LLVM_INSTALL_DIR}/lib/cmake/llvm/" )
 
-find_package( LLVM REQUIRED CONFIG )
+find_package( LLVM REQUIRED CONFIG 10.0 )
 
 message( STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}" )
 message( STATUS "Using LLVMConfig.cmake from ${LLVM_DIR}" )
