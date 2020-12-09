@@ -99,6 +99,6 @@ add_custom_target( lit
 
 enable_testing()
 
-add_subdirectory( external/sc )
+add_subdirectory( external )
 add_subdirectory( lib )
 # add_subdirectory( test )
