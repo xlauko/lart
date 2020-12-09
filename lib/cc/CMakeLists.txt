@@ -13,7 +13,9 @@ target_include_directories( lart
     ${PROJECT_SOURCE_DIR}/lib/include
 )
 
-target_link_libraries( lart PRIVATE llvmsc::llvmsc )
+add_dependencies( lart svflib )
+
+target_link_libraries( lart PRIVATE llvmsc::llvmsc svf::svf )
 target_link_libraries( lart PRIVATE lart_project_options lart_project_warnings )
 
 if( NOT LLVM_ENABLE_RTTI )
@@ -21,7 +23,7 @@ if( NOT LLVM_ENABLE_RTTI )
 endif()
 
 add_library( lart_module MODULE $<TARGET_OBJECTS:lart> )
-target_link_libraries( lart_module PRIVATE llvmsc::llvmsc )
+target_link_libraries( lart_module PRIVATE llvmsc::llvmsc svf::svf )
 target_link_libraries( lart_module PRIVATE lart_project_options lart_project_warnings )
 
 add_library( lart_static STATIC $<TARGET_OBJECTS:lart> )
