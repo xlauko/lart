@@ -19,6 +19,7 @@
 #include <cc/tristate.hpp>
 
 #include <vector>
+#include <cassert>
 
 namespace lart
 {
@@ -36,7 +37,7 @@ namespace lart
         friend auto operator<<( stream &s, type_layer t ) -> decltype( s << "" )
         {
             return s << "ptr:" << t.pointer
-                    << " abs:" << t.abstract;
+                     << " abs:" << t.abstract;
         }
     };
 
@@ -46,5 +47,75 @@ namespace lart
     }
 
     using type_vector = std::vector< type_layer >;
+
+    struct type_onion : type_vector
+    {
+        type_onion( size_t ptr_nest )
+            : type_vector( ptr_nest + 1, type_layer( true, false ) )
+        {
+            front() = type_layer( false, false );
+        }
+
+        type_onion( const type_vector &l ) : type_vector( l ) {}
+        type_onion( std::initializer_list< type_layer > il ) : type_vector( il ) {}
+
+        type_onion make_abstract() const
+        {
+            auto rv = *this;
+            rv.back().abstract = tristate(true);
+            return rv;
+        }
+
+        type_onion make_pointer() const
+        {
+            auto rv = *this;
+            rv.back().pointer = tristate(true);
+            return rv;
+        }
+
+        type_onion make_abstract_pointer() const
+        {
+            auto on = this->make_abstract().make_pointer();
+            on.front().abstract = tristate::maybe;
+            on.front().pointer = tristate::maybe;
+            return on;
+        }
+
+        bool maybe_abstract() const
+        {
+            tristate r( false );
+            for ( auto a : *this )
+                r = join( r, a.abstract );
+            return r.value != tristate::no;
+        }
+
+        bool maybe_pointer() const
+        {
+            tristate r( false );
+            for ( auto a : *this )
+                r = join( r, a.pointer );
+            return r.value != tristate::no;
+        }
+
+        type_onion wrap() const
+        {
+            auto rv = *this;
+            rv.emplace_back( true, false );
+            return rv;
+        }
+
+        type_onion peel() const
+        {
+            auto rv = *this;
+            if ( size() == 1 )
+                rv.front().pointer = tristate::maybe;
+            else
+            {
+                assert( back().pointer != tristate( false ) );
+                rv.pop_back();
+            }
+            return rv;
+        }
+    };
 
 } // namespace lart
