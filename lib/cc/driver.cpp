@@ -1,5 +1,5 @@
 /*
- * (c) 2020 Henrich Lauko <xlauko@mail.muni.cz>
+ * (c) 2020, 2021 Henrich Lauko <xlauko@mail.muni.cz>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -62,6 +62,13 @@ namespace lart
 
     bool driver::run()
     {
+        //auto svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
+
+        auto svf = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(module);
+        SVF::PAGBuilder builder;
+		auto pag = builder.build(svf);
+		pag->dump("pag");
+
         // 1. process annotations
         for (auto root : roots(module)) {
             root->dump();
