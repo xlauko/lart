@@ -41,4 +41,12 @@ namespace lart
                 }
         }
     };
+
+    inline tristate join( tristate a, tristate b )
+    {
+        if ( a.value == b.value )
+            return a;
+        return tristate( tristate::maybe );
+    }
+
 } // namespace lart
