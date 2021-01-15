@@ -22,7 +22,7 @@ namespace lart
     {
         enum { no, yes, maybe } value;
         explicit tristate( bool v ) : value( v ? yes : no ) {}
-        explicit tristate( decltype( value ) v ) : value( v ) {}
+        tristate( decltype( value ) v ) : value( v ) {}
 
         auto operator<=>( const tristate & ) const = default;
 
