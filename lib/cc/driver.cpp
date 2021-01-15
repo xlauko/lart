@@ -15,6 +15,7 @@
  */
 
 #include <cc/driver.hpp>
+#include <cc/dfa.hpp>
 
 #include <svf/SVF-FE/LLVMUtil.h>
 #include <svf/Graphs/SVFG.h>
@@ -23,9 +24,6 @@
 #include <svf/SVF-FE/PAGBuilder.h>
 #include <svf/SVF-FE/LLVMModule.h>
 
-#include <sc/annotation.hpp>
-#include <sc/case.hpp>
-
 #include <ranges>
 #include <queue>
 #include <vector>
@@ -33,33 +31,6 @@
 
 namespace lart
 {
-    std::set< llvm::CallSite > roots( llvm::Module &m )
-    {
-        auto ns = sc::annotation("lart", "abstract", "return");
-        auto annotated = sc::annotation::enumerate_in_namespace< llvm::Function >(ns, m);
-
-        std::queue< llvm::Value* > worklist;
-        auto transitive_users = [&] (auto val) {
-            for ( auto user : val->users() )
-                worklist.emplace( user );
-        };
-
-        for ( auto fn : annotated | std::views::keys )
-            transitive_users(fn);
-
-        std::set< llvm::CallSite > result;
-        while ( !worklist.empty() ) {
-            sc::llvmcase( worklist.front(),
-                [&] ( llvm::CastInst *c )     { transitive_users(c); },
-                [&] ( llvm::ConstantExpr *c ) { transitive_users(c); },
-                [&] ( llvm::CallInst *c )     { result.insert(c); },
-                [&] ( llvm::InvokeInst * c)   { result.insert(c); }
-            );
-            worklist.pop();
-        }
-        return result;
-    }
-
     bool driver::run()
     {
         //auto svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
@@ -69,11 +40,8 @@ namespace lart
 		auto pag = builder.build(svf);
 		pag->dump("pag");
 
-        // 1. process annotations
-        for (auto root : roots(module)) {
-            root->dump();
-        }
-        // 2. DFA
+        // propagate abstraction type from annotated roots
+        data_flow_analysis::run_on( module );
 
         // 3. syntactic pass ?
 
