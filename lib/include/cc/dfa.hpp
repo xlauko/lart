@@ -18,8 +18,13 @@
 
 #include <cc/tristate.hpp>
 
+#include <llvm/IR/Value.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/Function.h>
+
 #include <vector>
 #include <cassert>
+#include <unordered_map>
 
 namespace lart
 {
@@ -117,5 +122,67 @@ namespace lart
             return rv;
         }
     };
+
+    inline type_onion join( type_onion a, type_onion b )
+    {
+        if ( a.size() > b.size() )
+            std::swap( a, b );
+
+        if ( a.size() < b.size() )
+        {
+            for ( size_t i = 0; i < b.size() - a.size(); ++i )
+                a.front() = join( a.front(), b[ i ] );
+            a.front().pointer = tristate::maybe;
+        }
+
+        for ( size_t i = 0; i < a.size(); ++i )
+            a[ i ] = join( a[ i ], b[ i + b.size() - a.size() ] );
+
+        return a;
+    }
+
+    using onion_map = std::unordered_map< llvm::Value *, type_onion >;
+
+    enum class abstract_kind { scalar, pointer };
+
+    struct type_map : onion_map
+    {
+        using onion_map::count;
+        using onion_map::emplace;
+        using onion_map::insert_or_assign;
+
+        size_t pointer_nesting( llvm::Type *t ) const noexcept
+        {
+            size_t rv = 0;
+            while ( t->isPointerTy() )
+                ++rv, t = t->getPointerElementType();
+            return rv;
+        }
+
+        void add( llvm::Value * v, abstract_kind kind )
+        {
+            switch ( kind ) {
+            case abstract_kind::scalar:
+                get( v ).make_abstract(); break;
+            case abstract_kind::pointer:
+                get( v ).make_abstract_pointer(); break;
+            }
+        }
+
+        [[nodiscard]] type_onion& get( llvm::Value * v )
+        {
+            if ( !count( v ) ) {
+                auto ty = v->getType();
+                if ( auto fn = llvm::dyn_cast< llvm::Function >( v ) )
+                    ty = fn->getReturnType();
+                emplace( v, type_onion( pointer_nesting( ty ) ) );
+            }
+            return this->at( v );
+        }
+
+        type_onion& operator[]( llvm::Value * v ) { return get( v ); }
+        const type_onion& operator[]( llvm::Value * v ) const { return this->at( v ); }
+    };
+
 
 } // namespace lart
