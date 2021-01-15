@@ -39,7 +39,7 @@ namespace lart
         __builtin_unreachable();
     }
 
-    inline roots_map roots( llvm::Module &m )
+    inline roots_map gather_roots( llvm::Module &m )
     {
         auto ns = sc::annotation("lart", "abstract", "return");
         auto annotated = sc::annotation::enumerate_in_namespace< llvm::Function >(ns, m);
