@@ -17,10 +17,14 @@
 #pragma once
 
 #include <cc/tristate.hpp>
+#include <cc/roots.hpp>
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Function.h>
+#include <llvm/IR/Module.h>
+
+#include <sc/init.hpp>
 
 #include <vector>
 #include <cassert>
@@ -143,8 +147,6 @@ namespace lart
 
     using onion_map = std::unordered_map< llvm::Value *, type_onion >;
 
-    enum class abstract_kind { scalar, pointer };
-
     struct type_map : onion_map
     {
         using onion_map::count;
@@ -184,5 +186,23 @@ namespace lart
         const type_onion& operator[]( llvm::Value * v ) const { return this->at( v ); }
     };
 
+    struct data_flow_analysis : sc::with_context
+    {
+        explicit data_flow_analysis( llvm::Module &m )
+            : sc::with_context( m ), module( m ) {}
+
+        static void run_on( llvm::Module &m )
+        {
+            data_flow_analysis dfa( m );
+            dfa.run_from( roots( m ) );
+        }
+
+        void run_from( const roots_map & )
+        {
+
+        }
+
+        llvm::Module &module;
+    };
 
 } // namespace lart
