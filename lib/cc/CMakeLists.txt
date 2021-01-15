@@ -2,7 +2,6 @@ add_library( lart
   OBJECT
     driver.cpp
     pass.cpp
-    annotations.cpp
 )
 
 set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)
