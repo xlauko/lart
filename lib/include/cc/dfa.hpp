@@ -18,6 +18,7 @@
 
 #include <cc/tristate.hpp>
 #include <cc/roots.hpp>
+#include <cc/util.hpp>
 
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Type.h>
@@ -25,9 +26,11 @@
 #include <llvm/IR/Module.h>
 
 #include <sc/init.hpp>
+#include <sc/format.hpp>
 
 #include <vector>
 #include <cassert>
+#include <iostream>
 #include <unordered_map>
 
 namespace lart
@@ -194,13 +197,44 @@ namespace lart
         static void run_on( llvm::Module &m )
         {
             data_flow_analysis dfa( m );
-            dfa.run_from( roots( m ) );
+            dfa.run_from( gather_roots( m ) );
         }
 
-        void run_from( const roots_map & )
+        struct edge
         {
+            enum class type { uniform, load, store };
 
+            llvm::Value * from;
+            llvm::Value * to;
+            type ty;
+        };
+
+        template< typename stream >
+        friend auto operator<<( stream &s, edge e ) -> decltype( s << "" )
+        {
+            auto llvm_place = [] ( llvm::Value * v ) -> std::string {
+                if ( auto glob = llvm::isa< llvm::GlobalVariable >( v ) )
+                    return "global";
+                if ( llvm::isa< llvm::Function >( v ) )
+                    return "function";
+                if ( llvm::isa< llvm::ConstantExpr >( v ) )
+                    return "cexpr";
+                if ( util::is_one_of< llvm::Argument, llvm::Instruction >( v ) )
+                    return sc::get_function( v )->getName().str();
+                __builtin_unreachable();
+            };
+
+            auto pf = llvm_place( e.from );
+            auto pt = llvm_place( e.to );
+
+            if ( pf == pt )
+                return s << pf << ":" << sc::fmt::llvm_name( e.from ) << " → " << sc::fmt::llvm_name( e.to );
+            return s << pf << ":" << sc::fmt::llvm_name( e.from ) << " → " << pt << ":" << sc::fmt::llvm_name( e.to );
         }
+
+        using edges_t = std::vector< edge >;
+
+        void run_from( const roots_map &roots );
 
         llvm::Module &module;
     };

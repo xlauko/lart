@@ -15,3 +15,13 @@
  */
 
 #include <cc/dfa.hpp>
+
+namespace lart {
+
+    void data_flow_analysis::run_from( const roots_map &roots )
+    {
+        for ( const auto&[k, v] : roots ) {
+            k->dump();
+        }
+    }
+} // namespace lart
