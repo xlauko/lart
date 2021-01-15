@@ -1,6 +1,7 @@
 add_library( lart
   OBJECT
     driver.cpp
+    dfa.cpp
     pass.cpp
 )
 
