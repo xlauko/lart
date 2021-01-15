@@ -16,12 +16,73 @@
 
 #include <cc/dfa.hpp>
 
-namespace lart {
+#include <cc/logger.hpp>
 
-    void data_flow_analysis::run_from( const roots_map &roots )
+namespace lart::detail
+{
+    void dataflow_analysis::preprocess( llvm::Function * ) const {}
+    void dataflow_analysis::push( edge &&e ) noexcept
     {
-        for ( const auto&[k, v] : roots ) {
-            k->dump();
-        }
+        spdlog::info( "push {}", e );
+        worklist.push( e );
     }
-} // namespace lart
+
+    void dataflow_analysis::push( llvm::Value *v ) noexcept
+    {
+        if ( llvm::isa< llvm::ConstantData >( v ) )
+            return; //ignore
+
+        if ( util::is_one_of< llvm::Instruction, llvm::Argument >( v ) )
+            preprocess( sc::get_function( v ) );
+
+        for ( auto && e : edges( v ) )
+            push( std::move( e ) );
+    }
+
+    auto dataflow_analysis::pop() noexcept -> edge
+    {
+        auto e = worklist.front();
+        worklist.pop();
+        spdlog::info( "pop {}", e );
+        return e;
+    }
+
+    edges_t dataflow_analysis::edges( llvm::Value * ) const
+    {
+        return {};
+    }
+
+    void dataflow_analysis::run_from( const roots_map &roots )
+    {
+        // TODO obtain AA
+
+        /*using lart::tag::enumerate;
+        for ( auto r : enumerate( m, tag::abstract ) ) {
+            types.emplace( r, type_from_meta( r ) );
+            push( r );
+        }
+
+        for ( auto & fn : m ) {
+            if ( lart::tag::has( &fn, tag::abstract ) )
+                types.emplace( &fn, type_from_meta( &fn ) );
+        }
+
+        while ( !worklist.empty() )
+            process( pop() );*/
+
+        // abstract_meta( types, dfg, cr ).attach( m );
+
+        for ( const auto&[k, v] : roots ) {
+            push( k.getInstruction() );
+        }
+
+        while ( !worklist.empty() )
+            process( pop() );
+    }
+
+    void dataflow_analysis::process( edge &&/*e*/ )
+    {
+
+    }
+
+} // namespace lart::detail

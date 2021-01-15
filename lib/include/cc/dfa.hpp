@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cc/tristate.hpp>
+#include <cc/logger.hpp>
 #include <cc/roots.hpp>
 #include <cc/util.hpp>
 
@@ -34,6 +35,9 @@
 #include <unordered_map>
 
 namespace lart
+{
+
+namespace detail
 {
     struct type_layer
     {
@@ -189,25 +193,13 @@ namespace lart
         const type_onion& operator[]( llvm::Value * v ) const { return this->at( v ); }
     };
 
-    struct data_flow_analysis : sc::with_context
+    struct edge
     {
-        explicit data_flow_analysis( llvm::Module &m )
-            : sc::with_context( m ), module( m ) {}
+        enum class type { uniform, load, store };
 
-        static void run_on( llvm::Module &m )
-        {
-            data_flow_analysis dfa( m );
-            dfa.run_from( gather_roots( m ) );
-        }
-
-        struct edge
-        {
-            enum class type { uniform, load, store };
-
-            llvm::Value * from;
-            llvm::Value * to;
-            type ty;
-        };
+        llvm::Value * from;
+        llvm::Value * to;
+        type ty;
 
         template< typename stream >
         friend auto operator<<( stream &s, edge e ) -> decltype( s << "" )
@@ -228,15 +220,51 @@ namespace lart
             auto pt = llvm_place( e.to );
 
             if ( pf == pt )
-                return s << pf << ":" << sc::fmt::llvm_name( e.from ) << " → " << sc::fmt::llvm_name( e.to );
-            return s << pf << ":" << sc::fmt::llvm_name( e.from ) << " → " << pt << ":" << sc::fmt::llvm_name( e.to );
+                return s << pf << ":" << sc::fmt::llvm_name( e.from ) << " → "
+                        << sc::fmt::llvm_name( e.to );
+            return s << pf << ":" << sc::fmt::llvm_name( e.from ) << " → "
+                    << pt << ":" << sc::fmt::llvm_name( e.to );
         }
+    };
 
-        using edges_t = std::vector< edge >;
+    using edges_t = std::vector< edge >;
+
+    struct dataflow_analysis : sc::with_context
+    {
+        explicit dataflow_analysis( llvm::Module &m )
+            : sc::with_context( m ), module( m ) {}
+
+        void push( edge &&e ) noexcept;
+        void push( llvm::Value *v ) noexcept;
+        edge pop() noexcept;
+
+        void process( edge &&e );
+
+        edges_t edges( llvm::Value * v ) const;
+
+        void preprocess( llvm::Function * ) const;
 
         void run_from( const roots_map &roots );
 
+        std::queue< edge > worklist;
+
         llvm::Module &module;
+    };
+
+} // namespace lart::detail
+
+    struct dataflow_analysis
+    {
+        explicit dataflow_analysis( llvm::Module &m ) : impl( m ) {}
+
+        static void run_on( llvm::Module &m )
+        {
+            spdlog::info( "start dataflow analysis" );
+            dataflow_analysis dfa( m );
+            dfa.impl.run_from( gather_roots( m ) );
+        }
+
+        detail::dataflow_analysis impl;
     };
 
 } // namespace lart

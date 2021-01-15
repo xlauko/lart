@@ -36,6 +36,7 @@ namespace lart
     bool driver::run()
     {
         spdlog::cfg::load_env_levels();
+        spdlog::info("start lartcc pass");
 
         // propagate abstraction type from annotated roots
         dataflow_analysis::run_on( module );
