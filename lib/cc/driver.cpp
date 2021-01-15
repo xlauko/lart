@@ -29,19 +29,20 @@
 #include <vector>
 #include <iostream>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuseless-cast"
+#include "spdlog/spdlog.h"
+#include "spdlog/cfg/env.h"
+#pragma GCC diagnostic pop
+
 namespace lart
 {
     bool driver::run()
     {
-        //auto svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
-
-        auto svf = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(module);
-        SVF::PAGBuilder builder;
-		auto pag = builder.build(svf);
-		pag->dump("pag");
+        spdlog::cfg::load_env_levels();
 
         // propagate abstraction type from annotated roots
-        data_flow_analysis::run_on( module );
+        dataflow_analysis::run_on( module );
 
         // 3. syntactic pass ?
 
