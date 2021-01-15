@@ -15,7 +15,9 @@
  */
 
 #include <cc/driver.hpp>
+
 #include <cc/dfa.hpp>
+#include <cc/logger.hpp>
 
 #include <svf/SVF-FE/LLVMUtil.h>
 #include <svf/Graphs/SVFG.h>
@@ -28,12 +30,6 @@
 #include <queue>
 #include <vector>
 #include <iostream>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#include "spdlog/spdlog.h"
-#include "spdlog/cfg/env.h"
-#pragma GCC diagnostic pop
 
 namespace lart
 {
