@@ -242,6 +242,7 @@ namespace detail
         void process( edge &&e );
 
         edges_t edges( llvm::Value * v ) const;
+        edges_t induced_edges( llvm::Value * lhs, llvm::Value * rhs ) const;
 
         void preprocess( llvm::Function * ) const;
 
