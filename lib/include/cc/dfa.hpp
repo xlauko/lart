@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cc/preprocess.hpp>
 #include <cc/tristate.hpp>
 #include <cc/logger.hpp>
 #include <cc/roots.hpp>
@@ -232,7 +233,7 @@ namespace detail
     struct dataflow_analysis : sc::with_context
     {
         explicit dataflow_analysis( llvm::Module &m )
-            : sc::with_context( m ), module( m ) {}
+            : sc::with_context( m ), module( m ), prep( m ) {}
 
         void push( edge &&e ) noexcept;
         void push( llvm::Value *v ) noexcept;
@@ -247,8 +248,10 @@ namespace detail
         void run_from( const roots_map &roots );
 
         std::queue< edge > worklist;
+        type_map types;
 
         llvm::Module &module;
+        preprocessor prep;
     };
 
 } // namespace lart::detail
@@ -261,7 +264,8 @@ namespace detail
         {
             spdlog::info( "start dataflow analysis" );
             dataflow_analysis dfa( m );
-            dfa.impl.run_from( gather_roots( m ) );
+            auto roots = gather_roots( m );
+            dfa.impl.run_from( roots );
         }
 
         detail::dataflow_analysis impl;

@@ -16,30 +16,21 @@
 
 #pragma once
 
-#include <llvm/Support/raw_ostream.h>
+#include <sc/init.hpp>
 
-namespace lart::util
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Module.h>
+
+namespace lart
 {
-    template< typename... Ts >
-    bool is_one_of( llvm::Value *v ) {
-        return ( llvm::isa< Ts >( v ) || ... );
-    }
 
-    // Type is not under Value, therefore we need separate function
-    template< typename ... Ts >
-    bool is_one_of_types( llvm::Type *t )
+    struct preprocessor : sc::with_context
     {
-        return ( llvm::isa< Ts >( t ) || ... );
-    }
+        explicit preprocessor( llvm::Module &m ) : sc::with_context( m ), module( m ) {}
 
-    inline bool tag_function_with_metadata( llvm::Function &fn, std::string tag ) {
-        if ( fn.getMetadata( tag ) )
-            return false;
-        auto & ctx = fn.getContext();
-        auto dummy = llvm::MDString::get( ctx, "dummy" );
-        auto meta = llvm::MDTuple::get( ctx , { dummy } );
-        fn.setMetadata( tag, meta );
-        return true;
-    }
+        void run( llvm::Function * );
+
+        llvm::Module &module;
+    };
 
 } // namespace lart

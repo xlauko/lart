@@ -20,7 +20,6 @@
 
 namespace lart::detail
 {
-    void dataflow_analysis::preprocess( llvm::Function * ) const {}
     void dataflow_analysis::push( edge &&e ) noexcept
     {
         spdlog::info( "push {}", e );
@@ -33,7 +32,7 @@ namespace lart::detail
             return; //ignore
 
         if ( util::is_one_of< llvm::Instruction, llvm::Argument >( v ) )
-            preprocess( sc::get_function( v ) );
+            prep.run( sc::get_function( v ) );
 
         for ( auto && e : edges( v ) )
             push( std::move( e ) );
@@ -65,10 +64,8 @@ namespace lart::detail
         for ( auto & fn : m ) {
             if ( lart::tag::has( &fn, tag::abstract ) )
                 types.emplace( &fn, type_from_meta( &fn ) );
-        }
+        }*/
 
-        while ( !worklist.empty() )
-            process( pop() );*/
 
         // abstract_meta( types, dfg, cr ).attach( m );
 

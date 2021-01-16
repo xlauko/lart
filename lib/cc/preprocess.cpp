@@ -14,32 +14,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#pragma once
+#include <cc/preprocess.hpp>
 
-#include <llvm/Support/raw_ostream.h>
+#include <cc/util.hpp>
+#include <cc/logger.hpp>
 
-namespace lart::util
+
+namespace lart
 {
-    template< typename... Ts >
-    bool is_one_of( llvm::Value *v ) {
-        return ( llvm::isa< Ts >( v ) || ... );
-    }
-
-    // Type is not under Value, therefore we need separate function
-    template< typename ... Ts >
-    bool is_one_of_types( llvm::Type *t )
+    void preprocessor::run( llvm::Function *fn )
     {
-        return ( llvm::isa< Ts >( t ) || ... );
-    }
+        if ( !util::tag_function_with_metadata( *fn, "lart.abstract.preprocessed" ) )
+            return;
 
-    inline bool tag_function_with_metadata( llvm::Function &fn, std::string tag ) {
-        if ( fn.getMetadata( tag ) )
-            return false;
-        auto & ctx = fn.getContext();
-        auto dummy = llvm::MDString::get( ctx, "dummy" );
-        auto meta = llvm::MDTuple::get( ctx , { dummy } );
-        fn.setMetadata( tag, meta );
-        return true;
+        spdlog::info( "preprocess {}", fn->getName().str() );
     }
-
-} // namespace lart
+}

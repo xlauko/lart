@@ -3,6 +3,7 @@ add_library( lart
     driver.cpp
     dfa.cpp
     pass.cpp
+    preprocess.cpp
 )
 
 set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)
