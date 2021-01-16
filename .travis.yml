@@ -1,1 +1,30 @@
 language: cpp
+sudo: required
+
+services:
+- docker
+
+env:
+  global:
+    - secure: yjIfGPjOmZo/mayD+j4cthbrCAo08ORvLVPzdRLyGGnq1LtiYlo+GnDEFmR//aH54DAKuESQlax7sK9Ly9C/RirRuOMWn+L1t4Z+6erFg4Ieqv3rzyK5TyRMYANRwWlgPgDHx34HUs9JF8Bf6wBR5ufhcjP06GilVFYDRGmpLUSEs8YvAdXq6eWFz6R0dVaGve57GzQFC/r4fAzrfPDZvISb1XbGHM8aBdHcxeLJVwfio0+lNPmFNClFYhH0dDSpqdXYi+8b+vbAfmw0kCuzSWSiv2cvCy+yvQW9muivZzzBx9KhDZppreoTshIKlBmfmh2TzMj4Stw4xnj8jSLDXWIZtNCuA3lPUTdJ88KgPZumDOvNPwgbSDT0WTLWa33zWtjZryl+sq2rtvzyN7+uCys2Kn18BeuHYSjA9f+N7Gi9blh7kG9d5dvBvGL6JrOtRWHQKwLJVFxmTeMGan/gwoWEoECNzV+wAQSN4yGcZUhhesqNxscEhKP7ZWLhNOHiIoLWbw38iU2A5fGS+bE7eRyZqj0dj8MK/sngt0KhoFki+oMKUt5G9COqUzSStcVvo2UPjZNV7Ng1oenHeCSU7C+F/x4zIRto77zvLvQoBooGsXisdbG7cFYtMWfhOR5b1pK/eIb83lIxEEo3spStSfAfE8Bzu02zTuK68I6xw5o=
+
+    - DOCKER_USER=xheno
+
+before_script:
+  - docker pull xheno/lart || true
+
+script:
+  - docker build --pull --cache-from xheno/lart --tag xheno/lart .
+  - docker run xheno/lart
+
+after_script:
+  - docker images
+
+before_deploy:
+  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+
+deploy:
+  provider: script
+  script: docker push xheno/lart
+  on:
+    branch: master
