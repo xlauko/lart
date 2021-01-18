@@ -49,6 +49,6 @@ RUN cmake -S . -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_INSTALL_DIR="/usr/src/llvm"
 
-cmake --build build
+RUN cmake --build build
 
 LABEL Name=lart Version=0.1.0
