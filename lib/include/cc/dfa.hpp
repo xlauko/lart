@@ -169,13 +169,14 @@ namespace detail
             return rv;
         }
 
-        void add( llvm::Value * v, abstract_kind kind )
+        type_onion add( llvm::Value * v, abstract_kind kind )
         {
             switch ( kind ) {
             case abstract_kind::scalar:
-                get( v ).make_abstract(); break;
+                return get( v ).make_abstract();
             case abstract_kind::pointer:
-                get( v ).make_abstract_pointer(); break;
+                return get( v ).make_abstract_pointer();
+            default: __builtin_unreachable();
             }
         }
 

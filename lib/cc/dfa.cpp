@@ -199,22 +199,17 @@ namespace lart::detail
     {
         // TODO obtain AA
 
-        /*using lart::tag::enumerate;
-        for ( auto r : enumerate( m, tag::abstract ) ) {
-            types.emplace( r, type_from_meta( r ) );
-            push( r );
-        }
-
-        for ( auto & fn : m ) {
+        /* for ( auto & fn : m ) {
             if ( lart::tag::has( &fn, tag::abstract ) )
                 types.emplace( &fn, type_from_meta( &fn ) );
         }*/
 
-
         // abstract_meta( types, dfg, cr ).attach( m );
 
-        for ( const auto&[k, v] : roots ) {
-            push( k.getInstruction() );
+        for ( const auto&[call, kind] : roots ) {
+            auto inst = call.getInstruction();
+            types.add( inst, kind );
+            push( inst );
         }
 
         while ( !worklist.empty() )
