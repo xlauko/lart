@@ -21,6 +21,8 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
 
+#include <string>
+
 namespace lart
 {
 
@@ -28,7 +30,11 @@ namespace lart
     {
         explicit preprocessor( llvm::Module &m ) : sc::with_context( m ), module( m ) {}
 
-        void run( llvm::Function * );
+        void run( llvm::Function *fn );
+
+        void lower_cmps( llvm::Function *fn );
+
+        inline static const std::string tag = "lart.abstract.preprocessed";
 
         llvm::Module &module;
     };
