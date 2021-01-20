@@ -35,10 +35,11 @@ namespace lart
         friend auto operator<<( stream &s, tristate t ) -> decltype( s << "" )
         {
             switch ( t.value ) {
-                    case no: return s << "no";
-                    case yes: return s << "yes";
-                    case maybe: return s << "maybe";
-                }
+                case no: return s << "no";
+                case yes: return s << "yes";
+                case maybe: return s << "maybe";
+                default: __builtin_unreachable();
+            }
         }
     };
 
