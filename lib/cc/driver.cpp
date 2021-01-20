@@ -19,13 +19,6 @@
 #include <cc/dfa.hpp>
 #include <cc/logger.hpp>
 
-#include <svf/SVF-FE/LLVMUtil.h>
-#include <svf/Graphs/SVFG.h>
-#include <svf/WPA/Andersen.h>
-#include <svf/SABER/LeakChecker.h>
-#include <svf/SVF-FE/PAGBuilder.h>
-#include <svf/SVF-FE/LLVMModule.h>
-
 #include <ranges>
 #include <queue>
 #include <vector>
