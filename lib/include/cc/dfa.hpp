@@ -31,6 +31,7 @@
 #include <sc/format.hpp>
 
 #include <vector>
+#include <ranges>
 #include <cassert>
 #include <iostream>
 #include <unordered_map>
@@ -132,6 +133,15 @@ namespace detail
                 rv.pop_back();
             }
             return rv;
+        }
+
+        template< typename stream >
+        friend auto operator<<( stream &s, type_onion t ) -> decltype( s << "" )
+        {
+            s << '[';
+            std::ranges::copy(t, std::ostream_iterator<type_layer>(s, ", "));
+            s << "]";
+            return s;
         }
     };
 
