@@ -17,6 +17,7 @@
 #include <cc/driver.hpp>
 
 #include <cc/dfa.hpp>
+#include <cc/syntactic.hpp>
 #include <cc/logger.hpp>
 
 #include <ranges>
@@ -32,9 +33,11 @@ namespace lart
         spdlog::info("start lartcc pass");
 
         // propagate abstraction type from annotated roots
-        dataflow_analysis::run_on( module );
+        auto map = dfa::analysis::run_on( module );
 
-        // 3. syntactic pass ?
+        // 3. syntactic pass
+        syntactic syn;
+        syn.toprocess( map );
 
         /* Abstract IR */
 
