@@ -28,57 +28,30 @@
 
 namespace lart::aa
 {
-    struct analysis
+    struct andersen
     {
-        explicit analysis( llvm::Module *m ) : module( m ) {}
-
-        inline void update( llvm::Module *m ) { module = m; }
-
-        SVF::PAG * pag();
-
-        llvm::Module * module = nullptr;
-    };
-
-    struct andersen : analysis
-    {
-        explicit andersen( llvm::Module *m ) : analysis( m ) {}
-
-        using analysis::pag;
-
-        inline void update( llvm::Module *m )
+        void init( SVF::PAG * pag )
         {
-            result = nullptr;
-            analysis::update( m );
+            pta = SVF::AndersenWaveDiff::createAndersenWaveDiff( pag );
         }
 
-        inline void analyze()
+        inline auto node( const llvm::Value *value )
         {
-            spdlog::info("run alias analysis");
-            result = SVF::AndersenWaveDiff::createAndersenWaveDiff( pag() );
-        }
-
-        inline auto node( llvm::Value *value )
-        {
-            if ( !result )
-                analyze();
-            return result->getPAG()->getValueNode(value);
+            return pta->getPAG()->getValueNode(value);
         }
 
         template< typename T > using generator = cppcoro::generator< T >;
 
-        inline generator< const llvm::Value * > pointsto( llvm::Value *value )
+        inline generator< llvm::Value * > pointsto( llvm::Value *value )
         {
-            auto to_llvm = [&] (auto pts) {
-                return result->getPAG()->getPAGNode(pts)->getValue();
-            };
-
-            auto n = node(value);
-            for (auto pts : result->getPts(n)) {
-                co_yield to_llvm(pts);
+            for (auto pts : pta->getPts( node( value ) ) ) {
+                auto target = pta->getPAG()->getPAGNode(pts);
+                if ( target->hasValue() )
+                    co_yield const_cast< llvm::Value * >( target->getValue() );
             }
         }
 
-        SVF::AndersenWaveDiff * result = nullptr;
+        SVF::AndersenWaveDiff * pta = nullptr;
     };
 
 } // namespace lart::aa

@@ -16,19 +16,7 @@
 
 #include <cc/alias.hpp>
 
-#include <svf/SVF-FE/PAGBuilder.h>
-#include <svf/SVF-FE/LLVMModule.h>
-
 namespace lart::aa
 {
-    SVF::SVFModule * svf_module( llvm::Module &m )
-    {
-        return SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(m);
-    }
-
-    SVF::PAG * analysis::pag()
-    {
-        return SVF::PAGBuilder().build(svf_module(*module));
-    }
 
 } // namespace lart::aa
