@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cc/alias.hpp>
 #include <cc/preprocess.hpp>
 #include <cc/tristate.hpp>
 #include <cc/logger.hpp>
@@ -34,6 +35,7 @@
 #include <ranges>
 #include <cassert>
 #include <iostream>
+#include <experimental/iterator>
 #include <unordered_map>
 
 namespace lart
@@ -139,7 +141,7 @@ namespace detail
         friend auto operator<<( stream &s, type_onion t ) -> decltype( s << "" )
         {
             s << '[';
-            std::ranges::copy(t, std::ostream_iterator<type_layer>(s, ", "));
+            std::copy(t.begin(), t.end(), std::experimental::make_ostream_joiner(s, ", "));
             s << "]";
             return s;
         }
@@ -244,7 +246,8 @@ namespace detail
     struct dataflow_analysis : sc::with_context
     {
         explicit dataflow_analysis( llvm::Module &m )
-            : sc::with_context( m ), module( m ), prep( m ) {}
+            : sc::with_context( m ), module( m ), prep( m )
+        {}
 
         void push( edge &&e ) noexcept;
         void push( llvm::Value *v ) noexcept;
@@ -252,8 +255,8 @@ namespace detail
 
         void process( edge &&e );
 
-        edges_t edges( llvm::Value * v ) const;
-        edges_t induced_edges( llvm::Value * lhs, llvm::Value * rhs ) const;
+        edges_t edges( llvm::Value * v );
+        edges_t induced_edges( llvm::Value * lhs, llvm::Value * rhs );
 
         void preprocess( llvm::Function * ) const;
 
@@ -261,6 +264,8 @@ namespace detail
 
         std::queue< edge > worklist;
         type_map types;
+
+        aa::andersen aliases;
 
         llvm::Module &module;
         preprocessor prep;

@@ -16,8 +16,14 @@
 
 #include <cc/dfa.hpp>
 
+#include <cc/alias.hpp>
 #include <cc/util.hpp>
 #include <cc/logger.hpp>
+
+#include <svf/SVF-FE/PAGBuilder.h>
+#include <svf/SVF-FE/LLVMModule.h>
+#include <svf/WPA/Andersen.h>
+
 
 #include <llvm/IR/IntrinsicInst.h>
 
@@ -49,7 +55,7 @@ namespace lart::detail
         return e;
     }
 
-    edges_t dataflow_analysis::edges( llvm::Value *v ) const
+    edges_t dataflow_analysis::edges( llvm::Value *v )
     {
         edges_t edges;
 
@@ -126,14 +132,14 @@ namespace lart::detail
             return abstract_function( sc::get_function( value ) );
         };*/
 
-        auto users = [&] ( auto node ) -> std::vector< llvm::Value * > {
+        auto users = [&] ( auto val ) {
             /*if ( auto aml = dfg.gv_to_aml( node ) )
                 return query::query( aml->succs )
                     .filter( std::not_fn( in_abstractable_function ) )
                     .filter( std::not_fn( in_lava ) )
                     .filter( std::not_fn( in_lamp ) )
                     .freeze();*/
-            return { node->users().begin(), node->users().end() };
+            return val->users();
         };
 
         for ( auto u : users( v ) )
@@ -142,13 +148,13 @@ namespace lart::detail
         return edges;
     }
 
-    edges_t dataflow_analysis::induced_edges( llvm::Value * lhs, llvm::Value * rhs ) const
+    edges_t dataflow_analysis::induced_edges( llvm::Value * lhs, llvm::Value * rhs )
     {
         using type = edge::type;
 
         auto unif_edge =  [] ( auto l, auto r ) { return edge{ l, r, type::uniform }; };
         auto load_edge =  [] ( auto l, auto r ) { return edge{ l, r, type::load }; };
-        //auto store_edge = [] ( auto l, auto r ) { return edge{ l, r, type::store }; };
+        auto store_edge = [] ( auto l, auto r ) { return edge{ l, r, type::store }; };
 
         edges_t edges;
 
@@ -167,15 +173,14 @@ namespace lart::detail
             [&] ( llvm::ConstantExpr * )      { push( unif_edge( lhs, rhs ) ); },
             [&] ( llvm::GlobalVariable * )    { push( unif_edge( lhs, rhs ) ); },
             [&] ( llvm::LoadInst * )          { push( load_edge( lhs, rhs ) ); },
-            [&] ( llvm::StoreInst * )
+            [&] ( llvm::StoreInst * s )
             {
-                /*if ( lhs == s->getValueOperand() )
+                if ( lhs == s->getValueOperand() )
                 {
-                    auto amls = dfg.get( s->getPointerOperand() );
-                    for ( auto aml : amls )
-                        push( store_edge( lhs, aml->gv ) );
-                    stores.insert( s );
-                }*/
+                    for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
+                        push( store_edge( lhs, p ) );
+                    // TODO: stores.insert( s );
+                }
             },
             [&] ( llvm::ReturnInst * r )
             {
@@ -197,8 +202,15 @@ namespace lart::detail
 
     void dataflow_analysis::run_from( const roots_map &roots )
     {
-        // TODO obtain AA
+        spdlog::info( "setup svf module" );
+        auto svfmodule = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule( module );
+        assert( svfmodule != nullptr && "SVF Module is null" );
 
+        SVF::PAGBuilder builder;
+        auto pag = builder.build( svfmodule );
+        assert( pag != nullptr && "SVF Module is null" );
+
+        aliases.init( pag );
         /* for ( auto & fn : m ) {
             if ( lart::tag::has( &fn, tag::abstract ) )
                 types.emplace( &fn, type_from_meta( &fn ) );
@@ -207,7 +219,7 @@ namespace lart::detail
         // abstract_meta( types, dfg, cr ).attach( m );
 
         for ( const auto&[call, kind] : roots ) {
-            auto inst = call.getInstruction();
+            auto *inst = call.getInstruction();
             types.add( inst, kind );
             push( inst );
         }
@@ -216,9 +228,33 @@ namespace lart::detail
             process( pop() );
     }
 
-    void dataflow_analysis::process( edge &&/*e*/ )
+    void dataflow_analysis::process( edge &&e )
     {
+        auto to = types[ e.to ];
+        auto from = types[ e.from ];
 
+        auto push_change = [&] ( auto val, auto type ) {
+            if ( auto [it,change] = types.insert_or_assign( val, type ); change )
+                push( val );
+        };
+
+        auto peel = [&] ( auto v ) { return types[ v ].peel(); };
+        auto wrap = [&] ( auto v ) { return types[ v ].peel(); };
+
+        auto joined = [&] () -> type_onion {
+            switch ( e.ty ) {
+                case edge::type::uniform:
+                    if ( llvm::isa< llvm::CmpInst >( e.to ) )
+                        return type_onion{ join( to.back(), from.back() ) };
+                    return join( to, from );
+                case edge::type::load:     return join( to, peel( e.from ) );
+                case edge::type::store:    return join( to, wrap( e.from ) );
+                default: __builtin_unreachable();
+            }
+        } ();
+
+        spdlog::info( "\t {} v {} = {}", from, to, joined );
+        push_change( e.to, joined );
     }
 
 } // namespace lart::detail
