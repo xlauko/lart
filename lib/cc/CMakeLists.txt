@@ -5,6 +5,7 @@ add_library( lart
     dfa.cpp
     pass.cpp
     preprocess.cpp
+    syntactic.cpp
 )
 
 set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)
