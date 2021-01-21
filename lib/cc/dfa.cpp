@@ -27,7 +27,7 @@
 
 #include <llvm/IR/IntrinsicInst.h>
 
-namespace lart::detail
+namespace lart::dfa::detail
 {
     void dataflow_analysis::push( edge &&e ) noexcept
     {
@@ -200,7 +200,7 @@ namespace lart::detail
         return edges;
     }
 
-    void dataflow_analysis::run_from( const roots_map &roots )
+    type_map dataflow_analysis::run_from( const roots_map &roots )
     {
         spdlog::info( "setup svf module" );
         auto svfmodule = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule( module );
@@ -226,6 +226,8 @@ namespace lart::detail
 
         while ( !worklist.empty() )
             process( pop() );
+
+        return types;
     }
 
     void dataflow_analysis::process( edge &&e )
@@ -257,4 +259,4 @@ namespace lart::detail
         push_change( e.to, joined );
     }
 
-} // namespace lart::detail
+} // namespace lart::dfa::detail

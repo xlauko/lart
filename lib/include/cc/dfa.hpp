@@ -38,7 +38,7 @@
 #include <experimental/iterator>
 #include <unordered_map>
 
-namespace lart
+namespace lart::dfa
 {
 
 namespace detail
@@ -183,13 +183,16 @@ namespace detail
 
         type_onion add( llvm::Value * v, abstract_kind kind )
         {
+            auto &onion = get( v );
             switch ( kind ) {
             case abstract_kind::scalar:
-                return get( v ).make_abstract();
+                onion = onion.make_abstract(); break;
             case abstract_kind::pointer:
-                return get( v ).make_abstract_pointer();
+                onion = onion.make_abstract_pointer(); break;
             default: __builtin_unreachable();
             }
+
+            return onion;
         }
 
         [[nodiscard]] type_onion& get( llvm::Value * v )
@@ -260,7 +263,7 @@ namespace detail
 
         void preprocess( llvm::Function * ) const;
 
-        void run_from( const roots_map &roots );
+        type_map run_from( const roots_map &roots );
 
         std::queue< edge > worklist;
         type_map types;
@@ -273,19 +276,21 @@ namespace detail
 
 } // namespace lart::detail
 
-    struct dataflow_analysis
-    {
-        explicit dataflow_analysis( llvm::Module &m ) : impl( m ) {}
+    using types = detail::type_map;
 
-        static void run_on( llvm::Module &m )
+    struct analysis
+    {
+        explicit analysis( llvm::Module &m ) : impl( m ) {}
+
+        static types run_on( llvm::Module &m )
         {
             spdlog::info( "start dataflow analysis" );
-            dataflow_analysis dfa( m );
+            analysis dfa( m );
             auto roots = gather_roots( m );
-            dfa.impl.run_from( roots );
+            return dfa.impl.run_from( roots );
         }
 
         detail::dataflow_analysis impl;
     };
 
-} // namespace lart
+} // namespace lart::dfa
