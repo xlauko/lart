@@ -19,6 +19,7 @@
 #include <cc/dfa.hpp>
 #include <cc/operation.hpp>
 
+#include <optional>
 #include <vector>
 
 namespace lart
@@ -38,7 +39,7 @@ namespace lart
             : sc::with_context( m ), types( t ), module( m )
         {}
 
-        operation make_operation( llvm::Value *value );
+        std::optional< operation > make_operation( llvm::Value *value );
 
         std::vector< operation > toprocess();
         void process( const operation & op );

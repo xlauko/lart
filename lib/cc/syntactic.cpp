@@ -28,10 +28,17 @@ namespace lart
     {
         return static_cast< bool >( type.back().pointer );
     }
-    operation syntactic::make_operation( llvm::Value *val )
+
+    bool is_lamp_call( llvm::CallSite call )
     {
-        operation result;
-        val->dump();
+        if ( call.isIndirectCall() )
+            return false;
+        return call.getCalledFunction()->getName().startswith( "__lamp" );
+    }
+
+    std::optional< operation > syntactic::make_operation( llvm::Value *val )
+    {
+        std::optional< operation > result;
         sc::llvmcase( val,
             [&] ( llvm::AllocaInst * ) {
                 if ( is_abstract_pointer(types[val]) )
@@ -45,9 +52,6 @@ namespace lart
             },
             [&] ( llvm::BinaryOperator * ) {
                 result = op::binary( val );
-            },
-            [&] ( llvm::Value * ) {
-                __builtin_unreachable();
             }
         );
         return result;
@@ -57,7 +61,8 @@ namespace lart
     {
         std::vector< operation > ops;
         for ( const auto &[val, type] : types )
-            ops.emplace_back( make_operation(val) );
+            if ( auto op = make_operation(val); op.has_value() )
+                ops.emplace_back( op.value() );
 
         for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
             store->dump();
