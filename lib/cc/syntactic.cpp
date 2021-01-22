@@ -20,14 +20,39 @@
 
 namespace lart
 {
-    std::vector< operation > syntactic::toprocess( dfa::types map )
+
+    bool is_abstract_pointer( const dfa::types::type &type )
     {
-        for ( const auto &[val, type] : map ) {
-            spdlog::info("process {} -> {}", sc::fmt::llvm_name(val), type);
-        }
-        return {};
+        return static_cast< bool >( type.back().pointer );
     }
 
-    void syntactic::process( const operation & ) {}
+    std::vector< operation > syntactic::toprocess( dfa::types map )
+    {
+        std::vector< operation > ops;
+        for ( const auto &[val, type] : map ) {
+            sc::llvmcase( val,
+                [&] ( llvm::AllocaInst * ) {
+                    if ( is_abstract_pointer(type) ) {
+                        ops.emplace_back( op::alloc(val) );
+                    }
+                },
+                [&] ( llvm::LoadInst * ) {
+                    if ( is_abstract_pointer(type) )
+                        ops.emplace_back( op::load(val) );
+                    else
+                        ops.emplace_back( op::melt(val) );
+                },
+                [&] ( llvm::BinaryOperator * ) {
+                    ops.emplace_back( op::binary( val ) );
+                }
+            );
+        }
+        return ops;
+    }
+
+    void syntactic::process( const operation & )
+    {
+
+    }
 
 } // namespace lart

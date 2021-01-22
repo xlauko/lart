@@ -23,13 +23,12 @@
 
 namespace lart
 {
-    using op = operation::type;
+    using operation = lart::op::operation;
 
     // location where to instrument abstract operation for concrete value
     struct location
     {
         llvm::Value * value = nullptr;
-        op type = op::invalid;
         llvm::Instruction * where = nullptr;
     };
 
