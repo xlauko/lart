@@ -32,10 +32,18 @@ namespace lart
         llvm::Instruction * where = nullptr;
     };
 
-    struct syntactic
+    struct syntactic : sc::with_context
     {
-        std::vector< operation > toprocess( dfa::types annotated );
+        explicit syntactic( llvm::Module &m, const dfa::types &t )
+            : sc::with_context( m ), types( t ), module( m )
+        {}
 
+        operation make_operation( llvm::Value *value );
+
+        std::vector< operation > toprocess();
         void process( const operation & op );
+
+        const dfa::types &types;
+        llvm::Module &module;
     };
 } // namespace lart

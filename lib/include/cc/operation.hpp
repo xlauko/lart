@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <cc/dfa.hpp>
+
 #include <llvm/IR/Value.h>
 #include <variant>
 namespace lart::op
@@ -41,7 +43,7 @@ namespace lart::op
     struct store  : base {};
     struct load   : base {};
 
-    using operation = std::variant<
+    using operation = std::variant< std::monostate,
         melt, freeze,
         binary,
         alloc, store, load >;

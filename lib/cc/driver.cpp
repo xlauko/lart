@@ -33,11 +33,11 @@ namespace lart
         spdlog::info("start lartcc pass");
 
         // propagate abstraction type from annotated roots
-        auto map = dfa::analysis::run_on( module );
+        auto types = dfa::analysis::run_on( module );
 
         // 3. syntactic pass
-        syntactic syn;
-        syn.toprocess( map );
+        syntactic syn( module, types );
+        syn.toprocess();
 
         /* Abstract IR */
 

@@ -18,34 +18,49 @@
 
 #include <cc/logger.hpp>
 
+#include <sc/ranges.hpp>
+
 namespace lart
 {
+    namespace sv = sc::views;
 
     bool is_abstract_pointer( const dfa::types::type &type )
     {
         return static_cast< bool >( type.back().pointer );
     }
+    operation syntactic::make_operation( llvm::Value *val )
+    {
+        operation result;
+        val->dump();
+        sc::llvmcase( val,
+            [&] ( llvm::AllocaInst * ) {
+                if ( is_abstract_pointer(types[val]) )
+                    result = op::alloc(val);
+            },
+            [&] ( llvm::LoadInst * ) {
+                if ( is_abstract_pointer(types[val]) )
+                    result = op::load(val);
+                else
+                    result = op::melt(val);
+            },
+            [&] ( llvm::BinaryOperator * ) {
+                result = op::binary( val );
+            },
+            [&] ( llvm::Value * ) {
+                __builtin_unreachable();
+            }
+        );
+        return result;
+    }
 
-    std::vector< operation > syntactic::toprocess( dfa::types map )
+    std::vector< operation > syntactic::toprocess()
     {
         std::vector< operation > ops;
-        for ( const auto &[val, type] : map ) {
-            sc::llvmcase( val,
-                [&] ( llvm::AllocaInst * ) {
-                    if ( is_abstract_pointer(type) ) {
-                        ops.emplace_back( op::alloc(val) );
-                    }
-                },
-                [&] ( llvm::LoadInst * ) {
-                    if ( is_abstract_pointer(type) )
-                        ops.emplace_back( op::load(val) );
-                    else
-                        ops.emplace_back( op::melt(val) );
-                },
-                [&] ( llvm::BinaryOperator * ) {
-                    ops.emplace_back( op::binary( val ) );
-                }
-            );
+        for ( const auto &[val, type] : types )
+            ops.emplace_back( make_operation(val) );
+
+        for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
+            store->dump();
         }
         return ops;
     }
