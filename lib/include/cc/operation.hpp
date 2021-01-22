@@ -17,19 +17,33 @@
 #pragma once
 
 #include <llvm/IR/Value.h>
-
-namespace lart
+#include <variant>
+namespace lart::op
 {
-    struct operation
+    struct base
     {
-        enum class type : uint8_t
-        {
-            invalid,
-            lift, lower, join, meet,
-            alloca, melt, freeze, store, load,
-            phi, tobool, assume,
-            cmp, cast, binary, call
-        };
+        base( llvm::Value *what ) : _what( what ), _where( what ) {}
+
+        base( llvm::Value * what, llvm::Value *where )
+            : _what( what ), _where( where )
+        {}
+
+        llvm::Value * _what;
+        llvm::Value * _where;
     };
 
-} // namespace lart
+    struct melt   : base {};
+    struct freeze : base {};
+
+    struct binary : base {};
+
+    struct alloc  : base {};
+    struct store  : base {};
+    struct load   : base {};
+
+    using operation = std::variant<
+        melt, freeze,
+        binary,
+        alloc, store, load >;
+
+} // namespace lart::op
