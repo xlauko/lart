@@ -133,6 +133,8 @@ namespace lart::dfa::detail
         };*/
 
         auto users = [&] ( auto val ) {
+            // for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
+            //            push( store_edge( lhs, p ) )
             /*if ( auto aml = dfg.gv_to_aml( node ) )
                 return query::query( aml->succs )
                     .filter( std::not_fn( in_abstractable_function ) )
@@ -236,12 +238,14 @@ namespace lart::dfa::detail
         auto from = types[ e.from ];
 
         auto push_change = [&] ( auto val, auto type ) {
-            if ( auto [it,change] = types.insert_or_assign( val, type ); change )
+            if ( types[val] != type ) {
+                types[val] = type;
                 push( val );
+            }
         };
 
         auto peel = [&] ( auto v ) { return types[ v ].peel(); };
-        auto wrap = [&] ( auto v ) { return types[ v ].peel(); };
+        auto wrap = [&] ( auto v ) { return types[ v ].wrap(); };
 
         auto joined = [&] () -> type_onion {
             switch ( e.ty ) {
@@ -255,7 +259,7 @@ namespace lart::dfa::detail
             }
         } ();
 
-        spdlog::info( "\t {} v {} = {}", from, to, joined );
+        spdlog::info( "{} v {} = {}", from, to, joined );
         push_change( e.to, joined );
     }
 

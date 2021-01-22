@@ -169,6 +169,8 @@ namespace detail
 
     struct type_map : onion_map
     {
+        using type = type_onion;
+
         using onion_map::count;
         using onion_map::emplace;
         using onion_map::insert_or_assign;
