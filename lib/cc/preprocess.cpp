@@ -88,7 +88,8 @@ namespace lart
             return std::ranges::any_of( i->users(), sv::isnot< llvm::BranchInst > );
         };
 
-        for ( auto cmp : sv::filter< llvm::CmpInst >( *fn ) | std::views::filter( nonbr ) )
+        auto cmps = sv::filter< llvm::CmpInst >( *fn );
+        for ( auto cmp : cmps | std::views::filter( nonbr ) )
             lower( cmp );
     }
 }
