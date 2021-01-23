@@ -26,13 +26,6 @@ namespace lart
 {
     using operation = lart::op::operation;
 
-    // location where to instrument abstract operation for concrete value
-    struct location
-    {
-        llvm::Value * value = nullptr;
-        llvm::Instruction * where = nullptr;
-    };
-
     struct syntactic : sc::with_context
     {
         explicit syntactic( llvm::Module &m, const dfa::types &t )
@@ -42,7 +35,7 @@ namespace lart
         std::optional< operation > make_operation( llvm::Value *value );
 
         std::vector< operation > toprocess();
-        void process( const operation & op );
+        void process( operation op );
 
         const dfa::types &types;
         llvm::Module &module;

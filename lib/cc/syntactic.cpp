@@ -56,7 +56,6 @@ namespace lart
                     result = op::melt(val);
             },
             [&] ( llvm::StoreInst *store ) {
-                // if types has?
                 if ( is_abstract_pointer( types[ store->getPointerOperand() ] ) )
                     result = op::store(val);
                 else if ( is_abstract( types[ store->getValueOperand() ] ) )
@@ -91,8 +90,10 @@ namespace lart
         return ops;
     }
 
-    void syntactic::process( const operation & )
+    void syntactic::process( operation o )
     {
+        spdlog::info( "process {}", op::name(o) );
+        llvm::IRBuilder<> irb( op::location(o) );
 
     }
 
