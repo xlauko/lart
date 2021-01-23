@@ -37,7 +37,8 @@ namespace lart
 
         // 3. syntactic pass
         syntactic syn( module, types );
-        syn.toprocess();
+        for ( const auto &op : syn.toprocess() )
+            syn.process( op );
 
         /* Abstract IR */
 
