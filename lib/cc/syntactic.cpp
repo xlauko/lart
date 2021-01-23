@@ -24,9 +24,14 @@ namespace lart
 {
     namespace sv = sc::views;
 
+    bool is_abstract( const dfa::types::type &type )
+    {
+        return static_cast< bool >( type.back().abstract );
+    }
+
     bool is_abstract_pointer( const dfa::types::type &type )
     {
-        return static_cast< bool >( type.back().pointer );
+        return static_cast< bool >( type.back().pointer ) && is_abstract( type );
     }
 
     bool is_lamp_call( llvm::CallSite call )
@@ -50,9 +55,17 @@ namespace lart
                 else
                     result = op::melt(val);
             },
+            [&] ( llvm::StoreInst *store ) {
+                // if types has?
+                if ( is_abstract_pointer( types[ store->getPointerOperand() ] ) )
+                    result = op::store(val);
+                else if ( is_abstract( types[ store->getValueOperand() ] ) )
+                    result = op::freeze(val);
+            },
             [&] ( llvm::BinaryOperator * ) {
                 result = op::binary( val );
-            }
+            },
+            [&] ( llvm::Value * ) { /* fallthrough */ }
         );
         return result;
     }
@@ -60,13 +73,21 @@ namespace lart
     std::vector< operation > syntactic::toprocess()
     {
         std::vector< operation > ops;
-        for ( const auto &[val, type] : types )
+
+        auto record = [&] (auto val) {
             if ( auto op = make_operation(val); op.has_value() )
                 ops.emplace_back( op.value() );
+        };
+
+        for ( const auto &[val, type] : types )
+            record( val );
 
         for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
-            store->dump();
+            auto ptr = store->getPointerOperand();
+            if ( types.count(ptr) && types[ptr].maybe_abstract() )
+                record( store );
         }
+
         return ops;
     }
 
