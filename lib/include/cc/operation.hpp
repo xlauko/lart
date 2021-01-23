@@ -24,28 +24,61 @@ namespace lart::op
 {
     struct base
     {
-        base( llvm::Value *what ) : _what( what ), _where( what ) {}
+        base( llvm::Value *what )
+            : base( what, llvm::cast< llvm::Instruction >( what ) )
+        {}
 
-        base( llvm::Value * what, llvm::Value *where )
+        base( llvm::Value * what, llvm::Instruction *where )
             : _what( what ), _where( where )
         {}
 
+        llvm::Instruction * location() { return _where; }
+
         llvm::Value * _what;
-        llvm::Value * _where;
+        llvm::Instruction * _where;
     };
 
-    struct melt   : base {};
-    struct freeze : base {};
+    struct melt : base
+    {
+        std::string name() const { return "melt"; }
+    };
 
-    struct binary : base {};
+    struct freeze : base
+    {
+        std::string name() const { return "freeze"; }
+    };
 
-    struct alloc  : base {};
-    struct store  : base {};
-    struct load   : base {};
+    struct binary : base
+    {
+        std::string name() const { return "bin"; }
+    };
 
-    using operation = std::variant< std::monostate,
+    struct alloc : base
+    {
+        std::string name() const { return "alloca"; }
+    };
+
+    struct store : base
+    {
+        std::string name() const { return "store"; }
+    };
+
+    struct load : base
+    {
+        std::string name() const { return "load"; }
+    };
+
+    using operation = std::variant<
         melt, freeze,
         binary,
         alloc, store, load >;
+
+    namespace detail
+    {
+        static auto invoke = [] (auto f) { return [=] ( auto a ) { return std::visit(f, a); }; };
+    } // namespace detail
+
+    static auto location = detail::invoke( [] (auto o) { return o.location(); } );
+    static auto name = detail::invoke( [] (const auto &o) { return o.name(); } );
 
 } // namespace lart::op
