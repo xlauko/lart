@@ -69,25 +69,18 @@ namespace lart
         return result;
     }
 
-    std::vector< operation > syntactic::toprocess()
+    generator< operation > syntactic::toprocess()
     {
-        std::vector< operation > ops;
-
-        auto record = [&] (auto val) {
-            if ( auto op = make_operation(val); op.has_value() )
-                ops.emplace_back( op.value() );
-        };
-
         for ( const auto &[val, type] : types )
-            record( val );
+            if ( auto op = make_operation(val); op.has_value() )
+                co_yield op.value();
 
         for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
             auto ptr = store->getPointerOperand();
             if ( types.count(ptr) && types[ptr].maybe_abstract() )
-                record( store );
+                if ( auto op = make_operation(store); op.has_value() )
+                    co_yield op.value();
         }
-
-        return ops;
     }
 
     void syntactic::process( operation o )

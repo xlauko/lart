@@ -26,6 +26,8 @@ namespace lart
 {
     using operation = lart::op::operation;
 
+    template< typename T > using generator = cppcoro::generator< T >;
+
     struct syntactic : sc::with_context
     {
         explicit syntactic( llvm::Module &m, const dfa::types &t )
@@ -34,7 +36,7 @@ namespace lart
 
         std::optional< operation > make_operation( llvm::Value *value );
 
-        std::vector< operation > toprocess();
+        generator< operation > toprocess();
         void process( operation op );
 
         const dfa::types &types;
