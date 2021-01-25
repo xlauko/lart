@@ -18,6 +18,9 @@
 
 #include <cc/dfa.hpp>
 
+#include <sc/ranges.hpp>
+#include <sc/constant.hpp>
+
 #include <llvm/IR/Value.h>
 
 #include <variant>
@@ -35,6 +38,8 @@ namespace lart::op
         {}
 
         llvm::Instruction * location() { return _where; }
+
+        llvm::Value * default_value() const { return sc::null( sc::i8p() ); }
 
         llvm::Value * _what;
         llvm::Instruction * _where;
@@ -125,6 +130,21 @@ namespace lart::op
     static auto location  = detail::invoke( [] (auto o) { return o.location(); } );
     static auto name      = detail::invoke( [] (const auto &o) { return o.name(); } );
     static auto arguments = detail::invoke( [] (const auto &o) { return o.arguments(); } );
+    static auto default_value = detail::invoke( [] (const auto &o) { return o.default_value(); } );
+
+    namespace sv = sc::views;
+
+    inline auto unique_name_suffix(const operation &o)
+    {
+        auto values = sv::map([] (const auto &o_) { return o_.value; });
+        auto format = sv::map([] (auto t) { return sc::fmt::type(t); });
+
+        std::stringstream suff;
+        auto args = arguments(o);
+        auto fmt = args | values | sv::types | format;
+        std::copy(fmt.begin(), fmt.end(), std::experimental::make_ostream_joiner(suff, "."));
+        return suff.str();
+    }
 
     template< typename stream >
     auto operator<<( stream &s, const args_t &a ) -> decltype( s << "" )
