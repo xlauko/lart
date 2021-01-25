@@ -3,6 +3,7 @@ add_library( lart
     alias.cpp
     driver.cpp
     dfa.cpp
+    lifter.cpp
     pass.cpp
     preprocess.cpp
     syntactic.cpp
