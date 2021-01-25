@@ -25,8 +25,11 @@ namespace lart
 
     auto test_taint_call::arguments() const -> args_t
     {
-        auto lift = lifter(module, op).function();
-        args_t args = { lift, op::default_value(op) };
+        args_t args = { lifter(module, op).function() };
+
+        if ( auto def = op::default_value(op); def.has_value() )
+            args.push_back(def.value());
+
         for ( auto arg : op::arguments(op) ) {
             if ( arg.liftable ) {
                 args.push_back(arg.value);
@@ -54,10 +57,11 @@ namespace lart
             return fn;
         };
 
-        auto out = op::default_value(op);
         auto args = arguments();
 
-        auto fty = llvm::FunctionType::get( out->getType(), sv::freeze( args | sv::types ), false );
+        auto out = op::default_value(op);
+        auto rty = out.has_value() ? out.value()->getType() : sc::void_t();
+        auto fty = llvm::FunctionType::get( rty, sv::freeze( args | sv::types ), false );
         return get_or_insert_function( fty, name() );
     }
 

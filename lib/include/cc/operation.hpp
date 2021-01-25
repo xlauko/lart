@@ -41,7 +41,10 @@ namespace lart::op
 
         llvm::Instruction* location() { return _where; }
 
-        llvm::Value* default_value() const { return abstract_pointer(); }
+        std::optional< llvm::Value* > default_value() const
+        {
+            return abstract_pointer();
+        }
 
         llvm::Value *_what;
         llvm::Instruction *_where;
@@ -85,6 +88,11 @@ namespace lart::op
                 { store->getValueOperand(), lift },
                 { store->getPointerOperand(), concrete }
             };
+        }
+
+        std::optional< llvm::Value* > default_value() const
+        {
+            return std::nullopt;
         }
     };
 
