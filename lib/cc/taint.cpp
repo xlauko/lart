@@ -27,10 +27,14 @@ namespace lart
     {
         auto lift = lifter(module, op).function();
         args_t args = { lift, op::default_value(op) };
-
-        auto s = op::split_arguments(op);
-        args.insert(args.end(), std::make_move_iterator(s.begin())
-                              , std::make_move_iterator(s.end()));
+        for ( auto arg : op::arguments(op) ) {
+            if ( arg.liftable ) {
+                args.push_back(arg.value);
+                args.push_back(op::abstract_pointer());
+            } else {
+                args.push_back(arg.value);
+            }
+        }
 
         return args;
     }

@@ -136,20 +136,6 @@ namespace lart::op
 
     namespace sv = sc::views;
 
-    inline auto split_arguments(const operation &op)
-    {
-        std::vector< llvm::Value* > splitted;
-        for (const auto &arg : op::arguments(op)) {
-            if ( arg.liftable ) {
-                splitted.push_back(arg.value);
-                splitted.push_back(abstract_pointer());
-            } else {
-                splitted.push_back(arg.value);
-            }
-        }
-        return splitted;
-    }
-
     inline auto unique_name_suffix(const operation &o)
     {
         auto values = sv::map([] (const auto &o_) { return o_.value; });

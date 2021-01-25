@@ -51,7 +51,7 @@ namespace lart
         auto out = op::default_value(op);
         auto fty = llvm::FunctionType::get( out->getType(), sv::freeze( args | sv::types ), false );
 
-        return get_or_insert_function( fty, name() );;
+        return get_or_insert_function( fty, name() );
     }
 
 } // namespace lart
