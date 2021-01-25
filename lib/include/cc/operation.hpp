@@ -27,22 +27,24 @@
 #include <experimental/iterator>
 namespace lart::op
 {
+    inline auto abstract_pointer() { return sc::null( sc::i8p() ); }
+
     struct base
     {
         base( llvm::Value *what )
             : base( what, llvm::cast< llvm::Instruction >( what ) )
         {}
 
-        base( llvm::Value * what, llvm::Instruction *where )
+        base( llvm::Value *what, llvm::Instruction *where )
             : _what( what ), _where( where )
         {}
 
-        llvm::Instruction * location() { return _where; }
+        llvm::Instruction* location() { return _where; }
 
-        llvm::Value * default_value() const { return sc::null( sc::i8p() ); }
+        llvm::Value* default_value() const { return abstract_pointer(); }
 
-        llvm::Value * _what;
-        llvm::Instruction * _where;
+        llvm::Value *_what;
+        llvm::Instruction *_where;
     };
 
     struct argument
@@ -133,6 +135,20 @@ namespace lart::op
     static auto default_value = detail::invoke( [] (const auto &o) { return o.default_value(); } );
 
     namespace sv = sc::views;
+
+    inline auto split_arguments(const operation &op)
+    {
+        std::vector< llvm::Value* > splitted;
+        for (const auto &arg : op::arguments(op)) {
+            if ( arg.liftable ) {
+                splitted.push_back(arg.value);
+                splitted.push_back(abstract_pointer());
+            } else {
+                splitted.push_back(arg.value);
+            }
+        }
+        return splitted;
+    }
 
     inline auto unique_name_suffix(const operation &o)
     {

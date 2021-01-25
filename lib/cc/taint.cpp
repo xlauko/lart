@@ -15,6 +15,9 @@
  */
 
 #include <cc/taint.hpp>
+#include <cc/lifter.hpp>
+
+#include <sc/ranges.hpp>
 
 namespace lart
 {
@@ -22,21 +25,14 @@ namespace lart
 
     auto test_taint_call::arguments() const -> args_t
     {
-        args_t args = { lifter(), op::default_value(op) };
-        for (const auto &arg : op::arguments(op)) {
-            if ( arg.liftable ) {
-                args.push_back(arg.value);
-                args.push_back(abstract_pointer());
-            } else {
-                args.push_back(arg.value);
-            }
-        }
-        return args;
-    }
+        auto lift = lifter(module, op).function();
+        args_t args = { lift, op::default_value(op) };
 
-    llvm::Value* test_taint_call::lifter() const
-    {
-        return sc::null( sc::i8p() );
+        auto s = op::split_arguments(op);
+        args.insert(args.end(), std::make_move_iterator(s.begin())
+                              , std::make_move_iterator(s.end()));
+
+        return args;
     }
 
     std::string test_taint_call::name() const

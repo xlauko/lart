@@ -17,8 +17,11 @@
 #include <cc/syntactic.hpp>
 
 #include <cc/logger.hpp>
+#include <cc/taint.hpp>
 
 #include <sc/ranges.hpp>
+
+
 
 namespace lart
 {
@@ -46,11 +49,11 @@ namespace lart
         std::optional< operation > result;
         sc::llvmcase( val,
             [&] ( llvm::AllocaInst * ) {
-                if ( is_abstract_pointer(types[val]) )
+                if ( is_abstract_pointer( types[val] ) )
                     result = op::alloc(val);
             },
             [&] ( llvm::LoadInst * ) {
-                if ( is_abstract_pointer(types[val]) )
+                if ( is_abstract_pointer( types[val] ) )
                     result = op::load(val);
                 else
                     result = op::melt(val);
@@ -86,8 +89,19 @@ namespace lart
     void syntactic::process( operation o )
     {
         spdlog::info( "process {}", op::name(o) );
-        llvm::IRBuilder<> irb( op::location(o) );
 
+        // cretae test taint call
+        test_taint_call( module, o ).build();
+
+        // std::cerr << op::arguments(o) <<  " " << op::unique_name_suffix(o) << std::endl;
+        // op::default_value(o)->dump();
+
+        // create call
+        // record
+
+        // fill arguments
+
+        // replace abstract uses
     }
 
 } // namespace lart

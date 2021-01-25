@@ -18,8 +18,6 @@
 
 #include <cc/operation.hpp>
 
-#include <sc/ranges.hpp>
-
 namespace lart
 {
     struct test_taint_call
@@ -32,10 +30,7 @@ namespace lart
 
         using args_t = std::vector< llvm::Value * >;
 
-        inline auto abstract_pointer() const { return sc::null( sc::i8p() ); }
-
         args_t arguments() const;
-        llvm::Value * lifter() const;
         std::string name() const;
         llvm::Function* tester() const;
         llvm::CallInst * build() const;
