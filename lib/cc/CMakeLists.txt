@@ -6,6 +6,7 @@ add_library( lart
     pass.cpp
     preprocess.cpp
     syntactic.cpp
+    taint.cpp
 )
 
 set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)
