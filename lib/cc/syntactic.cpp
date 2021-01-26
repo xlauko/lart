@@ -90,16 +90,18 @@ namespace lart
     {
         spdlog::info( "process {}", op::name(o) );
 
-        // cretae test taint call
-        test_taint_call( module, o ).build();
+        auto test = test_taint_call( module, o );
 
-        // std::cerr << op::arguments(o) <<  " " << op::unique_name_suffix(o) << std::endl;
-        // op::default_value(o)->dump();
+        if ( !test.call->getType()->isVoidTy() ) {
+            auto concrete = op::value(o);
+            abstract[concrete] = test.call;
 
-        // create call
-        // record
+            for ( auto user : concrete->users() ) {
+                user->dump();
+            }
+        }
 
-        // fill arguments
+        spdlog::warn("places {}", test.placeholders);
 
         // replace abstract uses
     }

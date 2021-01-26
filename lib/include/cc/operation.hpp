@@ -39,6 +39,7 @@ namespace lart::op
             : _what( what ), _where( where )
         {}
 
+        llvm::Value* value() { return _what; }
         llvm::Instruction* location() { return _where; }
 
         std::optional< llvm::Value* > default_value() const
@@ -137,6 +138,7 @@ namespace lart::op
         static auto invoke = [] (auto f) { return [=] ( auto a ) { return std::visit(f, a); }; };
     } // namespace detail
 
+    static auto value     = detail::invoke( [] (auto o) { return o.value(); } );
     static auto location  = detail::invoke( [] (auto o) { return o.location(); } );
     static auto name      = detail::invoke( [] (const auto &o) { return o.name(); } );
     static auto arguments = detail::invoke( [] (const auto &o) { return o.arguments(); } );

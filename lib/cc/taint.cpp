@@ -23,31 +23,37 @@ namespace lart
 {
     namespace sv = sc::views;
 
-    auto test_taint_call::arguments() const -> args_t
+    auto test_taint_call::arguments() const -> std::pair< args_t, places_t >
     {
         args_t args = { lifter(module, op).function() };
 
         if ( auto def = op::default_value(op); def.has_value() )
             args.push_back(def.value());
 
+        places_t places;
+        size_t pos = args.size() - 1;
         for ( auto arg : op::arguments(op) ) {
             if ( arg.liftable ) {
                 args.push_back(arg.value);
                 args.push_back(op::abstract_pointer());
+                pos += 2;
+                places.set(pos);
             } else {
                 args.push_back(arg.value);
+                pos += 1;
             }
         }
 
-        return args;
+        return { args, places };
     }
+
 
     std::string test_taint_call::name() const
     {
         return "lart.test.taint." + op::name(op) + "." + op::unique_name_suffix(op);
     }
 
-    llvm::Function* test_taint_call::tester() const
+    llvm::Function* test_taint_call::tester( const args_t &args ) const
     {
         auto get_or_insert_function = [&] (auto fty, auto name) {
             auto fn = llvm::cast< llvm::Function >(
@@ -57,19 +63,20 @@ namespace lart
             return fn;
         };
 
-        auto args = arguments();
-
         auto out = op::default_value(op);
         auto rty = out.has_value() ? out.value()->getType() : sc::void_t();
         auto fty = llvm::FunctionType::get( rty, sv::freeze( args | sv::types ), false );
         return get_or_insert_function( fty, name() );
     }
 
-    llvm::CallInst* test_taint_call::build() const
+    llvm::CallInst* test_taint_call::create()
     {
         llvm::IRBuilder<> irb( op::location(op) );
-        tester()->dump();
-        return nullptr;
+
+        auto [args, places] = arguments();
+        placeholders = places;
+
+        return irb.CreateCall( tester( args ), args );
     }
 
 } // namespace lart

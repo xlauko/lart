@@ -39,6 +39,8 @@ namespace lart
         generator< operation > toprocess();
         void process( operation op );
 
+        std::map< llvm::Value*, llvm::Value* > abstract;
+
         const dfa::types &types;
         llvm::Module &module;
     };

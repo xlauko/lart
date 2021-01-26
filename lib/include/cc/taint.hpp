@@ -18,6 +18,8 @@
 
 #include <cc/operation.hpp>
 
+#include <bitset>
+
 namespace lart
 {
     struct test_taint_call
@@ -25,19 +27,27 @@ namespace lart
         using operation = lart::op::operation;
 
         explicit test_taint_call( llvm::Module &m, operation o )
-            : module(m), op(o)
+            : module( m ), op( o ), call( create() )
         {}
 
-        using args_t = std::vector< llvm::Value * >;
-
-        args_t arguments() const;
-        std::string name() const;
-        llvm::Function* tester() const;
-        llvm::CallInst * build() const;
-
     private:
+        using args_t = std::vector< llvm::Value* >;
+        using places_t = std::bitset<32>;
+
+        llvm::CallInst * create();
+        std::pair< args_t, places_t > arguments() const;
+        std::string name() const;
+
+        llvm::Function* tester(const args_t &args ) const;
+
         llvm::Module &module;
         operation op;
+
+    public:
+        // placeholder positions of uninitilized abstract arguments
+        places_t placeholders;
+
+        llvm::CallInst * call;
     };
 
 } // namespace lart
