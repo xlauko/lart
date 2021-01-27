@@ -18,6 +18,7 @@
 
 #include <cc/dfa.hpp>
 #include <cc/operation.hpp>
+#include <cc/taint.hpp>
 
 #include <optional>
 #include <vector>
@@ -40,8 +41,10 @@ namespace lart
         void process( operation op );
 
         std::map< llvm::Value*, llvm::Value* > abstract;
+        std::map< llvm::Value*, std::vector< arg::liftable > > places;
 
         const dfa::types &types;
         llvm::Module &module;
     };
+
 } // namespace lart

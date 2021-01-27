@@ -92,16 +92,31 @@ namespace lart
 
         auto test = TestTaint( module, o );
 
-        if ( !test.call->getType()->isVoidTy() ) {
+        if ( op::returns_value(o) ) {
             auto concrete = op::value(o);
             abstract[concrete] = test.call;
 
-            for ( auto user : concrete->users() ) {
-                user->dump();
+            // Update placeholders where result of this operation
+            // should be used instead. That are arguments of already
+            // abstracted users of concrete variant of this operation.
+            if ( auto args = places.find( concrete ); args != places.end() ) {
+                for ( auto &place : args->second )
+                    place.abstract.set( test.call );
+                places.erase(args);
             }
         }
 
-        // replace abstract uses
+        // Update placeholders of this instruction. If the abstract
+        // instruction does not exist yet, store the placeholder
+        // to quickly find it when abstract value is generated later.
+        for ( auto arg : liftable_view(test) )
+        {
+            auto &con = arg.concrete;
+            if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
+                arg.abstract.set( abs->second );
+            else
+                places[con].push_back( arg );
+        }
     }
 
 } // namespace lart
