@@ -32,7 +32,8 @@ namespace lart::op
     struct base
     {
         base( llvm::Value *what )
-            : base( what, llvm::cast< llvm::Instruction >( what ) )
+            : base( what, llvm::cast< llvm::Instruction >( what )
+                                ->getNextNonDebugInstruction() )
         {}
 
         base( llvm::Value *what, llvm::Instruction *where )
