@@ -25,6 +25,25 @@ namespace lart
 
     using operation = lart::op::operation;
 
+    namespace detail
+    {
+        generator< unsigned > liftable_indices( const TestTaint &test )
+        {
+            auto op = test.op;
+            // skip lifter and default value arguments
+            unsigned pos = op::returns_value(op) ? 2 : 1;
+
+            for ( auto arg : op::arguments(op) ) {
+                if ( arg.liftable ) {
+                    co_yield pos;
+                    pos += 2;
+                } else {
+                    pos++;
+                }
+            }
+        }
+    }
+
     generator< llvm::Value* > arguments(const lifter &lif, const operation &op )
     {
         co_yield lif.function();
@@ -70,8 +89,11 @@ namespace lart
         return irb.CreateCall( tester, args );
     }
 
-    /*generator< arg::liftable > liftable_view( const TestTaint &test )
+    generator< arg::liftable > liftable_view( const TestTaint &test )
     {
-    }*/
+        auto call = test.call;
+        for ( auto i : detail::liftable_indices(test) )
+            co_yield { call->getOperandUse(i), call->getOperandUse(i + 1) };
+    }
 
 } // namespace lart

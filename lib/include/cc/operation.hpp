@@ -144,6 +144,11 @@ namespace lart::op
     static auto arguments = detail::invoke( [] (const auto &o) { return o.arguments(); } );
     static auto default_value = detail::invoke( [] (const auto &o) { return o.default_value(); } );
 
+    inline bool returns_value( const operation &o )
+    {
+        return default_value(o).has_value();
+    }
+
     namespace sv = sc::views;
 
     inline auto unique_name_suffix(const operation &o)

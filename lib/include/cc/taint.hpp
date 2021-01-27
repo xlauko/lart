@@ -38,10 +38,21 @@ namespace lart
         std::string name() const;
 
         llvm::Module &module;
-        operation op;
 
     public:
+        operation op;
         llvm::CallInst *call;
     };
+
+    namespace arg
+    {
+        struct liftable
+        {
+            llvm::Use &concrete;
+            llvm::Use &abstract;
+        };
+    } // namespace arg
+
+    generator< arg::liftable > liftable_view( const TestTaint &test );
 
 } // namespace lart
