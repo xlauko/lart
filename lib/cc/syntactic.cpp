@@ -90,7 +90,7 @@ namespace lart
     {
         spdlog::info( "process {}", op::name(o) );
 
-        auto test = test_taint_call( module, o );
+        auto test = TestTaint( module, o );
 
         if ( !test.call->getType()->isVoidTy() ) {
             auto concrete = op::value(o);
@@ -100,8 +100,6 @@ namespace lart
                 user->dump();
             }
         }
-
-        spdlog::warn("places {}", test.placeholders);
 
         // replace abstract uses
     }

@@ -19,35 +19,29 @@
 #include <cc/operation.hpp>
 
 #include <bitset>
+#include <external/coro/generator.hpp>
 
 namespace lart
 {
-    struct test_taint_call
+    template< typename T > using generator = cppcoro::generator< T >;
+
+    struct TestTaint
     {
         using operation = lart::op::operation;
 
-        explicit test_taint_call( llvm::Module &m, operation o )
-            : module( m ), op( o ), call( create() )
+        explicit TestTaint( llvm::Module &m, operation o )
+            : module( m ), op( o ), call( intrinsic() )
         {}
 
     private:
-        using args_t = std::vector< llvm::Value* >;
-        using places_t = std::bitset<32>;
-
-        llvm::CallInst * create();
-        std::pair< args_t, places_t > arguments() const;
+        llvm::CallInst * intrinsic();
         std::string name() const;
-
-        llvm::Function* tester(const args_t &args ) const;
 
         llvm::Module &module;
         operation op;
 
     public:
-        // placeholder positions of uninitilized abstract arguments
-        places_t placeholders;
-
-        llvm::CallInst * call;
+        llvm::CallInst *call;
     };
 
 } // namespace lart

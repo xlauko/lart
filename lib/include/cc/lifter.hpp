@@ -26,7 +26,7 @@ namespace lart
         using operation = lart::op::operation;
 
         explicit lifter( llvm::Module &m, operation o )
-            : module(m), op(o)
+            : module( m ), op( o )
         {}
 
         std::string name() const;

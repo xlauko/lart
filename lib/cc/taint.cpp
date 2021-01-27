@@ -23,38 +23,37 @@ namespace lart
 {
     namespace sv = sc::views;
 
-    auto test_taint_call::arguments() const -> std::pair< args_t, places_t >
+    using operation = lart::op::operation;
+
+    generator< llvm::Value* > arguments(const lifter &lif, const operation &op )
     {
-        args_t args = { lifter(module, op).function() };
+        co_yield lif.function();
 
         if ( auto def = op::default_value(op); def.has_value() )
-            args.push_back(def.value());
+            co_yield def.value();
 
-        places_t places;
-        size_t pos = args.size() - 1;
         for ( auto arg : op::arguments(op) ) {
             if ( arg.liftable ) {
-                args.push_back(arg.value);
-                args.push_back(op::abstract_pointer());
-                pos += 2;
-                places.set(pos);
+                co_yield arg.value;
+                co_yield op::abstract_pointer();
             } else {
-                args.push_back(arg.value);
-                pos += 1;
+                co_yield arg.value;
             }
         }
-
-        return { args, places };
     }
 
-
-    std::string test_taint_call::name() const
+    std::string TestTaint::name() const
     {
         return "lart.test.taint." + op::name(op) + "." + op::unique_name_suffix(op);
     }
 
-    llvm::Function* test_taint_call::tester( const args_t &args ) const
+    llvm::CallInst* TestTaint::intrinsic()
     {
+        llvm::IRBuilder<> irb( op::location(op) );
+
+        lifter lif(module, op);
+        auto args = sv::freeze( arguments( lif, op ) );
+
         auto get_or_insert_function = [&] (auto fty, auto name) {
             auto fn = llvm::cast< llvm::Function >(
                 module.getOrInsertFunction( name, fty ).getCallee()
@@ -66,17 +65,13 @@ namespace lart
         auto out = op::default_value(op);
         auto rty = out.has_value() ? out.value()->getType() : sc::void_t();
         auto fty = llvm::FunctionType::get( rty, sv::freeze( args | sv::types ), false );
-        return get_or_insert_function( fty, name() );
+        auto tester = get_or_insert_function( fty, name() );
+
+        return irb.CreateCall( tester, args );
     }
 
-    llvm::CallInst* test_taint_call::create()
+    /*generator< arg::liftable > liftable_view( const TestTaint &test )
     {
-        llvm::IRBuilder<> irb( op::location(op) );
-
-        auto [args, places] = arguments();
-        placeholders = places;
-
-        return irb.CreateCall( tester( args ), args );
-    }
+    }*/
 
 } // namespace lart
