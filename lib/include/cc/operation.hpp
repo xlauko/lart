@@ -29,8 +29,11 @@ namespace lart::op
 {
     inline auto abstract_pointer() { return sc::null( sc::i8p() ); }
 
+    template< bool taints >
     struct base
     {
+        static constexpr bool with_taints = taints;
+
         base( llvm::Value *what )
             : base( what, llvm::cast< llvm::Instruction >( what )
                                 ->getNextNonDebugInstruction() )
@@ -52,6 +55,9 @@ namespace lart::op
         llvm::Instruction *_where;
     };
 
+    using with_taints_base = base< true >;
+    using without_taints_base = base< false >;
+
     struct argument
     {
         llvm::Value * value;
@@ -70,7 +76,7 @@ namespace lart::op
 
     using args_t = std::vector< argument >;
 
-    struct melt : base
+    struct melt : with_taints_base
     {
         std::string name() const { return "melt"; }
         args_t arguments() const
@@ -80,7 +86,7 @@ namespace lart::op
         }
     };
 
-    struct freeze : base
+    struct freeze : with_taints_base
     {
         std::string name() const { return "freeze"; }
         args_t arguments() const
@@ -98,7 +104,7 @@ namespace lart::op
         }
     };
 
-    struct binary : base
+    struct binary : with_taints_base
     {
         std::string name() const { return "bin"; }
         args_t arguments() const
@@ -111,31 +117,31 @@ namespace lart::op
         }
     };
 
-    struct alloc : base
+    struct alloc : with_taints_base
     {
         std::string name() const { return "alloca"; }
         args_t arguments() const { return {}; }
     };
 
-    struct store : base
+    struct store : with_taints_base
     {
         std::string name() const { return "store"; }
         args_t arguments() const { return {}; }
     };
 
-    struct load : base
+    struct load : with_taints_base
     {
         std::string name() const { return "load"; }
         args_t arguments() const { return {}; }
     };
 
-    struct stash : base
+    struct stash : without_taints_base
     {
         std::string name() const { return "stash"; }
         args_t arguments() const { return {}; }
     };
 
-    struct unstash : base
+    struct unstash : without_taints_base
     {
         std::string name() const { return "unstash"; }
         args_t arguments() const { return {}; }
@@ -157,6 +163,11 @@ namespace lart::op
     static auto name      = detail::invoke( [] (const auto &o) { return o.name(); } );
     static auto arguments = detail::invoke( [] (const auto &o) { return o.arguments(); } );
     static auto default_value = detail::invoke( [] (const auto &o) { return o.default_value(); } );
+
+    static auto with_taints = detail::invoke( [] (const auto &o)
+    {
+        return decltype(o)::with_taints;
+    });
 
     inline bool returns_value( const operation &o )
     {
