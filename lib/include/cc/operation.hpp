@@ -129,10 +129,23 @@ namespace lart::op
         args_t arguments() const { return {}; }
     };
 
+    struct stash : base
+    {
+        std::string name() const { return "stash"; }
+        args_t arguments() const { return {}; }
+    };
+
+    struct unstash : base
+    {
+        std::string name() const { return "unstash"; }
+        args_t arguments() const { return {}; }
+    };
+
     using operation = std::variant<
         melt, freeze,
         binary,
-        alloc, store, load >;
+        alloc, store, load,
+        stash, unstash >;
 
     namespace detail
     {
