@@ -29,11 +29,8 @@ namespace lart::op
 {
     inline auto abstract_pointer() { return sc::null( sc::i8p() ); }
 
-    template< bool taints >
     struct base
     {
-        static constexpr bool with_taints = taints;
-
         base( llvm::Value *what )
             : base( what, llvm::cast< llvm::Instruction >( what )
                                 ->getNextNonDebugInstruction() )
@@ -55,8 +52,19 @@ namespace lart::op
         llvm::Instruction *_where;
     };
 
-    using with_taints_base = base< true >;
-    using without_taints_base = base< false >;
+    struct with_taints_base : base
+    {
+        using base::base;
+
+        constexpr bool with_taints() const { return true; }
+    };
+
+    struct without_taints_base : base
+    {
+        using base::base;
+
+        constexpr bool with_taints() const { return false; }
+    };
 
     struct argument
     {
@@ -78,6 +86,9 @@ namespace lart::op
 
     struct melt : with_taints_base
     {
+        using base = with_taints_base;
+        using base::with_taints;
+
         std::string name() const { return "melt"; }
         args_t arguments() const
         {
@@ -163,11 +174,7 @@ namespace lart::op
     static auto name      = detail::invoke( [] (const auto &o) { return o.name(); } );
     static auto arguments = detail::invoke( [] (const auto &o) { return o.arguments(); } );
     static auto default_value = detail::invoke( [] (const auto &o) { return o.default_value(); } );
-
-    static auto with_taints = detail::invoke( [] (const auto &o)
-    {
-        return decltype(o)::with_taints;
-    });
+    static auto with_taints = detail::invoke( [] (const auto &o) { return o.with_taints(); } );
 
     inline bool returns_value( const operation &o )
     {
@@ -175,6 +182,8 @@ namespace lart::op
     }
 
     namespace sv = sc::views;
+
+    template< typename T > using generator = cppcoro::generator< T >;
 
     inline auto unique_name_suffix(const operation &o)
     {
@@ -188,6 +197,18 @@ namespace lart::op
         return suff.str();
     }
 
+    inline generator< llvm::Value* > duplicated_arguments(const operation &op)
+    {
+        for ( auto arg : op::arguments(op) ) {
+            if ( arg.liftable ) {
+                co_yield arg.value;
+                co_yield op::abstract_pointer();
+            } else {
+                co_yield arg.value;
+            }
+        }
+    }
+
     template< typename stream >
     auto operator<<( stream &s, const args_t &a ) -> decltype( s << "" )
     {
@@ -198,12 +219,12 @@ namespace lart::op
     }
 
     inline llvm::Function* intrinsic( const operation &op, llvm::Module *module
-                                    , const std::vector< llvm::Value * > &args
+                                    , const std::vector< llvm::Type * > &args
                                     , const std::string &intr_name )
     {
         auto out = op::default_value(op);
         auto rty = out.has_value() ? out.value()->getType() : sc::void_t();
-        auto fty = llvm::FunctionType::get( rty, sv::freeze( args | sv::types ), false );
+        auto fty = llvm::FunctionType::get( rty, args, false );
         auto fn = llvm::cast< llvm::Function >(
             module->getOrInsertFunction( intr_name, fty ).getCallee()
         );
@@ -217,7 +238,8 @@ namespace lart::op
     {
         llvm::IRBuilder<> irb( op::location(op) );
         auto module = irb.GetInsertBlock()->getModule();
-        return irb.CreateCall( intrinsic(op, module, args, intr_name), args );
+        auto arg_types = sv::freeze( args | sv::types );
+        return irb.CreateCall( intrinsic(op, module, arg_types, intr_name), args );
     }
 
 } // namespace lart::op

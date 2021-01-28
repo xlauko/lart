@@ -40,6 +40,12 @@ namespace lart
         generator< operation > toprocess();
         void process( operation op );
 
+        struct intrinsic_with_taints { testtaint test; };
+        struct direct_intrinsic { llvm::CallInst *call; };
+        using intrinsic = std::variant< intrinsic_with_taints, direct_intrinsic >;
+
+        intrinsic make_intrinsic(const operation &op) const;
+
         std::map< llvm::Value*, llvm::Value* > abstract;
         std::map< llvm::Value*, std::vector< arg::liftable > > places;
 

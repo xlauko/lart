@@ -25,11 +25,11 @@ namespace lart
 {
     template< typename T > using generator = cppcoro::generator< T >;
 
-    struct TestTaint
+    struct testtaint
     {
         using operation = lart::op::operation;
 
-        explicit TestTaint( llvm::Module &m, operation o )
+        explicit testtaint( llvm::Module &m, operation o )
             : module( m ), op( o ), call( intrinsic() )
         {}
 
@@ -53,6 +53,7 @@ namespace lart
         };
     } // namespace arg
 
-    generator< arg::liftable > liftable_view( const TestTaint &test );
+    generator< arg::liftable > liftable_view( const testtaint &test );
+
 
 } // namespace lart

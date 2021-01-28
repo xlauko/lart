@@ -93,36 +93,56 @@ namespace lart
         }
     }
 
+    auto syntactic::make_intrinsic( const operation &op ) const -> intrinsic
+    {
+        if ( op::with_taints( op ) )
+            return intrinsic_with_taints( testtaint( module, op ) );
+
+        auto args = sv::freeze( op::duplicated_arguments(op) );
+        auto name = "lart." + op::name(op);
+        return direct_intrinsic( op::make_intrinsic( op, args, name ) );
+    }
+
+    llvm::CallInst* callinst( const syntactic::intrinsic &intr )
+    {
+        return std::visit( util::overloaded {
+            [] ( const syntactic::intrinsic_with_taints &i ) { return i.test.call; },
+            [] ( const syntactic::direct_intrinsic &i ) { return i.call; },
+        }, intr );
+    }
+
     void syntactic::process( operation o )
     {
         spdlog::info( "process {}", op::name(o) );
 
-        auto test = TestTaint( module, o );
+        auto intr = make_intrinsic( o );
 
         if ( op::returns_value(o) ) {
             auto concrete = op::value(o);
-            abstract[concrete] = test.call;
+            abstract[concrete] = callinst( intr );
 
             // Update placeholders where result of this operation
             // should be used instead. That are arguments of already
             // abstracted users of concrete variant of this operation.
             if ( auto args = places.find( concrete ); args != places.end() ) {
                 for ( auto &place : args->second )
-                    place.abstract.set( test.call );
+                    place.abstract.set( callinst( intr ) );
                 places.erase(args);
             }
         }
 
-        // Update placeholders of this instruction. If the abstract
-        // instruction does not exist yet, store the placeholder
-        // to quickly find it when abstract value is generated later.
-        for ( auto arg : liftable_view(test) )
-        {
-            auto &con = arg.concrete;
-            if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
-                arg.abstract.set( abs->second );
-            else
-                places[con].push_back( arg );
+        if ( auto tainted = std::get_if< intrinsic_with_taints >( &intr ) ) {
+            // Update placeholders of this instruction. If the abstract
+            // instruction does not exist yet, store the placeholder
+            // to quickly find it when abstract value is generated later.
+            for ( auto arg : liftable_view(tainted->test) )
+            {
+                auto &con = arg.concrete;
+                if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
+                    arg.abstract.set( abs->second );
+                else
+                    places[con].push_back( arg );
+            }
         }
     }
 

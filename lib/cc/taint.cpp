@@ -27,7 +27,7 @@ namespace lart
 
     namespace detail
     {
-        generator< unsigned > liftable_indices( const TestTaint &test )
+        generator< unsigned > liftable_indices( const testtaint &test )
         {
             auto op = test.op;
             // skip lifter and default value arguments
@@ -51,29 +51,23 @@ namespace lart
         if ( auto def = op::default_value(op); def.has_value() )
             co_yield def.value();
 
-        for ( auto arg : op::arguments(op) ) {
-            if ( arg.liftable ) {
-                co_yield arg.value;
-                co_yield op::abstract_pointer();
-            } else {
-                co_yield arg.value;
-            }
-        }
+        for ( auto arg : op::duplicated_arguments(op) )
+            co_yield arg;
     }
 
-    std::string TestTaint::name() const
+    std::string testtaint::name() const
     {
         return "lart.test.taint." + op::name(op) + "." + op::unique_name_suffix(op);
     }
 
-    llvm::CallInst* TestTaint::intrinsic()
+    llvm::CallInst* testtaint::intrinsic()
     {
         lifter lif(module, op);
         auto args = sv::freeze( arguments( lif, op ) );
         return op::make_intrinsic(op, args, name() );
     }
 
-    generator< arg::liftable > liftable_view( const TestTaint &test )
+    generator< arg::liftable > liftable_view( const testtaint &test )
     {
         auto call = test.call;
         for ( auto i : detail::liftable_indices(test) )
