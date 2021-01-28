@@ -29,14 +29,6 @@ namespace lart
 
     llvm::Function* lifter::function() const
     {
-        auto get_or_insert_function = [&] (auto fty, auto name) {
-            auto fn = llvm::cast< llvm::Function >(
-                module.getOrInsertFunction( name, fty ).getCallee()
-            );
-            fn->addFnAttr( llvm::Attribute::NoUnwind );
-            return fn;
-        };
-
         std::vector< llvm::Value * > args;
         for ( auto arg : op::arguments(op) ) {
             if ( arg.liftable ) {
@@ -48,11 +40,7 @@ namespace lart
             }
         }
 
-        auto out = op::default_value(op);
-        auto rty = out.has_value() ? out.value()->getType() : sc::void_t();
-        auto fty = llvm::FunctionType::get( rty, sv::freeze( args | sv::types ), false );
-
-        return get_or_insert_function( fty, name() );
+        return op::intrinsic( op, &module, args, name() );
     }
 
 } // namespace lart

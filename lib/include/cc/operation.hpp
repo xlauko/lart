@@ -197,4 +197,27 @@ namespace lart::op
         return s;
     }
 
+    inline llvm::Function* intrinsic( const operation &op, llvm::Module *module
+                                    , const std::vector< llvm::Value * > &args
+                                    , const std::string &intr_name )
+    {
+        auto out = op::default_value(op);
+        auto rty = out.has_value() ? out.value()->getType() : sc::void_t();
+        auto fty = llvm::FunctionType::get( rty, sv::freeze( args | sv::types ), false );
+        auto fn = llvm::cast< llvm::Function >(
+            module->getOrInsertFunction( intr_name, fty ).getCallee()
+        );
+        fn->addFnAttr( llvm::Attribute::NoUnwind );
+        return fn;
+    }
+
+    inline llvm::CallInst* make_intrinsic( const operation &op
+                                         , const std::vector< llvm::Value * > &args
+                                         , const std::string &intr_name )
+    {
+        llvm::IRBuilder<> irb( op::location(op) );
+        auto module = irb.GetInsertBlock()->getModule();
+        return irb.CreateCall( intrinsic(op, module, args, intr_name), args );
+    }
+
 } // namespace lart::op

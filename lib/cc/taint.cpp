@@ -68,25 +68,9 @@ namespace lart
 
     llvm::CallInst* TestTaint::intrinsic()
     {
-        llvm::IRBuilder<> irb( op::location(op) );
-
         lifter lif(module, op);
         auto args = sv::freeze( arguments( lif, op ) );
-
-        auto get_or_insert_function = [&] (auto fty, auto name) {
-            auto fn = llvm::cast< llvm::Function >(
-                module.getOrInsertFunction( name, fty ).getCallee()
-            );
-            fn->addFnAttr( llvm::Attribute::NoUnwind );
-            return fn;
-        };
-
-        auto out = op::default_value(op);
-        auto rty = out.has_value() ? out.value()->getType() : sc::void_t();
-        auto fty = llvm::FunctionType::get( rty, sv::freeze( args | sv::types ), false );
-        auto tester = get_or_insert_function( fty, name() );
-
-        return irb.CreateCall( tester, args );
+        return op::make_intrinsic(op, args, name() );
     }
 
     generator< arg::liftable > liftable_view( const TestTaint &test )
