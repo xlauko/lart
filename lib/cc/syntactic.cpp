@@ -67,6 +67,13 @@ namespace lart
             [&] ( llvm::BinaryOperator * ) {
                 result = op::binary( val );
             },
+            [&] ( llvm::CallInst *call ) {
+                if ( is_lamp_call(call) ) {
+                    result = op::unstash(call);
+                } else {
+                    // TODO
+                }
+            },
             [&] ( llvm::Value * ) { /* fallthrough */ }
         );
         return result;
