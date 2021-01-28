@@ -29,14 +29,16 @@ namespace lart
 
     llvm::Function* lifter::function() const
     {
-        std::vector< llvm::Value * > args;
+        auto aptr = op::abstract_pointer()->getType();
+
+        std::vector< llvm::Type * > args;
         for ( auto arg : op::arguments(op) ) {
             if ( arg.liftable ) {
-                args.push_back(sc::i1(false)); // dummy false
-                args.push_back(arg.value);
-                args.push_back(op::abstract_pointer());
+                args.push_back(sc::i1()); // dummy false
+                args.push_back(arg.value->getType());
+                args.push_back(aptr);
             } else {
-                args.push_back(arg.value);
+                args.push_back(arg.value->getType());
             }
         }
 
