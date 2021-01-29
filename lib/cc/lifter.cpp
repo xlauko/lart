@@ -132,6 +132,7 @@ namespace lart
             return module.getFunction( name );
         };
 
+        llvm::Value *lifted = nullptr;
         using args_t = std::vector< llvm::Value* >;
         auto lift = [&] ( auto arg, unsigned pos ) {
             if ( auto a = std::get_if< arg::with_taint >( &arg ) ) {
@@ -141,6 +142,7 @@ namespace lart
                     | sc::action::advance_block( -2 )
                     /* entry block to lift section */
                     | sc::action::call( wrap( a->concrete ), args_t{ a->concrete } )
+                    | sc::action::inspect( [&] { lifted = bld.stack.back(); } )
                     | sc::action::condbr( a->taint )
                     | sc::action::advance_block( 1 )
                     /* lift block */
