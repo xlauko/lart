@@ -27,13 +27,21 @@ namespace lart
 
         explicit lifter( llvm::Module &m, operation o )
             : module( m ), op( o )
-        {}
+        {
+            if ( function()->empty() )
+                generate();
+        }
 
         std::string name() const;
         llvm::Function* function() const;
 
     private:
+        void generate() const;
+
+        mutable llvm::Function *_function = nullptr;
         llvm::Module &module;
+
+    public:
         operation op;
     };
 
