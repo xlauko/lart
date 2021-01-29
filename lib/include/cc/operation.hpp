@@ -90,6 +90,7 @@ namespace lart::op
         using base::with_taints;
 
         std::string name() const { return "melt"; }
+        std::string impl() const { return "__lart_melt"; }
         args_t arguments() const
         {
             auto load = llvm::cast< llvm::LoadInst >( _what );
@@ -100,6 +101,8 @@ namespace lart::op
     struct freeze : with_taints_base
     {
         std::string name() const { return "freeze"; }
+        std::string impl() const { return "__lart_freeze"; }
+
         args_t arguments() const
         {
             auto store = llvm::cast< llvm::StoreInst >( _what );
@@ -118,6 +121,12 @@ namespace lart::op
     struct binary : with_taints_base
     {
         std::string name() const { return "bin"; }
+        std::string impl() const
+        {
+            auto bin = llvm::cast< llvm::BinaryOperator >( _what );
+            return "__lamp_" + std::string(bin->getOpcodeName());
+        }
+
         args_t arguments() const
         {
             auto bin = llvm::cast< llvm::BinaryOperator >( _what );
@@ -131,30 +140,35 @@ namespace lart::op
     struct alloc : with_taints_base
     {
         std::string name() const { return "alloca"; }
+        std::string impl() const { return "__lamp_alloca"; }
         args_t arguments() const { return {}; }
     };
 
     struct store : with_taints_base
     {
         std::string name() const { return "store"; }
+        std::string impl() const { return "__lamp_store"; }
         args_t arguments() const { return {}; }
     };
 
     struct load : with_taints_base
     {
         std::string name() const { return "load"; }
+        std::string impl() const { return "__lamp_load"; }
         args_t arguments() const { return {}; }
     };
 
     struct stash : without_taints_base
     {
         std::string name() const { return "stash"; }
+        std::string impl() const { return "__lart_stash"; }
         args_t arguments() const { return {}; }
     };
 
     struct unstash : without_taints_base
     {
         std::string name() const { return "unstash"; }
+        std::string impl() const { return "__lart_unstash"; }
         args_t arguments() const { return {}; }
     };
 
@@ -172,6 +186,7 @@ namespace lart::op
     static auto value     = detail::invoke( [] (auto o) { return o.value(); } );
     static auto location  = detail::invoke( [] (auto o) { return o.location(); } );
     static auto name      = detail::invoke( [] (const auto &o) { return o.name(); } );
+    static auto impl      = detail::invoke( [] (const auto &o) { return o.impl(); } );
     static auto arguments = detail::invoke( [] (const auto &o) { return o.arguments(); } );
     static auto default_value = detail::invoke( [] (const auto &o) { return o.default_value(); } );
     static auto with_taints = detail::invoke( [] (const auto &o) { return o.with_taints(); } );
