@@ -127,6 +127,12 @@ namespace lart
 
         auto args = sv::freeze( detail::arguments( *this ) );
 
+        auto wrap = [&] ( auto val ) {
+            auto name = "__lamp_wrap_" + sc::fmt::llvm_name( val->getType() );
+            return module.getFunction( name );
+        };
+
+        using args_t = std::vector< llvm::Value* >;
         auto lift = [&] ( auto arg, unsigned pos ) {
             if ( auto a = std::get_if< arg::with_taint >( &arg ) ) {
                 bld = bld
@@ -134,15 +140,14 @@ namespace lart
                     | sc::action::create_block( "merge." + std::to_string(pos) )
                     | sc::action::advance_block( -2 )
                     /* entry block to lift section */
+                    | sc::action::call( wrap( a->concrete ), args_t{ a->concrete } )
                     | sc::action::condbr( a->taint )
                     | sc::action::advance_block( 1 )
-                    // TODO lift value
                     /* lift block */
                     | sc::action::branch()
                     | sc::action::advance_block( 1 );
                     /* merge block */
                     // TODO create phi of lifted and argument value
-
                 // TODO update abstract argument
             }
         };
