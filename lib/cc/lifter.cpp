@@ -19,6 +19,8 @@
 #include <sc/ranges.hpp>
 #include <sc/builder.hpp>
 
+#include <numeric>
+
 namespace lart
 {
     namespace sv = sc::views;
@@ -33,45 +35,57 @@ namespace lart
             llvm::Argument *concrete;
             llvm::Argument *abstract;
         };
+
+        struct without_taint
+        {
+            llvm::Argument *value;
+        };
+
     } // namespace arg
+
+    using argument = std::variant< arg::with_taint, arg::without_taint >;
 
     namespace detail
     {
-        generator< unsigned > taint_indices( const lifter &lif )
+        generator< argument > arguments( const lifter &lif )
         {
-            unsigned pos = 0;
+            auto f = lif.function();
+
+            unsigned i = 0;
             for ( auto arg : op::arguments(lif.op) ) {
                 if ( arg.liftable ) {
-                    co_yield pos;
-                    pos += 3;
+                    co_yield arg::with_taint{ f->getArg(i), f->getArg(i + 1), f->getArg(i + 2) };
+                    i += 3;
                 } else {
-                    pos++;
+                    co_yield arg::without_taint{ f->getArg(i) };
+                    i++;
                 }
             }
         }
 
-        generator< arg::with_taint > args_with_taints( const lifter &lif )
+        static auto final = [] ( const argument &arg ) -> llvm::Value*
         {
-            auto f = lif.function();
-            for ( auto i : taint_indices(lif) )
-                co_yield { f->getArg(i), f->getArg(i + 1), f->getArg(i + 2) };
+            return std::visit( util::overloaded {
+                [] ( arg::with_taint a ) { return a.abstract; },
+                [] ( arg::without_taint a ) { return a.value; },
+            }, arg );
+        };
+
+        static auto with_taint = [] ( const argument &arg ) -> bool
+        {
+            return std::holds_alternative< arg::with_taint >( arg );
+        };
+
+        auto count_taints( const std::vector< argument > &args )
+        {
+            return std::ranges::count_if( args, with_taint );
         }
 
-        generator< unsigned > argument_indices( const lifter &lif )
+        auto final_args( const std::vector< argument > &args )
         {
-            unsigned pos = 0;
-            for ( auto arg : op::arguments(lif.op) ) {
-                pos = arg.liftable ? pos + 2 : pos;
-                co_yield pos;
-                pos++;
-            }
-        }
-
-        generator< llvm::Value* > arguments( const lifter &lif )
-        {
-            auto f = lif.function();
-            for ( auto i : argument_indices(lif) )
-                co_yield f->getArg( i );
+            std::vector< llvm::Value* > fargs;
+            std::ranges::transform( args, std::back_inserter(fargs), final );
+            return fargs;
         }
 
     } // namespace detail
@@ -107,21 +121,45 @@ namespace lart
     {
         assert( function()->empty() );
 
-        auto builder = sc::stack_builder()
-                     | sc::action::function( function() )
-                     | sc::action::create_block( "entry" );
+        auto bld = sc::stack_builder()
+                 | sc::action::function( function() )
+                 | sc::action::create_block( "entry" );
 
-        auto taints = sv::freeze( detail::args_with_taints( *this ) );
         auto args = sv::freeze( detail::arguments( *this ) );
 
-        if ( taints.size() < 2 ) {
-            // trivial lifter: no need to lift anything when only one argument
-            // can be tainted. If the test.taint is triggered we know,
-            // that the single argument is abstract.
-            auto impl = module.getFunction( op::impl(op) );
-            builder | sc::action::call( impl, args )
-                    | sc::action::ret();
+        auto lift = [&] ( auto arg, unsigned pos ) {
+            if ( auto a = std::get_if< arg::with_taint >( &arg ) ) {
+                bld = bld
+                    | sc::action::create_block( "lift." + std::to_string(pos) )
+                    | sc::action::create_block( "merge." + std::to_string(pos) )
+                    | sc::action::advance_block( -2 )
+                    /* entry block to lift section */
+                    | sc::action::condbr( a->taint )
+                    | sc::action::advance_block( 1 )
+                    // TODO lift value
+                    /* lift block */
+                    | sc::action::branch()
+                    | sc::action::advance_block( 1 );
+                    /* merge block */
+                    // TODO create phi of lifted and argument value
+
+                // TODO update abstract argument
+            }
+        };
+
+        // for trivial lifter there is no need to lift anything when
+        // only one argument can be tainted. If the test.taint is triggered
+        // we know, that the single argument is abstract.
+        if ( detail::count_taints( args ) > 1 ) {
+            unsigned pos = 1;
+            for ( auto arg : args )
+                lift( arg, pos++ );
         }
+
+        auto impl = module.getFunction( op::impl(op) );
+        bld | sc::action::call( impl, detail::final_args( args ) ) | sc::action::ret();
+
+        function()->dump();
     }
 
 } // namespace lart
