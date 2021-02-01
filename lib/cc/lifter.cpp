@@ -31,14 +31,14 @@ namespace lart
     {
         struct with_taint
         {
-            llvm::Argument *taint;
-            llvm::Argument *concrete;
-            llvm::Argument *abstract;
+            llvm::Value *taint;
+            llvm::Value *concrete;
+            llvm::Value *abstract;
         };
 
         struct without_taint
         {
-            llvm::Argument *value;
+            llvm::Value *value;
         };
 
     } // namespace arg
@@ -133,7 +133,7 @@ namespace lart
         };
 
         using args_t = std::vector< llvm::Value* >;
-        auto lift = [&] ( auto arg, unsigned pos ) {
+        auto lift = [&] ( auto &arg, unsigned pos ) {
             std::vector< sc::phi_edge > edges;
             if ( auto a = std::get_if< arg::with_taint >( &arg ) ) {
                 bld = bld
@@ -157,7 +157,9 @@ namespace lart
                 bld = bld
                     /* merge block */
                     | sc::action::phi( edges );
-                // TODO update abstract argument
+
+                // set abstract value to be merge of lifted and argument value
+                a->abstract = bld.stack.back();
             }
         };
 
@@ -166,7 +168,7 @@ namespace lart
         // we know, that the single argument is abstract.
         if ( detail::count_taints( args ) > 1 ) {
             unsigned pos = 1;
-            for ( auto arg : args )
+            for ( auto &arg : args )
                 lift( arg, pos++ );
         }
 
