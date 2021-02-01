@@ -135,17 +135,21 @@ namespace lart
         using args_t = std::vector< llvm::Value* >;
         auto lift = [&] ( auto &arg, unsigned pos ) {
             std::vector< sc::phi_edge > edges;
+
+            std::string entry_block = ( *bld.current_block )->getName();
+            std::string lift_block  = "lift." + std::to_string(pos);
+            std::string merge_block = "merge." + std::to_string(pos);
             if ( auto a = std::get_if< arg::with_taint >( &arg ) ) {
                 bld = bld
-                    | sc::action::create_block( "lift." + std::to_string(pos) )
-                    | sc::action::create_block( "merge." + std::to_string(pos) )
-                    | sc::action::advance_block( -2 )
+                    | sc::action::create_block( lift_block )
+                    | sc::action::create_block( merge_block )
+                    | sc::action::set_block( entry_block )
                     /* entry block to lift section */
                     | sc::action::inspect( [&]( auto *builder ) {
                         edges.emplace_back( a->abstract, *(builder->current_block) );
                     })
                     | sc::action::condbr( a->taint )
-                    | sc::action::advance_block( 1 )
+                    | sc::action::set_block( lift_block )
                     /* lift block */
                     | sc::action::call( wrap( a->concrete ), args_t{ a->concrete } )
                     | sc::action::inspect( [&]( auto *builder ) {
@@ -153,7 +157,7 @@ namespace lart
                         edges.emplace_back( wrapped, *(builder->current_block) );
                     })
                     | sc::action::branch()
-                    | sc::action::advance_block( 1 );
+                    | sc::action::set_block( merge_block );
                 bld = bld
                     /* merge block */
                     | sc::action::phi( edges );
