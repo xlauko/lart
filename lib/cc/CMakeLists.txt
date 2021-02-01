@@ -8,6 +8,9 @@ add_library( lart
     preprocess.cpp
     syntactic.cpp
     taint.cpp
+
+    backend/base.cpp
+    backend/exec.cpp
 )
 
 set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)

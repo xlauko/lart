@@ -20,6 +20,10 @@
 #include <cc/syntactic.hpp>
 #include <cc/logger.hpp>
 
+#include <cc/backend/exec.hpp>
+
+#include <sc/ranges.hpp>
+
 #include <ranges>
 #include <queue>
 #include <vector>
@@ -27,6 +31,8 @@
 
 namespace lart
 {
+    namespace sv = sc::views;
+
     bool driver::run()
     {
         spdlog::cfg::load_env_levels();
@@ -50,7 +56,13 @@ namespace lart
 
         // 7. interrupts ?
 
-        // 8. lart clean up
+        // TODO pick backend based on cmd arguments
+        auto backend = lart::backend::exec();
+
+        for ( auto call : sv::filter< llvm::CallInst >( module ) )
+            if ( auto intr = backend.get_intrinsic( call ) )
+                backend.lower( intr.value() );
+
         return true;
     }
 
