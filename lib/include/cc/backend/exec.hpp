@@ -33,6 +33,10 @@ namespace lart::backend
                 );
             };
 
+            stash_fn = getfunction( stash::impl,
+                llvm::FunctionType::get( sc::void_t, { sc::i8p() }, false )
+            );
+
             unstash_fn = getfunction( unstash::impl,
                 llvm::FunctionType::get( sc::i8p(), {}, false )
             );
@@ -40,10 +44,12 @@ namespace lart::backend
 
         using base::lower;
 
+        void lower( stash ) override;
         void lower( unstash ) override;
 
     private:
 
+        llvm::Function *stash_fn;
         llvm::Function *unstash_fn;
 
         llvm::Module &module;
