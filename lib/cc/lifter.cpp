@@ -132,24 +132,31 @@ namespace lart
             return module.getFunction( name );
         };
 
-        llvm::Value *lifted = nullptr;
         using args_t = std::vector< llvm::Value* >;
         auto lift = [&] ( auto arg, unsigned pos ) {
+            std::vector< sc::phi_edge > edges;
             if ( auto a = std::get_if< arg::with_taint >( &arg ) ) {
                 bld = bld
                     | sc::action::create_block( "lift." + std::to_string(pos) )
                     | sc::action::create_block( "merge." + std::to_string(pos) )
                     | sc::action::advance_block( -2 )
                     /* entry block to lift section */
-                    | sc::action::call( wrap( a->concrete ), args_t{ a->concrete } )
-                    | sc::action::inspect( [&] { lifted = bld.stack.back(); } )
+                    | sc::action::inspect( [&]( auto *builder ) {
+                        edges.emplace_back( a->abstract, *(builder->current_block) );
+                    })
                     | sc::action::condbr( a->taint )
                     | sc::action::advance_block( 1 )
                     /* lift block */
+                    | sc::action::call( wrap( a->concrete ), args_t{ a->concrete } )
+                    | sc::action::inspect( [&]( auto *builder ) {
+                        auto wrapped = builder->stack.back();
+                        edges.emplace_back( wrapped, *(builder->current_block) );
+                    })
                     | sc::action::branch()
                     | sc::action::advance_block( 1 );
+                bld = bld
                     /* merge block */
-                    // TODO create phi of lifted and argument value
+                    | sc::action::phi( edges );
                 // TODO update abstract argument
             }
         };
