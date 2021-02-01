@@ -18,11 +18,6 @@
 
 namespace lart::backend
 {
-    bool intrinsic_base::is_test_taint() const
-    {
-        return call->getCalledFunction()->getName().startswith( "lart.test.taint" );
-    }
-
     void base::lower( intrinsic i )
     {
         std::visit( [&](auto &&a) { this->lower(a); }, i );
@@ -30,8 +25,7 @@ namespace lart::backend
 
     template< typename intr >
     auto isintrinsic = [] (auto name) -> bool {
-        return name.startswith( "lart." + intr::name ) ||
-               name.startswith( "lart.test.taint." + intr::name );
+        return name.startswith( "lart." + intr::name );
     };
 
     std::optional< intrinsic > base::get_intrinsic( llvm::CallInst *call )
@@ -44,6 +38,8 @@ namespace lart::backend
                 return unstash{ call, {} };
             if ( isintrinsic< unstash >( name ) )
                 return unstash{ call, {} };
+            if ( isintrinsic< testtaint >( name ) )
+                return testtaint{ call };
         }
         return std::nullopt;
     }

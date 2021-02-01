@@ -47,6 +47,7 @@ namespace lart::backend
 
         void lower( stash ) override;
         void lower( unstash ) override;
+        void lower( testtaint ) override;
 
     private:
 

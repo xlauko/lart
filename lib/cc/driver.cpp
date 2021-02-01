@@ -56,7 +56,6 @@ namespace lart
 
         // 7. interrupts ?
 
-
         // TODO pick backend based on cmd arguments
         auto backend = lart::backend::exec( module );
 

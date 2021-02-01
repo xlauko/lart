@@ -16,19 +16,32 @@
 
 #include <cc/backend/exec.hpp>
 
+#include <sc/builder.hpp>
+
 #include <cassert>
 
 namespace lart::backend
 {
     void exec::lower( stash s )
     {
-        assert( !s.is_test_taint() );
         s.call->setCalledFunction( stash_fn );
     }
 
     void exec::lower( unstash u )
     {
-        assert( !u.is_test_taint() );
         u.call->setCalledFunction( unstash_fn );
+    }
+
+    void exec::lower( testtaint tt )
+    {
+        auto fn = tt.call->getCalledFunction();
+        if ( !fn->empty() )
+            return; // already synthesized
+
+        auto bld = sc::stack_builder()
+            | sc::action::function( fn )
+            | sc::action::create_block( "entry" );
+
+        fn->dump();
     }
 } // namespace lart::backend
