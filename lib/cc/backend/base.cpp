@@ -18,6 +18,11 @@
 
 namespace lart::backend
 {
+    bool intrinsic_base::is_test_taint() const
+    {
+        return call->getCalledFunction()->getName().startswith( "lart.test.taint" );
+    }
+
     void base::lower( intrinsic i )
     {
         std::visit( [&](auto &&a) { this->lower(a); }, i );

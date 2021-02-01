@@ -33,9 +33,10 @@ namespace lart::backend
                 );
             };
 
-            stash_fn = getfunction( stash::impl,
-                llvm::FunctionType::get( sc::void_t, { sc::i8p() }, false )
-            );
+            // TODO
+            //stash_fn = getfunction( stash::impl,
+            //    llvm::FunctionType::get( sc::void_t(), { sc::i8p() }, false )
+            //);
 
             unstash_fn = getfunction( unstash::impl,
                 llvm::FunctionType::get( sc::i8p(), {}, false )

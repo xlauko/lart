@@ -16,15 +16,19 @@
 
 #include <cc/backend/exec.hpp>
 
+#include <cassert>
+
 namespace lart::backend
 {
     void exec::lower( stash s )
     {
-        u.call->setCalledFunction( stash_fn );
+        assert( !s.is_test_taint() );
+        s.call->setCalledFunction( stash_fn );
     }
 
     void exec::lower( unstash u )
     {
+        assert( !u.is_test_taint() );
         u.call->setCalledFunction( unstash_fn );
     }
 } // namespace lart::backend

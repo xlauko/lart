@@ -27,6 +27,8 @@ namespace lart::backend
     struct intrinsic_base
     {
         llvm::CallInst *call;
+
+        bool is_test_taint() const;
     };
 
     struct stash : intrinsic_base, op::unstash_base {};
