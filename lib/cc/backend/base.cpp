@@ -35,6 +35,8 @@ namespace lart::backend
             if ( !fn->hasName() )
                 return std::nullopt;
             auto name = fn->getName();
+            if ( isintrinsic< stash >( name ) )
+                return unstash{ call, {} };
             if ( isintrinsic< unstash >( name ) )
                 return unstash{ call, {} };
         }

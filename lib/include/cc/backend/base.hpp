@@ -29,9 +29,11 @@ namespace lart::backend
         llvm::CallInst *call;
     };
 
+    struct stash : intrinsic_base, op::unstash_base {};
     struct unstash : intrinsic_base, op::unstash_base {};
 
-    using intrinsic = std::variant< unstash >;
+
+    using intrinsic = std::variant< stash, unstash >;
 
     struct base
     {
@@ -41,6 +43,7 @@ namespace lart::backend
 
         std::optional< intrinsic > get_intrinsic( llvm::CallInst *call );
 
+        virtual void lower( stash u )   = 0;
         virtual void lower( unstash u ) = 0;
     };
 
