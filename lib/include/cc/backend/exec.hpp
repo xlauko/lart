@@ -33,7 +33,7 @@ namespace lart::backend
                 );
             };
 
-            unstash_fn = getfunction( "__lart_unstash",
+            unstash_fn = getfunction( unstash::impl,
                 llvm::FunctionType::get( sc::i8p(), {}, false )
             );
         }

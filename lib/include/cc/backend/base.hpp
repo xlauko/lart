@@ -18,6 +18,8 @@
 
 #include <llvm/IR/Instructions.h>
 
+#include <cc/operation.hpp>
+
 #include <variant>
 
 namespace lart::backend
@@ -27,7 +29,7 @@ namespace lart::backend
         llvm::CallInst *call;
     };
 
-    struct unstash : intrinsic_base {};
+    struct unstash : intrinsic_base, op::unstash_base {};
 
     using intrinsic = std::variant< unstash >;
 

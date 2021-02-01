@@ -158,17 +158,30 @@ namespace lart::op
         args_t arguments() const { return {}; }
     };
 
+    struct stash_base
+    {
+        inline static const std::string name = "stash";
+        inline static const std::string impl = "__lart_stash";
+    };
+
     struct stash : without_taints_base
     {
-        std::string name() const { return "stash"; }
-        std::string impl() const { return "__lart_stash"; }
+        std::string name() const { return stash_base::name; }
+        std::string impl() const { return stash_base::impl; }
         args_t arguments() const { return {}; }
     };
 
-    struct unstash : without_taints_base
+
+    struct unstash_base
     {
-        std::string name() const { return "unstash"; }
-        std::string impl() const { return "__lart_unstash"; }
+        inline static const std::string name = "unstash";
+         inline static const std::string impl= "__lart_unstash";
+    };
+
+    struct unstash : without_taints_base, unstash_base
+    {
+        std::string name() const { return unstash_base::name; }
+        std::string impl() const { return unstash_base::impl; }
         args_t arguments() const { return {}; }
     };
 

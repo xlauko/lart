@@ -23,14 +23,20 @@ namespace lart::backend
         std::visit( [&](auto &&a) { this->lower(a); }, i );
     }
 
+    template< typename intr >
+    auto isintrinsic = [] (auto name) -> bool {
+        return name.startswith( "lart." + intr::name ) ||
+               name.startswith( "lart.test.taint." + intr::name );
+    };
+
     std::optional< intrinsic > base::get_intrinsic( llvm::CallInst *call )
     {
         if ( auto fn = call->getCalledFunction() ) {
             if ( !fn->hasName() )
                 return std::nullopt;
             auto name = fn->getName();
-            if ( name.startswith( "lart.unstash" ) )
-                return unstash{ call };
+            if ( isintrinsic< unstash >( name ) )
+                return unstash{ call, {} };
         }
         return std::nullopt;
     }

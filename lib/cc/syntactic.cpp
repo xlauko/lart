@@ -69,7 +69,7 @@ namespace lart
             },
             [&] ( llvm::CallInst *call ) {
                 if ( is_lamp_call(call) ) {
-                    result = op::unstash(call);
+                    result = op::unstash(call, {});
                 } else {
                     // TODO
                 }
