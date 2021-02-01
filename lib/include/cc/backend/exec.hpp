@@ -17,13 +17,35 @@
 #pragma once
 
 #include <cc/backend/base.hpp>
+#include <llvm/IR/Module.h>
+
+#include <sc/types.hpp>
 
 namespace lart::backend
 {
     struct exec : base
     {
+        exec( llvm::Module &m ) : module( m )
+        {
+            auto getfunction = [&] ( auto name, auto fty ) {
+                return llvm::cast< llvm::Function >(
+                    module.getOrInsertFunction( name, fty ).getCallee()
+                );
+            };
+
+            unstash_fn = getfunction( "__lart_unstash",
+                llvm::FunctionType::get( sc::i8p(), {}, false )
+            );
+        }
+
         using base::lower;
 
         void lower( unstash ) override;
+
+    private:
+
+        llvm::Function *unstash_fn;
+
+        llvm::Module &module;
     };
 }

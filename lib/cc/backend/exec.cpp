@@ -18,7 +18,8 @@
 
 namespace lart::backend
 {
-
-    void exec::lower( unstash u ) {}
-
+    void exec::lower( unstash u )
+    {
+        u.call->setCalledFunction( unstash_fn );
+    }
 } // namespace lart::backend
