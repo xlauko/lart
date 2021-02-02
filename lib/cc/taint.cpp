@@ -47,7 +47,7 @@ namespace lart::taint
             unsigned pos = op::returns_value(op) ? 2 : 1;
 
             for ( auto arg : op::arguments(op) ) {
-                if ( arg.liftable ) {
+                if ( arg.type == op::argtype::lift ) {
                     co_yield pos;
                     pos += 2;
                 } else {

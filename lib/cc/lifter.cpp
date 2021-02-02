@@ -53,7 +53,7 @@ namespace lart
 
             unsigned i = 0;
             for ( auto arg : op::arguments(lif.op) ) {
-                if ( arg.liftable ) {
+                if ( arg.type == op::argtype::lift ) {
                     co_yield arg::with_taint{ f->getArg(i), f->getArg(i + 1), f->getArg(i + 2) };
                     i += 3;
                 } else {
@@ -104,7 +104,7 @@ namespace lart
 
         std::vector< llvm::Type * > args;
         for ( auto arg : op::arguments(op) ) {
-            if ( arg.liftable ) {
+            if ( arg.type == op::argtype::lift ) {
                 args.push_back(sc::i1()); // dummy false
                 args.push_back(arg.value->getType());
                 args.push_back(aptr);

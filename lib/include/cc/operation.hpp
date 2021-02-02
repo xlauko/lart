@@ -66,21 +66,27 @@ namespace lart::op
         constexpr bool with_taints() const { return false; }
     };
 
+    enum class argtype { test, lift, concrete };
+
     struct argument
     {
         llvm::Value * value;
-        bool liftable;
+        argtype type;
 
         template< typename stream >
         friend auto operator<<( stream &s, argument a ) -> decltype( s << "" )
         {
-            auto lift = a.liftable ? "lift" : "concrete";
+            auto lift = [a] {
+                switch (a.type) {
+                    case argtype::test: return "test";
+                    case argtype::lift: return "lift";
+                    case argtype::concrete: return "concrete";
+                }
+            } ();
+
             return s << sc::fmt::llvm_name( a.value ) << ":" << lift;
         }
     };
-
-    static constexpr bool lift = true;
-    static constexpr bool concrete = !lift;
 
     using args_t = std::vector< argument >;
 
@@ -94,7 +100,7 @@ namespace lart::op
         args_t arguments() const
         {
             auto load = llvm::cast< llvm::LoadInst >( _what );
-            return { { load->getPointerOperand(), concrete } };
+            return { { load->getPointerOperand(), argtype::concrete } };
         }
     };
 
@@ -107,8 +113,8 @@ namespace lart::op
         {
             auto store = llvm::cast< llvm::StoreInst >( _what );
             return {
-                { store->getValueOperand(), lift },
-                { store->getPointerOperand(), concrete }
+                { store->getValueOperand(), argtype::lift },
+                { store->getPointerOperand(), argtype::concrete }
             };
         }
 
@@ -131,8 +137,8 @@ namespace lart::op
         {
             auto bin = llvm::cast< llvm::BinaryOperator >( _what );
             return {
-                { bin->getOperand( 0 ), lift },
-                { bin->getOperand( 1 ), lift },
+                { bin->getOperand( 0 ), argtype::lift },
+                { bin->getOperand( 1 ), argtype::lift },
             };
         }
     };
@@ -228,7 +234,7 @@ namespace lart::op
     inline generator< llvm::Value* > duplicated_arguments(const operation &op)
     {
         for ( auto arg : op::arguments(op) ) {
-            if ( arg.liftable ) {
+            if ( arg.type == argtype::lift ) {
                 co_yield arg.value;
                 co_yield op::abstract_pointer();
             } else {
