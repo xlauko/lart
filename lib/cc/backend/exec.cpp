@@ -15,6 +15,7 @@
  */
 
 #include <cc/backend/exec.hpp>
+#include <cc/taint.hpp>
 
 #include <sc/builder.hpp>
 
@@ -28,14 +29,67 @@ namespace lart::backend
         if ( !fn->empty() )
             return; // already synthesized
 
-        //auto tainted = sc::i1( false );
+        llvm::Value *tainted = sc::i1( false );
 
-        //std::vector< llvm::Value * > taints;
+        auto bld = sc::stack_builder()
+            | sc::action::function( fn )
+            | sc::action::create_block( "entry" );
 
-        // std::vector< llvm::Value * > args;
-        // auto bld = sc::stack_builder()
-        //     | sc::action::function( fn )
-        //     | sc::action::create_block( "entry" );
+        auto test = [&] ( auto arg ) -> llvm::Value* {
+            if ( arg->getType()->isIntegerTy() ) {
+                bld = bld | sc::action::zfit( arg, sc::i8() )
+                          | sc::action::call( testtaint_fn, { std::nullopt } );
+                return bld.stack.back();
+            }
+            return arg;
+        };
+
+        std::vector< llvm::Value* > args;
+        // skip lifter and default value arguments
+        unsigned pos = op::returns_value( i.op ) ? 2 : 1;
+
+        for ( auto arg : op::arguments( i.op ) ) {
+            if ( arg.type == op::argtype::lift ) {
+                auto concrete = fn->getArg(pos);
+                auto abstract = fn->getArg(pos + 1);
+                auto taint = test( concrete );
+
+                bld = bld | sc::action::or_( tainted, taint );
+                tainted = bld.stack.back();
+
+                args.push_back( taint );
+                args.push_back( concrete );
+                args.push_back( abstract );
+
+                pos += 2;
+            } else if ( arg.type == op::argtype::test ) {
+                auto taint = test( fn->getArg(pos) );
+                bld = bld | sc::action::or_( tainted, taint );
+                tainted = bld.stack.back();
+                pos++;
+            } else {
+                args.push_back( fn->getArg(pos) );
+                pos++;
+            }
+        }
+
+        bld = bld
+            | sc::action::create_block( "abstract.path" )
+            | sc::action::create_block( "concrete.path" )
+            | sc::action::set_block( "entry" )
+            | sc::action::condbr( tainted )
+            /* abstract path */
+            | sc::action::set_block( "abstract.path")
+            | sc::action::call( fn->getArg(0), args )
+            | sc::action::ret()
+            /* concrete path */
+            | sc::action::set_block( "concrete.path" );
+
+        if ( auto def = op::default_value(i.op); def.has_value() ) {
+            bld | sc::action::ret( def.value() );
+        } else {
+            bld | sc::action::ret();
+        }
     }
 
     void exec::lower( callinst call, op::unstash )

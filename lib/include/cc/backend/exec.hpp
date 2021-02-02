@@ -45,7 +45,7 @@ namespace lart::backend
             );
 
             testtaint_fn = getfunction( "__lart_test_taint",
-                llvm::FunctionType::get( sc::i1(), { sc::i64() }, false )
+                llvm::FunctionType::get( sc::i1(), { sc::i8() }, false )
             );
         }
 
