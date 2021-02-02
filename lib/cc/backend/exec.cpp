@@ -22,26 +22,25 @@
 
 namespace lart::backend
 {
-    void exec::lower( stash s )
+    void exec::lower( ir::intrinsic i, testtaint )
     {
-        s.call->setCalledFunction( stash_fn );
-    }
-
-    void exec::lower( unstash u )
-    {
-        u.call->setCalledFunction( unstash_fn );
-    }
-
-    void exec::lower( testtaint tt )
-    {
-        auto fn = tt.call->getCalledFunction();
+        auto fn = i.call->getCalledFunction();
         if ( !fn->empty() )
             return; // already synthesized
 
-        auto bld = sc::stack_builder()
-            | sc::action::function( fn )
-            | sc::action::create_block( "entry" );
+        //auto tainted = sc::i1( false );
 
-        fn->dump();
+        //std::vector< llvm::Value * > taints;
+
+        // std::vector< llvm::Value * > args;
+        // auto bld = sc::stack_builder()
+        //     | sc::action::function( fn )
+        //     | sc::action::create_block( "entry" );
     }
+
+    void exec::lower( callinst call, op::unstash )
+    {
+        call->setCalledFunction( unstash_fn );
+    }
+
 } // namespace lart::backend

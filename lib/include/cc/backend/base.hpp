@@ -18,39 +18,24 @@
 
 #include <llvm/IR/Instructions.h>
 
-#include <cc/operation.hpp>
+#include <cc/ir.hpp>
 
 #include <variant>
 
 namespace lart::backend
 {
-    struct intrinsic_base
-    {
-        llvm::CallInst *call;
-    };
-
-    struct testtaint : intrinsic_base
-    {
-        inline static const std::string name = "test.taint";
-    };
-
-    struct stash : intrinsic_base, op::unstash_base {};
-    struct unstash : intrinsic_base, op::unstash_base {};
-
-
-    using intrinsic = std::variant< testtaint, stash, unstash >;
-
     struct base
     {
+        struct testtaint { };
+
         virtual ~base() = default;
 
-        void lower( intrinsic i );
+        void lower( ir::intrinsic i );
+        void lower( llvm::CallInst *call, op::operation );
 
-        std::optional< intrinsic > get_intrinsic( llvm::CallInst *call );
-
-        virtual void lower( stash s )     = 0;
-        virtual void lower( unstash u )   = 0;
-        virtual void lower( testtaint t ) = 0;
+        using callinst = llvm::CallInst*;
+        virtual void lower( ir::intrinsic, testtaint ) = 0;
+        virtual void lower( callinst c, op::unstash u ) = 0;
     };
 
 } // namespace lart::backend

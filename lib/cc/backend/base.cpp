@@ -18,30 +18,17 @@
 
 namespace lart::backend
 {
-    void base::lower( intrinsic i )
+    void base::lower( ir::intrinsic i )
     {
-        std::visit( [&](auto &&a) { this->lower(a); }, i );
+        if ( op::with_taints( i.op ) )
+            this->lower( i, testtaint{} );
+        else
+            std::visit( [&] (auto &&a) { this->lower( i.call, a ); }, i.op );
     }
 
-    template< typename intr >
-    auto isintrinsic = [] (auto name) -> bool {
-        return name.startswith( "lart." + intr::name );
-    };
-
-    std::optional< intrinsic > base::get_intrinsic( llvm::CallInst *call )
+    void base::lower( llvm::CallInst *, op::operation )
     {
-        if ( auto fn = call->getCalledFunction() ) {
-            if ( !fn->hasName() )
-                return std::nullopt;
-            auto name = fn->getName();
-            if ( isintrinsic< stash >( name ) )
-                return unstash{ call, {} };
-            if ( isintrinsic< unstash >( name ) )
-                return unstash{ call, {} };
-            if ( isintrinsic< testtaint >( name ) )
-                return testtaint{ call };
-        }
-        return std::nullopt;
+        __builtin_unreachable(); // not implementeted lowering operation
     }
 
 } // namespace lart::backend

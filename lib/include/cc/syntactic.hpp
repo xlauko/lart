@@ -19,6 +19,7 @@
 #include <cc/dfa.hpp>
 #include <cc/operation.hpp>
 #include <cc/taint.hpp>
+#include <cc/ir.hpp>
 
 #include <optional>
 #include <vector>
@@ -38,16 +39,10 @@ namespace lart
         std::optional< operation > make_operation( llvm::Value *value );
 
         generator< operation > toprocess();
-        void process( operation op );
-
-        struct intrinsic_with_taints { testtaint test; };
-        struct direct_intrinsic { llvm::CallInst *call; };
-        using intrinsic = std::variant< intrinsic_with_taints, direct_intrinsic >;
-
-        intrinsic make_intrinsic(const operation &op) const;
+        ir::intrinsic process( operation op );
 
         std::map< llvm::Value*, llvm::Value* > abstract;
-        std::map< llvm::Value*, std::vector< arg::liftable > > places;
+        std::map< llvm::Value*, std::vector< ir::arg::liftable > > places;
 
         const dfa::types &types;
         llvm::Module &module;

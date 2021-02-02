@@ -17,21 +17,34 @@
 #pragma once
 
 #include <cc/operation.hpp>
-#include <cc/ir.hpp>
 
-#include <llvm/IR/Module.h>
+#include <sc/ranges.hpp>
 
-#include <bitset>
-#include <external/coro/generator.hpp>
+#include <variant>
 
-namespace lart::taint
+namespace lart::ir
 {
-    template< typename T > using generator = cppcoro::generator< T >;
-
     using operation = lart::op::operation;
+    namespace sv = sc::views;
 
-    llvm::CallInst * make_call( llvm::Module &module, const operation &op );
+    struct intrinsic
+    {
+        llvm::CallInst *call;
+        operation op;
+    };
 
-    generator< ir::arg::liftable > liftable_view( const ir::intrinsic &test );
+    namespace arg
+    {
+        struct liftable
+        {
+            llvm::Use &concrete;
+            llvm::Use &abstract;
+        };
+    } // namespace arg
 
-} // namespace lart::taint
+    namespace detail
+    {
+        static auto invoke = [] (auto f) { return [=] ( auto a ) { return std::visit(f, a); }; };
+    } // namespace detail
+
+} // namespace lart::ir

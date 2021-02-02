@@ -17,6 +17,8 @@
 #pragma once
 
 #include <cc/backend/base.hpp>
+#include <cc/operation.hpp>
+
 #include <llvm/IR/Module.h>
 
 #include <sc/types.hpp>
@@ -33,24 +35,29 @@ namespace lart::backend
                 );
             };
 
-            // TODO
-            //stash_fn = getfunction( stash::impl,
-            //    llvm::FunctionType::get( sc::void_t(), { sc::i8p() }, false )
-            //);
+            // TODO unify with operation impl
+            stash_fn = getfunction( "__lart_stash",
+                llvm::FunctionType::get( sc::void_t(), { sc::i8p() }, false )
+            );
 
-            unstash_fn = getfunction( unstash::impl,
+            unstash_fn = getfunction( "__lart_unstash",
                 llvm::FunctionType::get( sc::i8p(), {}, false )
+            );
+
+            testtaint_fn = getfunction( "__lart_test_taint",
+                llvm::FunctionType::get( sc::i1(), { sc::i64() }, false )
             );
         }
 
         using base::lower;
+        using base::testtaint;
+        using base::callinst;
 
-        void lower( stash ) override;
-        void lower( unstash ) override;
-        void lower( testtaint ) override;
+        void lower( ir::intrinsic, testtaint ) override;
+        void lower( callinst c, op::unstash u ) override;
 
     private:
-
+        llvm::Function *testtaint_fn;
         llvm::Function *stash_fn;
         llvm::Function *unstash_fn;
 

@@ -42,9 +42,10 @@ namespace lart
         auto types = dfa::analysis::run_on( module );
 
         // 3. syntactic pass
+        std::vector< ir::intrinsic > intrinsics;
         syntactic syn( module, types );
         for ( const auto &op : syn.toprocess() )
-            syn.process( op );
+            intrinsics.push_back( syn.process( op ) );
 
         /* Abstract IR */
 
@@ -58,10 +59,8 @@ namespace lart
 
         // TODO pick backend based on cmd arguments
         auto backend = lart::backend::exec( module );
-
-        for ( auto call : sv::filter< llvm::CallInst >( module ) )
-            if ( auto intr = backend.get_intrinsic( call ) )
-                backend.lower( intr.value() );
+        for ( auto intr : intrinsics )
+            backend.lower( intr );
 
         return true;
     }

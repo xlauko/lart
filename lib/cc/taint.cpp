@@ -19,15 +19,28 @@
 
 #include <sc/ranges.hpp>
 
-namespace lart
+namespace lart::taint
 {
     namespace sv = sc::views;
-
-    using operation = lart::op::operation;
-
     namespace detail
     {
-        generator< unsigned > liftable_indices( const testtaint &test )
+        std::string name( const operation &op )
+        {
+            return "lart.test.taint." + op::name(op) + "." + op::unique_name_suffix(op);
+        }
+
+        generator< llvm::Value* > arguments( const lart::lifter &lifter, const operation &op )
+        {
+            co_yield lifter.function();
+
+            if ( auto def = op::default_value(op); def.has_value() )
+                co_yield def.value();
+
+            for ( auto arg : op::duplicated_arguments(op) )
+                co_yield arg;
+        }
+
+        generator< unsigned > liftable_indices( const ir::intrinsic &test )
         {
             auto op = test.op;
             // skip lifter and default value arguments
@@ -42,36 +55,22 @@ namespace lart
                 }
             }
         }
+
+    } // namespace detail
+
+    llvm::CallInst * make_call( llvm::Module &module, const operation &op )
+    {
+        lart::lifter lifter( module, op );
+        auto args = sv::freeze( detail::arguments( lifter, op ) );
+        return op::make_call( op, args, detail::name( op ) );
     }
 
-    generator< llvm::Value* > arguments(const lifter &lif, const operation &op )
+    generator< ir::arg::liftable > liftable_view( const ir::intrinsic &test )
     {
-        co_yield lif.function();
-
-        if ( auto def = op::default_value(op); def.has_value() )
-            co_yield def.value();
-
-        for ( auto arg : op::duplicated_arguments(op) )
-            co_yield arg;
-    }
-
-    std::string testtaint::name() const
-    {
-        return "lart.test.taint." + op::name(op) + "." + op::unique_name_suffix(op);
-    }
-
-    llvm::CallInst* testtaint::intrinsic()
-    {
-        lifter lif( module, op );
-        auto args = sv::freeze( arguments( lif, op ) );
-        return op::make_call( op, args, name() );
-    }
-
-    generator< arg::liftable > liftable_view( const testtaint &test )
-    {
+        // TODO assert is test taint
         auto call = test.call;
-        for ( auto i : detail::liftable_indices(test) )
+        for ( auto i : detail::liftable_indices( test ) )
             co_yield { call->getOperandUse(i), call->getOperandUse(i + 1) };
     }
 
-} // namespace lart
+} // namespace lart::taint
