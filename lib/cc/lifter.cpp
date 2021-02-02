@@ -55,8 +55,7 @@ namespace lart
             for ( auto arg : op::arguments(lif.op) ) {
                 switch ( arg.type ) {
                 case op::argtype::test:
-                    i++; // ignore test arguments in lifter
-                    break;
+                    break; // ignore test arguments in lifter
                 case op::argtype::lift:
                     co_yield arg::with_taint{ f->getArg(i), f->getArg(i + 1), f->getArg(i + 2) };
                     i += 3;

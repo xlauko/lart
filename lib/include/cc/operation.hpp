@@ -101,7 +101,10 @@ namespace lart::op
         args_t arguments() const
         {
             auto load = llvm::cast< llvm::LoadInst >( _what );
-            return { { load->getPointerOperand(), argtype::concrete } };
+            return {
+                { load, argtype::test },
+                { load->getPointerOperand(), argtype::concrete }
+            };
         }
     };
 
