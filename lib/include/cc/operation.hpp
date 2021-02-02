@@ -82,6 +82,7 @@ namespace lart::op
                     case argtype::lift: return "lift";
                     case argtype::concrete: return "concrete";
                 }
+                __builtin_unreachable();
             } ();
 
             return s << sc::fmt::llvm_name( a.value ) << ":" << lift;

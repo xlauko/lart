@@ -47,11 +47,15 @@ namespace lart::taint
             unsigned pos = op::returns_value(op) ? 2 : 1;
 
             for ( auto arg : op::arguments(op) ) {
-                if ( arg.type == op::argtype::lift ) {
+                switch ( arg.type ) {
+                case op::argtype::lift:
                     co_yield pos;
                     pos += 2;
-                } else {
+                    break;
+                case op::argtype::test:
+                case op::argtype::concrete:
                     pos++;
+                    break;
                 }
             }
         }

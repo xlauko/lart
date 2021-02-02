@@ -49,16 +49,22 @@ namespace lart
     {
         generator< argument > arguments( const lifter &lif )
         {
-            auto f = lif.function();
+            auto *f = lif.function();
 
             unsigned i = 0;
             for ( auto arg : op::arguments(lif.op) ) {
-                if ( arg.type == op::argtype::lift ) {
+                switch ( arg.type ) {
+                case op::argtype::test:
+                    i++; // ignore test arguments in lifter
+                    break;
+                case op::argtype::lift:
                     co_yield arg::with_taint{ f->getArg(i), f->getArg(i + 1), f->getArg(i + 2) };
                     i += 3;
-                } else {
+                    break;
+                case op::argtype::concrete:
                     co_yield arg::without_taint{ f->getArg(i) };
                     i++;
+                    break;
                 }
             }
         }
@@ -104,12 +110,17 @@ namespace lart
 
         std::vector< llvm::Type * > args;
         for ( auto arg : op::arguments(op) ) {
-            if ( arg.type == op::argtype::lift ) {
+            switch ( arg.type ) {
+            case op::argtype::test:
+                break; // ignore test arguments in lifters
+            case op::argtype::lift:
                 args.push_back(sc::i1()); // dummy false
                 args.push_back(arg.value->getType());
                 args.push_back(aptr);
-            } else {
+                break;
+            case op::argtype::concrete:
                 args.push_back(arg.value->getType());
+                break;
             }
         }
 
