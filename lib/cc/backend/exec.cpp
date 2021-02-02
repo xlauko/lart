@@ -45,8 +45,8 @@ namespace lart::backend
         };
 
         std::vector< llvm::Value* > args;
-        // skip lifter and default value arguments
-        unsigned pos = op::returns_value( i.op ) ? 2 : 1;
+        // skip lifter argument
+        unsigned pos = 1;
 
         for ( auto arg : op::arguments( i.op ) ) {
             if ( arg.type == op::argtype::lift ) {

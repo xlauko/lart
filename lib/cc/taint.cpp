@@ -33,9 +33,6 @@ namespace lart::taint
         {
             co_yield lifter.function();
 
-            if ( auto def = op::default_value(op); def.has_value() )
-                co_yield def.value();
-
             for ( auto arg : op::duplicated_arguments(op) )
                 co_yield arg;
         }
@@ -43,8 +40,8 @@ namespace lart::taint
         generator< unsigned > liftable_indices( const ir::intrinsic &test )
         {
             auto op = test.op;
-            // skip lifter and default value arguments
-            unsigned pos = op::returns_value(op) ? 2 : 1;
+            // skip lifter argument
+            unsigned pos = 1;
 
             for ( auto arg : op::arguments(op) ) {
                 switch ( arg.type ) {
