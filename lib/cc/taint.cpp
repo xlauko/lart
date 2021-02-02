@@ -62,9 +62,9 @@ namespace lart
 
     llvm::CallInst* testtaint::intrinsic()
     {
-        lifter lif(module, op);
+        lifter lif( module, op );
         auto args = sv::freeze( arguments( lif, op ) );
-        return op::make_intrinsic(op, args, name() );
+        return op::make_call( op, args, name() );
     }
 
     generator< arg::liftable > liftable_view( const testtaint &test )

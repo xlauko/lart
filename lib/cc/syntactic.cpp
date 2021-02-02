@@ -100,7 +100,7 @@ namespace lart
 
         auto args = sv::freeze( op::duplicated_arguments(op) );
         auto name = "lart." + op::name(op);
-        return direct_intrinsic( op::make_intrinsic( op, args, name ) );
+        return direct_intrinsic( op::make_call( op, args, name ) );
     }
 
     llvm::CallInst* callinst( const syntactic::intrinsic &intr )

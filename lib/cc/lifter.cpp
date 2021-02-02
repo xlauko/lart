@@ -113,7 +113,7 @@ namespace lart
             }
         }
 
-        _function = op::intrinsic( op, &module, args, name() );
+        _function = op::function( op, &module, args, name() );
         return _function;
     }
 

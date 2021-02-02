@@ -175,7 +175,7 @@ namespace lart::op
     struct unstash_base
     {
         inline static const std::string name = "unstash";
-         inline static const std::string impl= "__lart_unstash";
+        inline static const std::string impl= "__lart_unstash";
     };
 
     struct unstash : without_taints_base, unstash_base
@@ -246,7 +246,7 @@ namespace lart::op
         return s;
     }
 
-    inline llvm::Function* intrinsic( const operation &op, llvm::Module *module
+    inline llvm::Function* function( const operation &op, llvm::Module *module
                                     , const std::vector< llvm::Type * > &args
                                     , const std::string &intr_name )
     {
@@ -260,14 +260,14 @@ namespace lart::op
         return fn;
     }
 
-    inline llvm::CallInst* make_intrinsic( const operation &op
+    inline llvm::CallInst* make_call( const operation &op
                                          , const std::vector< llvm::Value * > &args
                                          , const std::string &intr_name )
     {
         llvm::IRBuilder<> irb( op::location(op) );
         auto module = irb.GetInsertBlock()->getModule();
         auto arg_types = sv::freeze( args | sv::types );
-        return irb.CreateCall( intrinsic(op, module, arg_types, intr_name), args );
+        return irb.CreateCall( function(op, module, arg_types, intr_name), args );
     }
 
 } // namespace lart::op
