@@ -1,12 +1,12 @@
 #!/bin/bash
 
-RUNTIME="@LART_RUNTIME_DIR@"
+LART_INTERFACE="@PROJECT_BINARY_DIR@/include/"
+RUNTIME="@PROJECT_BINARY_DIR@/lib/runtime/exec/liblart-exec-runtime.a"
 PASS="@CMAKE_CURRENT_BINARY_DIR@/liblart_module.so"
 
 exec @CLANG_BINARY@                             \
      -Xclang -load -Xclang "$PASS"              \
      "$@"                                       \
-     -L"$RUNTIME"                               \
-     -llart-runtime                              \
-     -Wl,-rpath,"$RUNTIME"                      \
+     "$RUNTIME"                                 \
+     -I"$LART_INTERFACE"                        \
      -Qunused-arguments

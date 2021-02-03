@@ -1,5 +1,6 @@
 #!/bin/bash
 
+LART_INTERFACE="@PROJECT_BINARY_DIR@/include/"
 RUNTIME="@LART_RUNTIME_DIR@"
 PASS="@CMAKE_CURRENT_BINARY_DIR@/liblart_module.so"
 LIBCXX=LARTCC_LIBCXX_PATH
@@ -23,7 +24,8 @@ exec @CLANGPP_BINARY@                           \
      $STDLIB_CFLAGS                             \
      "$@"                                       \
      $STDLIB_LDFLAGS                            \
+     -I"$LART_INTERFACE"                        \
      -L"$RUNTIME"                               \
-     -llart-runtime                              \
+     -llart-runtime                             \
      -Wl,-rpath,"$RUNTIME"                      \
      -Qunused-arguments
