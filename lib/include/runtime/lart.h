@@ -18,6 +18,11 @@ extern "C" {
     void __lart_stash( void * );
     void * __lart_unstash();
 
+
+    _Bool __lart_test_taint( uint8_t byte );
+
+    void __lart_set_taint( void *value, unsigned bytes );
+
 #ifdef __cplusplus
 }
 #endif
