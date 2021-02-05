@@ -97,6 +97,8 @@ add_custom_target( lit
   DEPENDS lart
 )
 
+option(BUILD_LART_RUNTIME "Build the lart runtime library" OFF)
+
 enable_testing()
 
 add_subdirectory( external )
