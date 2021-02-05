@@ -16,7 +16,21 @@
 
 #include <exec/taint.hpp>
 
+#include "utils.hpp"
+
 namespace __lart::rt
 {
+    dfsan_label taint;
+
+    constructor void init_taint()
+    {
+        taint = dfsan_create_label( "taint", nullptr );
+    }
+
+    void make_tainted( void *value, unsigned bytes )
+    {
+        dfsan_set_label( taint, value, bytes );
+    }
+
 
 } // namespace __lart::rt
