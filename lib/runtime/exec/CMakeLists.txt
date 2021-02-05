@@ -17,6 +17,8 @@ set_property( TARGET lart-exec PROPERTY CXX_STANDARD 20 )
 add_compile_options( "-fsanitize=dataflow;-nostdinc++;-fno-exceptions" )
 add_link_options( "-fsanitize=dataflow;-stdlib=libc++;-Wl,-rpath,${LLVM_INSTALL_DIR}/lib" )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=dataflow")
+
 llvm_map_components_to_libnames( libcxx )
 
 target_include_directories( lart-exec
@@ -28,7 +30,6 @@ target_include_directories( lart-exec
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-
 
 target_link_libraries( lart-exec
   INTERFACE
