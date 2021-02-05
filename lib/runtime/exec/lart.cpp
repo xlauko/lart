@@ -15,6 +15,7 @@
  */
 
 #include <exec/stash.hpp>
+#include <exec/taint.hpp>
 
 extern "C"
 {
@@ -26,5 +27,16 @@ extern "C"
     void __lart_stash( void *val )
     {
         __lart::rt::stash( val );
+    }
+
+    bool __lart_test_taint( uint8_t byte )
+    {
+        return __lart::rt::is_tainted( byte );
+    }
+
+
+    void __lart_set_taint( void *value, unsigned bytes )
+    {
+        __lart::rt::make_tainted( value, bytes );
     }
 }
