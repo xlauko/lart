@@ -45,7 +45,7 @@ COPY . /usr/src/lart
 RUN ls /usr/src/
 
 # This command compiles your app using GCC, adjust for your source code
-RUN cmake -S . -B build -G Ninja \
+RUN cmake -S . -B build --target lart_module -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_INSTALL_DIR="/usr/src/llvm"
 
