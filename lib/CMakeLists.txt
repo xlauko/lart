@@ -4,3 +4,5 @@ if (BUILD_LART_RUNTIME)
 endif()
 
 add_subdirectory( cc )
+add_subdirectory( lava )
+add_subdirectory( lamp )
