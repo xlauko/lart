@@ -107,13 +107,13 @@ namespace __lava
             swap( _data, other._data );
         }
 
-        inline iterator begin() noexcept { return _data ?_data->get() : nullptr; }
-        inline const_iterator begin() const noexcept { return _data ?_data->get() : nullptr; }
-        inline const_iterator cbegin() const noexcept { return _data ?_data->get() : nullptr; }
+        inline iterator begin() noexcept { return _data ?_data.get() : nullptr; }
+        inline const_iterator begin() const noexcept { return _data ?_data.get() : nullptr; }
+        inline const_iterator cbegin() const noexcept { return _data ?_data.get() : nullptr; }
 
-        inline iterator end() noexcept { return _data ? _data->get() + size() : nullptr; }
-        inline const_iterator end() const noexcept { return _data ? _data->get() + size() : nullptr; }
-        inline const_iterator cend() const noexcept { return _data ? _data->get() + size() : nullptr; }
+        inline iterator end() noexcept { return _data ? _data.end() : nullptr; }
+        inline const_iterator end() const noexcept { return _data ? _data.end() : nullptr; }
+        inline const_iterator cend() const noexcept { return _data ? _data.end() : nullptr; }
 
         inline reverse_iterator rbegin() noexcept { return reverse_iterator( end() ); }
         inline const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator( end() ); }
@@ -131,7 +131,7 @@ namespace __lava
         [[nodiscard]] inline bool empty() const noexcept { return !_data; }
         [[nodiscard]] inline size_type size() const noexcept
         {
-            return empty() ? 0 : _data->size();
+            return empty() ? 0 : _data.size();
         }
 
         inline void clear() noexcept ( nothrow_dtor )
@@ -139,8 +139,7 @@ namespace __lava
             if ( empty() )
                 return;
             _clear();
-            free( _data );
-            _data = nullptr;
+            _data.clear();
         }
 
         void push_back( const T& t ) noexcept ( nothrow_copy )
@@ -169,24 +168,6 @@ namespace __lava
         {
             back().~T();
             _resize( size() - 1 );
-        }
-
-        iterator erase( iterator it ) noexcept ( nothrow_dtor )
-        {
-            return erase( it, std::next( it ) );
-        }
-
-        iterator erase( iterator first, iterator last ) noexcept ( nothrow_dtor )
-        {
-            if ( empty() )
-                return end();
-            int origSize = size();
-            int shift = std::distance( first, last );
-            for ( iterator it = first; it != last; it++ )
-                it->~T();
-            memmove( first, last, ( end() - last ) * sizeof( T ) );
-            _resize( origSize - shift );
-            return last;
         }
 
         iterator insert( iterator where, const T &val ) noexcept ( nothrow_copy && nothrow_move )
@@ -237,16 +218,15 @@ namespace __lava
         {
             if ( n == 0 )
             {
-                if ( _data )
-                    delete _data;
-                _data = nullptr;
+                _data.clear();
             }
             else if ( empty() ) {
-                _data = new items[ n ];
+                _data = make_items( n );
             } else {
-                auto resized = new items[ n ];
-                std::copy(_data.raw(), _data.raw() + _data.underlying_size(), resized);
-                delete _data;
+                // TODO Move
+                auto resized = make_items( n );
+                std::copy(_data.begin(), _data.end(), resized.begin());
+                clear();
                 _data = resized;
             }
         }
@@ -272,22 +252,34 @@ namespace __lava
 
         struct items
         {
+            using underlying_type = uint8_t;
+
             struct _header
             {
-                size_type size;
+                size_type elems;
             };
 
-            std::byte *_data;
+            underlying_type* _data;
 
-            _header* header() noexcept
+            auto header() noexcept
             {
-                return static_cast< _header* >( _data );
+                return reinterpret_cast< _header* >( _data );
             }
 
-            std::byte* raw() noexcept { return _data; }
+            auto header() const noexcept
+            {
+                return reinterpret_cast< _header* const >( _data );
+            }
+
+            underlying_type* raw() noexcept { return _data; }
 
             size_type size() const noexcept {
-                return header()->size;
+                return header()->elems;
+            }
+
+            size_type bytes() const noexcept
+            {
+                return underlying_size( header()->size );
             }
 
             constexpr size_type underlying_size( size_type elems ) const noexcept
@@ -295,19 +287,7 @@ namespace __lava
                 return sizeof( _header ) + elems * sizeof( T );
             }
 
-            static void* operator new( size_t elems ) noexcept
-            {
-                auto data = new(std::nothrow) std::byte[ underlying_size(elems) ];
-                static_cast< _header* >( data )->size = elems;
-                return data;
-            }
-
-            static void operator delete( void* ptr ) noexcept
-            {
-                delete[] ptr;
-            }
-
-            T *begin() noexcept
+            T *begin() const noexcept
             {
                 return static_cast< T* >( _data + sizeof( _header ) );
             }
@@ -317,10 +297,31 @@ namespace __lava
                 return static_cast< T* >( _data + sizeof( _header ) ) + size();
             }
 
+            T *end() const noexcept
+            {
+                return static_cast< T* >( _data + sizeof( _header ) ) + size();
+            }
+
             T *get() noexcept { return begin(); }
+            T *get() const noexcept { return begin(); }
+
+            void clear() noexcept
+            {
+                delete[] _data;
+                _data = nullptr;
+            }
+            operator bool() const { return _data != nullptr; }
         };
 
-        items _data = nullptr;
+        items make_items( unsigned elems )
+        {
+            items is;
+            is._data = new items::underlying_type[ is.underlying_size( elems ) ];
+            is.header()->elems = elems;
+            return is;
+        }
+
+        items _data = { nullptr };
     };
 
 } // namespace __lava
