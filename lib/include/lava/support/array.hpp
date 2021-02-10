@@ -28,6 +28,8 @@ namespace __lava
 {
     struct construct_shared_t {};
 
+    static constexpr construct_shared_t construct_shared;
+
     template< typename T >
     struct array
     {
@@ -44,8 +46,6 @@ namespace __lava
         /* Allow construction of multiple array instances that point to the same
          * memory. Objects constructed in this manner must never be destroyed but
          * must be disowned instead. */
-
-        static constexpr construct_shared_t construct_shared{};
 
         static constexpr bool nothrow_dtor = std::is_nothrow_destructible_v< T >;
         static constexpr bool nothrow_copy = std::is_nothrow_copy_constructible_v< T >;
