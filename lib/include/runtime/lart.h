@@ -27,6 +27,8 @@ extern "C" {
     void __lart_set_taint( void *value, unsigned bytes );
 
     int __lart_choose( int count );
+
+    void __lart_cancel();
 #ifdef __cplusplus
 }
 #endif

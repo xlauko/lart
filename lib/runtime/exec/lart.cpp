@@ -43,4 +43,6 @@ extern "C"
     {
         return 0; // TODO
     }
+
+    void __lart_cancel() { /* TODO */ }
 }
