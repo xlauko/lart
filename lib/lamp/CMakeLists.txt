@@ -10,3 +10,9 @@ target_include_directories( trivial
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/lib/include/lamp/lamp.h
+    ${PROJECT_BINARY_DIR}/include/lamp.h
+    COPYONLY
+)

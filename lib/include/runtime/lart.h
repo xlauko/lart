@@ -1,7 +1,18 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include <stdint.h>
+#include <stdbool.h>
+
+#define __annotate( x )   __attribute__(( __annotate__( #x ) ))
+#define __inline          __attribute__(( __always_inline__ ))
+#define __noinline        __attribute__(( __noinline__ ))
+#define __flatten         __attribute__(( __flatten__ ))
+
+#define __ignore_return   __annotate( lart.transform.ignore.ret )
+#define __ignore_args     __annotate( lart.transform.ignore.arg )
+#define __noalias_return  __annotate( lart.noalias.ret )
+#define __noalias_args    __annotate( lart.noalias.arg )
+#define __noalias         __noalias_return __noalias_args
 
 #ifdef __cplusplus
 extern "C" {
