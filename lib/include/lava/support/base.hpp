@@ -15,6 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#pragma once
+
 #include <cstdint>
 
 #include <lava/support/array.hpp>
@@ -24,7 +26,7 @@ namespace __lava
     using bitwidth_t = uint8_t;
     using tag_t = uint8_t;
 
-    constexpr tag_t invalid_tag = std::numeric_limits< tag_t >::max();
+    static constexpr tag_t invalid_tag = std::numeric_limits< tag_t >::max();
 
     struct tagged_array : array< uint8_t >
     {
