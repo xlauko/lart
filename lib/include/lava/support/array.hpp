@@ -60,7 +60,7 @@ namespace __lava
         {}
 
         array( void *ptr, construct_shared_t ) noexcept
-            : _data( ptr )
+            : _data( reinterpret_cast< items::underlying_type* >( ptr ) )
         {}
 
         array( const array& other ) noexcept ( nothrow_copy )
