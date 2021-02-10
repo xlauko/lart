@@ -34,8 +34,8 @@ namespace __lava
         constexpr tristate( value_t v ) noexcept : value( v ) {}
         constexpr tristate( uint8_t v ) noexcept : tristate( value_t( v ) ) {}
 
-        constexpr explicit tristate( bool value ) noexcept
-            : value( value ? true_value : false_value )
+        constexpr explicit tristate( bool v ) noexcept
+            : value( v ? true_value : false_value )
         {}
 
         constexpr tristate( maybe_tag_t ) noexcept : value( maybe_value ) {}
@@ -186,7 +186,7 @@ namespace __lava
         };
 
         return os << to_string( t );
-    };
+    }
 
     constexpr inline tristate lift( bool v ) noexcept { return tristate( v ); }
 
