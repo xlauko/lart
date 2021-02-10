@@ -131,6 +131,135 @@ namespace __lava
         base copy_from() const { return this->template storage_copy< base >(); }
     };
 
+    using i1  = bool;
+    using i8  = uint8_t;
+    using i16 = uint16_t;
+    using i32 = uint32_t;
+    using i64 = uint64_t;
+
+    using si8  = int8_t;
+    using si16 = int16_t;
+    using si32 = int32_t;
+    using si64 = int64_t;
+
+    using f32 = float;
+    using f64 = double;
+    struct array_ref { void *base; size_t size; };
+
+    template< typename type >
+    constexpr int bitwidth_v = std::is_same_v< type, bool > ? 1 : sizeof( type ) * 8;
+
+    template< typename T > struct number_type { using type = T; };
+    template< bool, int > struct number_;
+
+    template<> struct number_< true, 1 >  : number_type< bool > {};
+    template<> struct number_< true, 8 >  : number_type< int8_t > {};
+    template<> struct number_< true, 16 > : number_type< int16_t > {};
+    template<> struct number_< true, 32 > : number_type< int32_t > {};
+    template<> struct number_< true, 64 > : number_type< int64_t > {};
+
+    template<> struct number_< false, 1 >  : number_type< bool > {};
+    template<> struct number_< false, 8 >  : number_type< uint8_t > {};
+    template<> struct number_< false, 16 > : number_type< uint16_t > {};
+    template<> struct number_< false, 32 > : number_type< uint32_t > {};
+    template<> struct number_< false, 64 > : number_type< uint64_t > {};
+
+    template< bool s, int w >
+    using number = typename number_< s, w >::type;
+
+    template< bool, bool, int > struct value_;
+
+    template< bool s, int w >
+    struct value_< false /* non-pointer */, s, w > : number_< s, w > {};
+
+    template< bool s, int w >
+    struct value_< true /* pointer */, s, w >
+    {
+        using type = std::add_pointer_t< number< s, w > >;
+    };
+
+    template< bool p, bool s, int w >
+    using value = typename value_< p, s, w >::type;
+
+    template< bool s, int w, typename t >
+    static value< std::is_pointer_v< t >, s, w > cast( t v )
+    {
+        return static_cast< decltype( cast< s, w >( v ) ) >( v );
+    }
+
+    template< bool signedness, typename fn_t, typename... args_t >
+    auto call( bitwidth_t bw, fn_t fn, args_t&&... args )
+    {
+        switch ( bw ) {
+            case 1 : return fn( cast< signedness,  1 >( args )...  );
+            case 8 : return fn( cast< signedness,  8 >( args )...  );
+            case 16: return fn( cast< signedness, 16 >( args )...  );
+            case 32: return fn( cast< signedness, 32 >( args )...  );
+            case 64: return fn( cast< signedness, 64 >( args )...  );
+        }
+        __builtin_unreachable();
+    }
+
+    static constexpr auto callu = []( const auto & ... xs ) { return call< false >( xs... ); };
+    static constexpr auto calls = []( const auto & ... xs ) { return call< true  >( xs... ); };    struct array_ref { void *base; size_t size; };
+
+    template< typename type >
+    constexpr int bitwidth_v = std::is_same_v< type, bool > ? 1 : sizeof( type ) * 8;
+
+    template< typename T > struct number_type { using type = T; };
+    template< bool, int > struct number_;
+
+    template<> struct number_< true, 1 >  : number_type< bool > {};
+    template<> struct number_< true, 8 >  : number_type< int8_t > {};
+    template<> struct number_< true, 16 > : number_type< int16_t > {};
+    template<> struct number_< true, 32 > : number_type< int32_t > {};
+    template<> struct number_< true, 64 > : number_type< int64_t > {};
+
+    template<> struct number_< false, 1 >  : number_type< bool > {};
+    template<> struct number_< false, 8 >  : number_type< uint8_t > {};
+    template<> struct number_< false, 16 > : number_type< uint16_t > {};
+    template<> struct number_< false, 32 > : number_type< uint32_t > {};
+    template<> struct number_< false, 64 > : number_type< uint64_t > {};
+
+    template< bool s, int w >
+    using number = typename number_< s, w >::type;
+
+    template< bool, bool, int > struct value_;
+
+    template< bool s, int w >
+    struct value_< false /* non-pointer */, s, w > : number_< s, w > {};
+
+    template< bool s, int w >
+    struct value_< true /* pointer */, s, w >
+    {
+        using type = std::add_pointer_t< number< s, w > >;
+    };
+
+    template< bool p, bool s, int w >
+    using value = typename value_< p, s, w >::type;
+
+    template< bool s, int w, typename t >
+    static value< std::is_pointer_v< t >, s, w > cast( t v )
+    {
+        return static_cast< decltype( cast< s, w >( v ) ) >( v );
+    }
+
+    template< bool signedness, typename fn_t, typename... args_t >
+    auto call( bitwidth_t bw, fn_t fn, args_t&&... args )
+    {
+        switch ( bw ) {
+            case 1 : return fn( cast< signedness,  1 >( args )...  );
+            case 8 : return fn( cast< signedness,  8 >( args )...  );
+            case 16: return fn( cast< signedness, 16 >( args )...  );
+            case 32: return fn( cast< signedness, 32 >( args )...  );
+            case 64: return fn( cast< signedness, 64 >( args )...  );
+        }
+        __builtin_unreachable();
+    }
+
+    static constexpr auto callu = []( const auto & ... xs ) { return call< false >( xs... ); };
+    static constexpr auto calls = []( const auto & ... xs ) { return call< true  >( xs... ); };
+
     struct base {};
 
 } // namespace __lava
