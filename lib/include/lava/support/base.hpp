@@ -120,6 +120,17 @@ namespace __lava
         const type &get() const { return **this; }
     };
 
+    template< typename base >
+    struct domain_ref : base
+    {
+        domain_ref( const base &v ) : base( v.unsafe_ptr(), construct_shared ) {}
+        explicit domain_ref( void *v ) : base( v, construct_shared ) {}
+
+        ~domain_ref() { this->disown(); }
+
+        base copy_from() const { return this->template storage_copy< base >(); }
+    };
+
     struct base {};
 
 } // namespace __lava
