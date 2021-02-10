@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <cdefs.h>
 
 #include <runtime/lart.h>
 
