@@ -16,6 +16,7 @@
  */
 
 #include <lava/unit.hpp>
+#include <lava/constant.hpp>
 
 namespace __lamp
 {
@@ -26,5 +27,3 @@ namespace __lamp
     };
 
 } // namespace __lamp
-
-#include "wrapper.hpp"
