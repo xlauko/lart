@@ -34,9 +34,13 @@ extern "C"
         return __lart::rt::is_tainted( byte );
     }
 
-
     void __lart_set_taint( void *value, unsigned bytes )
     {
         __lart::rt::make_tainted( value, bytes );
+    }
+
+    int __lart_choose(int count)
+    {
+        return 0; // TODO
     }
 }
