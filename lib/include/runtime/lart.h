@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdbool.h>
 
 #define __annotate( x )   __attribute__(( __annotate__( #x ) ))
@@ -13,6 +14,19 @@
 #define __noalias_return  __annotate( lart.noalias.ret )
 #define __noalias_args    __annotate( lart.noalias.arg )
 #define __noalias         __noalias_return __noalias_args
+#define __unused          __attribute__((unused))
+#define __used            __attribute__((used))
+#define __export          __attribute__((weak))
+#define __lart_stub       { __builtin_unreachable(); }
+
+#define __lart_ignore_diagnostic \
+    _Pragma("GCC diagnostic push") \
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"") \
+
+#define __lart_pop_diagnostic \
+    _Pragma("GCC diagnostic pop") \
+
+__lart_ignore_diagnostic
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,17 +43,23 @@ extern "C" {
     * TODO The second problem might have to be tackled in the verification
     * algorithm anyway, since there might be other ways to trigger the same
     * problem. */
-    void __lart_stash( void * );
-    void * __lart_unstash();
+    __export void __lart_stash( void* abstract ) __lart_stub;
 
+    __export void* __lart_unstash()  __lart_stub;
 
-    _Bool __lart_test_taint( uint8_t byte );
+    __export _Bool __lart_test_taint( uint8_t byte ) __lart_stub;
 
-    void __lart_set_taint( void *value, unsigned bytes );
+    __export void __lart_set_taint( void *value, unsigned bytes )  __lart_stub;
 
-    int __lart_choose( int count );
+    __export int __lart_choose( int count ) __lart_stub;
 
-    void __lart_cancel();
+    __export void __lart_cancel() __lart_stub;
+
+    __export void* __lart_melt( void *addr, uint32_t bw ) __lart_stub;
+    __export void* __lart_freeze( void *value, void *addre, uint32_t bw ) __lart_stub;
+
 #ifdef __cplusplus
 }
 #endif
+
+__lart_pop_diagnostic
