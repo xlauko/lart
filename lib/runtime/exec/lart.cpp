@@ -45,4 +45,15 @@ extern "C"
     }
 
     void __lart_cancel() { /* TODO */ }
+
+    void* __lart_melt( void */* addr */, uint32_t /* bytes */ )
+    {
+        /* TODO */
+        return nullptr;
+    }
+
+    void __lart_freeze( void */* value */, void */* where */, uint32_t /* bytes */ )
+    {
+        /* TODO */
+    }
 }
