@@ -41,10 +41,11 @@ namespace lart
 
     inline roots_map gather_roots( llvm::Module &m )
     {
-        auto ns = sc::annotation("lart", "abstract", "return");
+        roots_map result;
+        /*auto ns = sc::annotation("lart", "abstract", "return");
         auto annotated = sc::annotation::enumerate_in_namespace< llvm::Function >(ns, m);
 
-        roots_map result;
+
         for ( const auto &[fn, ann] : annotated )
         {
             std::queue< llvm::Value* > worklist;
@@ -56,6 +57,34 @@ namespace lart
             auto kind = annotated_kind( ann );
 
             transitive_users(fn);
+            while ( !worklist.empty() ) {
+                sc::llvmcase( worklist.front(),
+                    [&] ( llvm::CastInst *c )     { transitive_users(c); },
+                    [&] ( llvm::ConstantExpr *c ) { transitive_users(c); },
+                    [&] ( llvm::CallInst *c )     { result[c] = kind; },
+                    [&] ( llvm::InvokeInst * c)   { result[c] = kind; }
+                );
+                worklist.pop();
+            }
+        }*/
+
+        for ( auto &fn : m )
+        {
+            if ( fn.hasName() && !(
+                fn.getName().startswith( "__lamp_lift" ) ||
+                fn.getName().startswith( "__lamp_any" )
+               ) )
+               continue;
+
+            std::queue< llvm::Value* > worklist;
+            auto transitive_users = [&] (auto val) {
+                for ( auto user : val->users() )
+                    worklist.emplace( user );
+            };
+
+            auto kind = abstract_kind::scalar;
+
+            transitive_users(&fn);
             while ( !worklist.empty() ) {
                 sc::llvmcase( worklist.front(),
                     [&] ( llvm::CastInst *c )     { transitive_users(c); },
