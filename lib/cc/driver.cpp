@@ -62,6 +62,16 @@ namespace lart
         for ( auto intr : intrinsics )
             backend.lower( intr );
 
+        // delete stubs
+        for ( auto &fn : module ) {
+            // TODO add stub annotation
+            if ( fn.getName().startswith( "__lamp" ) )
+                fn.deleteBody();
+
+            if ( fn.getName().startswith( "__lart" ) )
+                fn.deleteBody();
+        }
+
         return true;
     }
 
