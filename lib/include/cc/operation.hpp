@@ -101,9 +101,12 @@ namespace lart::op
         args_t arguments() const
         {
             auto load = llvm::cast< llvm::LoadInst >( _what );
+            auto ptr = load->getPointerOperand();
+            auto elem = ptr->getType()->getPointerElementType();
             return {
                 { load, argtype::test },
-                { load->getPointerOperand(), argtype::concrete }
+                { ptr, argtype::concrete },
+                { sc::i32( sc::bytes( elem ) ), argtype::concrete }
             };
         }
     };
@@ -116,9 +119,12 @@ namespace lart::op
         args_t arguments() const
         {
             auto store = llvm::cast< llvm::StoreInst >( _what );
+            auto ptr = store->getPointerOperand();
+            auto elem = ptr->getType()->getPointerElementType();
             return {
                 { store->getValueOperand(), argtype::lift },
-                { store->getPointerOperand(), argtype::concrete }
+                { ptr, argtype::concrete },
+                { sc::i32( sc::bytes( elem ) ), argtype::concrete }
             };
         }
 
