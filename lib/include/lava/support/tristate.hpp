@@ -138,12 +138,12 @@ namespace __lava
 
     constexpr inline tristate operator==( maybe_tag_t, tristate b ) noexcept
     {
-        return maybe == b;
+        return tristate( maybe ) == b;
     }
 
     constexpr inline tristate operator==( tristate a, maybe_tag_t ) noexcept
     {
-        return a == maybe;
+        return a == tristate( maybe );
     }
 
     constexpr inline tristate operator!=( tristate a, tristate b ) noexcept
@@ -165,12 +165,12 @@ namespace __lava
 
     constexpr inline tristate operator!=( maybe_tag_t, tristate b ) noexcept
     {
-        return maybe != b;
+        return tristate( maybe ) != b;
     }
 
     constexpr inline tristate operator!=( tristate a, maybe_tag_t ) noexcept
     {
-        return a != maybe;
+        return a != tristate( maybe );
     }
 
     template< typename stream >
