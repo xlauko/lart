@@ -2,13 +2,14 @@
 
 LART_INTERFACE="@PROJECT_BINARY_DIR@/include/"
 RUNTIME="@PROJECT_BINARY_DIR@/lib/runtime/exec/liblart-exec-runtime.a"
+DOMAIN="@PROJECT_BINARY_DIR@/lib/lamp/libunit-runtime.a"
 PASS="@CMAKE_CURRENT_BINARY_DIR@/liblart_module.so"
 
 exec @CLANG_BINARY@                             \
      -Xclang -load -Xclang "$PASS"              \
      -fsanitize=dataflow                        \
      "$@"                                       \
-     "$RUNTIME"                                 \
+     "$DOMAIN"                                  \
      -Wl,-rpath,"@{LLVM_INSTALL_DIR}/lib"       \
      -I"$LART_INTERFACE"                        \
      -Qunused-arguments
