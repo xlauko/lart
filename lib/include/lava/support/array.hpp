@@ -60,7 +60,7 @@ namespace __lava
         {}
 
         array( void *ptr, construct_shared_t ) noexcept
-            : _data( reinterpret_cast< items::underlying_type* >( ptr ) )
+            : _data( { reinterpret_cast< typename items::underlying_type* >( ptr ) } )
         {}
 
         array( const array& other ) noexcept ( nothrow_copy )
@@ -91,7 +91,7 @@ namespace __lava
             return *this;
         }
 
-        void *disown() { void *rv = begin(); _data = nullptr; return rv; }
+        void *disown() { void *rv = begin(); _data = { nullptr }; return rv; }
 
         template< typename It >
         void assign( size_type size, It b, It e ) noexcept ( nothrow_copy )
@@ -307,7 +307,7 @@ namespace __lava
 
             void clear() noexcept
             {
-                delete[] _data;
+                free( _data );
                 _data = nullptr;
             }
             operator bool() const { return _data != nullptr; }
@@ -315,8 +315,11 @@ namespace __lava
 
         items make_items( unsigned elems )
         {
+            using underlying = typename items::underlying_type;
             items is;
-            is._data = new items::underlying_type[ is.underlying_size( elems ) ];
+            is._data = static_cast< underlying * >(
+                malloc( sizeof( underlying ) * is.underlying_size( elems ) )
+            );
             is.header()->elems = elems;
             return is;
         }
