@@ -11,13 +11,12 @@ add_library( lart-exec
 set_property( TARGET lart-exec PROPERTY POSITION_INDEPENDENT_CODE ON )
 set_property( TARGET lart-exec PROPERTY CXX_STANDARD 20 )
 
-# target_compile_options( lart-exec-runtime INTERFACE "-fcoroutines" )
-
 # link against sanitized libc++
-add_compile_options( "-fsanitize=dataflow;-nostdinc++;-fno-exceptions" )
-add_link_options( "-fsanitize=dataflow;-stdlib=libc++;-Wl,-rpath,${LLVM_INSTALL_DIR}/lib" )
+add_compile_options( "-nostdinc++;-fno-exceptions;-fno-rtti" )
+add_link_options( "-stdlib=libc++;-Wl,-rpath,${LLVM_INSTALL_DIR}/lib" )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=dataflow")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize-blacklist=${PROJECT_BINARY_DIR}/runtime/dfsan-blacklist.txt")
 
 llvm_map_components_to_libnames( libcxx )
 

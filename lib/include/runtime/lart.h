@@ -56,7 +56,7 @@ extern "C" {
     __export void __lart_cancel() __lart_stub;
 
     __export void* __lart_melt( void *addr, uint32_t bw ) __lart_stub;
-    __export void* __lart_freeze( void *value, void *addre, uint32_t bw ) __lart_stub;
+    __export void* __lart_freeze( void *value, void *addr, uint32_t bw ) __lart_stub;
 
 #ifdef __cplusplus
 }

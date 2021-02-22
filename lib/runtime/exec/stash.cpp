@@ -19,4 +19,4 @@
 namespace __lart::rt
 {
     thread_local stash_register_t stash_register = 0;
-} // namesapce __lart::rt
+} // namespace __lart::rt

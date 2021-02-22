@@ -9,6 +9,7 @@ exec @CLANG_BINARY@                             \
      -Xclang -load -Xclang "$PASS"              \
      -fsanitize=dataflow                        \
      "$@"                                       \
+     "$RUNTIME"                                 \
      "$DOMAIN"                                  \
      -Wl,-rpath,"@{LLVM_INSTALL_DIR}/lib"       \
      -I"$LART_INTERFACE"                        \

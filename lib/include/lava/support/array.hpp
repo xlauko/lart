@@ -52,6 +52,13 @@ namespace __lava
         static constexpr bool nothrow_move = std::is_nothrow_move_constructible_v< T >;
         static constexpr bool is_trivial   = std::is_trivial_v< T >;
 
+        struct items
+        {
+            T *get() noexcept {
+                return reinterpret_cast< T* >(reinterpret_cast< size_type* >( this ) + 1);
+            }
+        };
+
         array() noexcept = default;
         ~array() noexcept( nothrow_dtor ) { clear(); }
 
@@ -60,7 +67,7 @@ namespace __lava
         {}
 
         array( void *ptr, construct_shared_t ) noexcept
-            : _data( { reinterpret_cast< typename items::underlying_type* >( ptr ) } )
+            : _data( static_cast< items* >( ptr ) )
         {}
 
         array( const array& other ) noexcept ( nothrow_copy )
@@ -91,7 +98,12 @@ namespace __lava
             return *this;
         }
 
-        void *disown() { void *rv = begin(); _data = { nullptr }; return rv; }
+        void *disown()
+        {
+            void *rv = _data;
+            _data = nullptr;
+            return rv;
+        }
 
         template< typename It >
         void assign( size_type size, It b, It e ) noexcept ( nothrow_copy )
@@ -107,13 +119,13 @@ namespace __lava
             swap( _data, other._data );
         }
 
-        inline iterator begin() noexcept { return _data ?_data.get() : nullptr; }
-        inline const_iterator begin() const noexcept { return _data ?_data.get() : nullptr; }
-        inline const_iterator cbegin() const noexcept { return _data ?_data.get() : nullptr; }
+        inline iterator begin() noexcept { return _data ?_data->get() : nullptr; }
+        inline const_iterator begin() const noexcept { return _data ?_data->get() : nullptr; }
+        inline const_iterator cbegin() const noexcept { return _data ?_data->get() : nullptr; }
 
-        inline iterator end() noexcept { return _data ? _data.end() : nullptr; }
-        inline const_iterator end() const noexcept { return _data ? _data.end() : nullptr; }
-        inline const_iterator cend() const noexcept { return _data ? _data.end() : nullptr; }
+        inline iterator end() noexcept { return _data ? _data->get() + size() : nullptr; }
+        inline const_iterator end() const noexcept { return _data ? _data->get() + size() : nullptr; }
+        inline const_iterator cend() const noexcept { return _data ? _data->get() + size() : nullptr; }
 
         inline reverse_iterator rbegin() noexcept { return reverse_iterator( end() ); }
         inline const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator( end() ); }
@@ -131,7 +143,7 @@ namespace __lava
         [[nodiscard]] inline bool empty() const noexcept { return !_data; }
         [[nodiscard]] inline size_type size() const noexcept
         {
-            return empty() ? 0 : _data.size();
+            return empty() ? 0 : *reinterpret_cast< size_type* >( _data );
         }
 
         inline void clear() noexcept ( nothrow_dtor )
@@ -139,7 +151,8 @@ namespace __lava
             if ( empty() )
                 return;
             _clear();
-            _data.clear();
+            free( _data );
+            _data = nullptr;
         }
 
         void push_back( const T& t ) noexcept ( nothrow_copy )
@@ -216,18 +229,18 @@ namespace __lava
 
         void _resize( size_type n ) noexcept
         {
-            if ( n == 0 )
-            {
-                _data.clear();
+            if ( n == 0 ) {
+                free( _data );
+                _data = nullptr;
             }
             else if ( empty() ) {
-                _data = make_items( n );
-            } else {
-                // TODO Move
-                auto resized = make_items( n );
-                std::copy(_data.begin(), _data.end(), resized.begin());
-                clear();
-                _data = resized;
+                _data = static_cast< items* >( malloc( n * sizeof( T ) + sizeof( size_type ) ) );
+                (*reinterpret_cast< size_type* >( _data )) = n;
+            }
+            else
+            {
+                _data = static_cast< items * >( realloc( _data, n * sizeof( T ) + sizeof( size_type ) ) );
+                (*reinterpret_cast< size_type* >( _data )) = n;
             }
         }
 
@@ -249,82 +262,7 @@ namespace __lava
         }
 
     private:
-
-        struct items
-        {
-            using underlying_type = uint8_t;
-
-            struct _header
-            {
-                size_type elems;
-            };
-
-            underlying_type* _data;
-
-            auto header() noexcept
-            {
-                return reinterpret_cast< _header* >( _data );
-            }
-
-            auto header() const noexcept
-            {
-                return reinterpret_cast< _header* const >( _data );
-            }
-
-            underlying_type* raw() noexcept { return _data; }
-
-            size_type size() const noexcept {
-                return header()->elems;
-            }
-
-            size_type bytes() const noexcept
-            {
-                return underlying_size( header()->size );
-            }
-
-            constexpr size_type underlying_size( size_type elems ) const noexcept
-            {
-                return sizeof( _header ) + elems * sizeof( T );
-            }
-
-            T *begin() const noexcept
-            {
-                return static_cast< T* >( _data + sizeof( _header ) );
-            }
-
-            T *end() noexcept
-            {
-                return static_cast< T* >( _data + sizeof( _header ) ) + size();
-            }
-
-            T *end() const noexcept
-            {
-                return static_cast< T* >( _data + sizeof( _header ) ) + size();
-            }
-
-            T *get() noexcept { return begin(); }
-            T *get() const noexcept { return begin(); }
-
-            void clear() noexcept
-            {
-                free( _data );
-                _data = nullptr;
-            }
-            operator bool() const { return _data != nullptr; }
-        };
-
-        items make_items( unsigned elems )
-        {
-            using underlying = typename items::underlying_type;
-            items is;
-            is._data = static_cast< underlying * >(
-                malloc( sizeof( underlying ) * is.underlying_size( elems ) )
-            );
-            is.header()->elems = elems;
-            return is;
-        }
-
-        items _data = { nullptr };
+        items *_data = nullptr;
     };
 
 } // namespace __lava
