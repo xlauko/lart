@@ -16,7 +16,28 @@
 
 #include <exec/shadow.hpp>
 
+#include <cstddef>
+#include <sanitizer/dfsan_interface.h>
+
 namespace __lart::rt
 {
+    void poke( void *addr, size_t size, shadow_t value )
+    {
+        auto shadow = dfsan_create_label( "shadow", value );
+        dfsan_set_label( shadow, addr, size );
+    }
+
+    shadow_t peek( const void *addr )
+    {
+        auto meta        = dfsan_read_label( addr, 1 );
+        const auto *info = dfsan_get_label_info( meta );
+        return info->userdata;
+    }
+
+    peeked peek( const void *addr, std::size_t size )
+    {
+        auto *current = peek( addr );
+        return peeked { current, 0 };
+    }
 
 } // namespace __lart::rt

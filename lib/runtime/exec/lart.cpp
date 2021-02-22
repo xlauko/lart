@@ -16,6 +16,7 @@
 
 #include <exec/stash.hpp>
 #include <exec/taint.hpp>
+#include <exec/shadow.hpp>
 
 extern "C"
 {
@@ -46,14 +47,13 @@ extern "C"
 
     void __lart_cancel() { /* TODO */ }
 
-    void* __lart_melt( void */* addr */, uint32_t /* bytes */ )
+    void* __lart_melt( void *addr, uint32_t bytes )
     {
-        /* TODO */
-        return nullptr;
+        return __lart::rt::peek(addr, bytes).value;
     }
 
-    void __lart_freeze( void */* value */, void */* where */, uint32_t /* bytes */ )
+    void __lart_freeze( void *value, void *where, uint32_t bytes )
     {
-        /* TODO */
+        __lart::rt::poke(where, bytes, value);
     }
 }

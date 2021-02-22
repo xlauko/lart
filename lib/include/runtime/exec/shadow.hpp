@@ -16,7 +16,19 @@
 
 #pragma once
 
+#include <cstddef>
+
 namespace __lart::rt
 {
+    using shadow_t = void *;
 
+    void poke( void *addr, std::size_t size, shadow_t value );
+
+    struct peeked
+    {
+        shadow_t value;
+        std::size_t offset;
+    };
+
+    peeked peek( const void *addr, std::size_t size );
 }
