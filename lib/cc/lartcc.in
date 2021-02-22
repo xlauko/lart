@@ -2,7 +2,7 @@
 
 LART_INTERFACE="@PROJECT_BINARY_DIR@/include/"
 RUNTIME="@PROJECT_BINARY_DIR@/lib/runtime/native/libnative.a"
-DOMAIN="@PROJECT_BINARY_DIR@/lib/lamp/libunit-runtime.a"
+DOMAIN="@PROJECT_BINARY_DIR@/lib/lamp/libunit.a"
 PASS="@CMAKE_CURRENT_BINARY_DIR@/liblart_module.so"
 
 exec @CLANG_BINARY@                             \
@@ -10,6 +10,7 @@ exec @CLANG_BINARY@                             \
      -fsanitize=dataflow                        \
      "$@"                                       \
      "$RUNTIME"                                 \
+     "$DOMAIN"                                  \
      -Wl,-rpath,"@{LLVM_INSTALL_DIR}/lib"       \
      -I"$LART_INTERFACE"                        \
      -Qunused-arguments
