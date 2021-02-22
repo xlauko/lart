@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <exec/shadow.hpp>
+#include "shadow.hpp"
 
 #include <cstddef>
 #include <sanitizer/dfsan_interface.h>

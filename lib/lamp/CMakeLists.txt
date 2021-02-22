@@ -1,3 +1,6 @@
+set( CMAKE_C_COMPILER CLANG_BINARY )
+set( CMAKE_CXX_COMPILER CLANGPP_BINARY )
+
 # link against sanitized libc++
 add_compile_options( "-fsanitize=dataflow;-fno-exceptions;-fno-rtti" )
 add_link_options( "-fsanitize=dataflow;-stdlib=libc++;-Wl,-rpath,${LLVM_INSTALL_DIR}/lib" )

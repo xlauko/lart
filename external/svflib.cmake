@@ -7,7 +7,6 @@ ExternalProject_Add( ${SVFLIB}
     PREFIX           ${SVFLIB_ROOT}
 
     SOURCE_DIR       ${SVFLIB_SRC}
-    BUILD_ALWAYS     ON
 
     DOWNLOAD_COMMAND "" # content is fetched dufing configuraion
 

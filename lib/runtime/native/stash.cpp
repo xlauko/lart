@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <exec/stash.hpp>
+#include "stash.hpp"
 
 namespace __lart::rt
 {

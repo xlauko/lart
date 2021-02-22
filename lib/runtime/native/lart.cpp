@@ -14,9 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <exec/stash.hpp>
-#include <exec/taint.hpp>
-#include <exec/shadow.hpp>
+#include "stash.hpp"
+#include "taint.hpp"
+#include "shadow.hpp"
 
 extern "C"
 {
