@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <runtime/lart.h>
+#include <lart.h>
 
 __lart_ignore_diagnostic
 
