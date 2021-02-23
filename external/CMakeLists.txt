@@ -28,9 +28,9 @@ include( svflib.cmake )
 
 # spdlog =================================================================== #
 include(FetchContent REQUIRED)
- FetchContent_Declare( spdlog
-    GIT_REPOSITORY  https://github.com/xlauko/spdlog.git
-    GIT_TAG         v1.8.2
+FetchContent_Declare( spdlog
+  GIT_REPOSITORY  https://github.com/xlauko/spdlog.git
+  GIT_TAG         v1.8.2
 )
 FetchContent_GetProperties(spdlog)
 
@@ -41,12 +41,3 @@ if(NOT spdlog_POPULATED)
   add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
   set(SPDLOG_INCLUDE_DIR ${spdlog_SOURCE_DIR}/include)
 endif()
-
-# add_library( spdlog IMPORTED GLOBAL )
-# target_link_libraries( spdlog spdlog::)
-# target_include_directories( svf
-#     INTERFACE
-#         ${SVFLIB_SRC}/include
-#         ${SVFLIB_ROOT}/include
-# )
-
