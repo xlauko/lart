@@ -14,6 +14,7 @@ ExternalProject_Add( lamp
     PREFIX           "lamp"
     BUILD_ALWAYS     ON
     CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_CXX_COMPILER=${CLANGPP_BINARY}
         -DCMAKE_C_COMPILER=${CLANG_BINARY}
 )
