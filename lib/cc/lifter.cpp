@@ -190,8 +190,6 @@ namespace lart
                 lift( arg, pos++ );
         }
 
-        function()->dump();
-
         auto impl = module.getFunction( op::impl(op) );
         bld | sc::action::call( impl, detail::final_args( args ) ) | sc::action::ret();
 
