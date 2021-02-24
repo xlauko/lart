@@ -157,8 +157,12 @@ namespace lart
                     /* entry block to lift section */
                     | sc::action::inspect( [&]( auto *builder ) {
                         edges.emplace_back( a->abstract, *(builder->current_block) );
-                    })
-                    | sc::action::condbr( a->taint )
+                    });
+                auto mbb = bld.block( merge_block );
+                auto lbb = bld.block( lift_block );
+
+                bld = bld
+                    | sc::action::condbr( a->taint, mbb, lbb )
                     | sc::action::set_block( lift_block )
                     /* lift block */
                     | sc::action::call( wrap( a->concrete ), args_t{ a->concrete } )
@@ -186,8 +190,11 @@ namespace lart
                 lift( arg, pos++ );
         }
 
+        function()->dump();
+
         auto impl = module.getFunction( op::impl(op) );
         bld | sc::action::call( impl, detail::final_args( args ) ) | sc::action::ret();
+
     }
 
 } // namespace lart
