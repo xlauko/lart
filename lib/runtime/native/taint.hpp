@@ -28,7 +28,8 @@ namespace __lart::rt
     template< typename integral > bool is_tainted( integral value )
     {
         auto label = dfsan_get_label( static_cast< std::int64_t >( value ) );
-        return dfsan_has_label( label, taint );
+        return dfsan_has_label( label, taint ) ||
+               dfsan_has_label_with_desc( label, "shadow" );
     }
 
 } // namespace __lart::rt
