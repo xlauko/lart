@@ -27,7 +27,18 @@
 #include <experimental/iterator>
 namespace lart::op
 {
-    inline auto abstract_pointer() { return sc::null( sc::i8p() ); }
+
+    struct abstract_pointer_default {};
+    struct concrete_argument_default { unsigned index; };
+
+    inline auto abstract_pointer()
+    {
+        return sc::null( sc::i8p() );
+    }
+
+    using default_wrapper = std::variant<
+        abstract_pointer_default, concrete_argument_default
+    >;
 
     struct base
     {
@@ -43,9 +54,9 @@ namespace lart::op
         llvm::Value* value() { return _what; }
         llvm::Instruction* location() { return _where; }
 
-        std::optional< llvm::Value* > default_value() const
+        std::optional< default_wrapper > default_value() const
         {
-            return abstract_pointer();
+            return abstract_pointer_default();
         }
 
         llvm::Value *_what;
@@ -128,7 +139,7 @@ namespace lart::op
             };
         }
 
-        std::optional< llvm::Value* > default_value() const
+        std::optional< default_wrapper > default_value() const
         {
             return std::nullopt;
         }
@@ -241,9 +252,31 @@ namespace lart::op
         args_t arguments() const { return {}; }
     };
 
+    struct tobool : with_taints_base
+    {
+        tobool( llvm::BranchInst *br )
+            : with_taints_base( br, br )
+        {}
+
+        std::string name() const { return "tobool"; }
+        std::string impl() const { return "__lamp_to_bool"; }
+
+        args_t arguments() const
+        {
+            auto br = llvm::cast< llvm::BranchInst >( _what );
+            return { { br->getCondition(), argtype::lift } };
+        }
+
+        std::optional< default_wrapper > default_value() const
+        {
+            return concrete_argument_default{ 1 };
+        }
+    };
+
     using operation = std::variant<
         melt, freeze,
         binary, cast, cmp,
+        tobool,
         alloc, store, load,
         stash, unstash >;
 
@@ -263,6 +296,31 @@ namespace lart::op
     inline bool returns_value( const operation &o )
     {
         return default_value(o).has_value();
+    }
+
+    inline auto extract_default( default_wrapper def, const std::vector< llvm::Value* > &args )
+        -> llvm::Value*
+    {
+        if ( std::holds_alternative< abstract_pointer_default >( def ) )
+            return abstract_pointer();
+        auto idx = std::get< concrete_argument_default >( def ).index;
+        return args[ idx ];
+    }
+
+    inline auto extract_default( default_wrapper def, const std::vector< llvm::Type* > &types )
+        -> llvm::Type*
+    {
+        if ( std::holds_alternative< abstract_pointer_default >( def ) )
+            return abstract_pointer()->getType();
+        auto idx = std::get< concrete_argument_default >( def ).index;
+        return types[ idx ];
+    }
+
+    inline auto extract_return_type( const operation &op, const std::vector< llvm::Type* > &types )
+        -> llvm::Type*
+    {
+        auto out = op::default_value(op);
+        return out.has_value() ? extract_default( out.value(), types ) : sc::void_t();
     }
 
     namespace sv = sc::views;
@@ -302,12 +360,11 @@ namespace lart::op
         return s;
     }
 
-    inline llvm::Function* function( const operation &op, llvm::Module *module
-                                    , const std::vector< llvm::Type * > &args
-                                    , const std::string &intr_name )
+    inline llvm::Function* function( llvm::Module *module
+                                   , llvm::Type *rty
+                                   , const std::vector< llvm::Type * > &args
+                                   , const std::string &intr_name )
     {
-        auto out = op::default_value(op);
-        auto rty = out.has_value() ? out.value()->getType() : sc::void_t();
         auto fty = llvm::FunctionType::get( rty, args, false );
         auto fn = llvm::cast< llvm::Function >(
             module->getOrInsertFunction( intr_name, fty ).getCallee()
@@ -317,13 +374,14 @@ namespace lart::op
     }
 
     inline llvm::CallInst* make_call( const operation &op
-                                         , const std::vector< llvm::Value * > &args
-                                         , const std::string &intr_name )
+                                    , const std::vector< llvm::Value * > &args
+                                    , const std::string &intr_name )
     {
         llvm::IRBuilder<> irb( op::location(op) );
         auto module = irb.GetInsertBlock()->getModule();
         auto arg_types = sv::freeze( args | sv::types );
-        return irb.CreateCall( function(op, module, arg_types, intr_name), args );
+        auto rty = extract_return_type( op, arg_types );
+        return irb.CreateCall( function(module, rty, arg_types, intr_name), args );
     }
 
 } // namespace lart::op
