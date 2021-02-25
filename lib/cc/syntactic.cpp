@@ -68,6 +68,9 @@ namespace lart
             [&] ( llvm::BinaryOperator * ) {
                 result = op::binary( val );
             },
+            [&] ( llvm::CmpInst * ) {
+                result = op::cmp( val );
+            },
             [&] ( llvm::CastInst * ) {
                 if ( util::is_one_of< llvm::BitCastInst
                                     , llvm::PtrToIntInst

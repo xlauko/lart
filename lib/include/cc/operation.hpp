@@ -173,6 +173,26 @@ namespace lart::op
         }
     };
 
+    struct cmp : with_taints_base
+    {
+        std::string name() const { return "cmp"; }
+        std::string impl() const
+        {
+            auto c = llvm::cast< llvm::CmpInst >( _what );
+            auto pred = llvm::CmpInst::getPredicateName( c->getPredicate() );
+            return "__lamp_" + std::string( pred );
+        }
+
+        args_t arguments() const
+        {
+            auto c = llvm::cast< llvm::CmpInst >( _what );
+            return {
+                { c->getOperand( 0 ), argtype::lift },
+                { c->getOperand( 1 ), argtype::lift },
+            };
+        }
+    };
+
     struct alloc : with_taints_base
     {
         std::string name() const { return "alloca"; }
@@ -223,7 +243,7 @@ namespace lart::op
 
     using operation = std::variant<
         melt, freeze,
-        binary, cast,
+        binary, cast, cmp,
         alloc, store, load,
         stash, unstash >;
 
