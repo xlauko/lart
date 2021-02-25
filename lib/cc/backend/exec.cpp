@@ -86,7 +86,7 @@ namespace lart::backend
             | sc::action::set_block( "concrete.path" );
 
         if ( auto def = op::default_value(i.op); def.has_value() ) {
-            bld | sc::action::ret( def.value() );
+            bld | sc::action::ret( extract_default( def.value(), args ) );
         } else {
             bld | sc::action::ret();
         }

@@ -123,7 +123,8 @@ namespace lart
             }
         }
 
-        _function = op::function( op, &module, args, name() );
+        auto rty = extract_return_type( op, args );
+        _function = op::function( &module, rty, args, name() );
         return _function;
     }
 
@@ -193,6 +194,7 @@ namespace lart
         auto impl = module.getFunction( op::impl(op) );
         bld | sc::action::call( impl, detail::final_args( args ) ) | sc::action::ret();
 
+        function()->dump();
     }
 
 } // namespace lart

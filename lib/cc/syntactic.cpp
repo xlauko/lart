@@ -103,6 +103,14 @@ namespace lart
                 if ( auto op = make_operation(store); op.has_value() )
                     co_yield op.value();
         }
+
+        for ( auto br : sv::filter< llvm::BranchInst >( module ) ) {
+            if ( !br->isConditional() )
+                continue;
+            auto cond = br->getCondition();
+            if ( types.count(cond) && types[cond].maybe_abstract() )
+                co_yield op::tobool(br);
+        }
     }
 
     ir::intrinsic make_intrinsic( llvm::Module &m, const operation &op )
@@ -148,6 +156,7 @@ namespace lart
             }
         }
 
+        intr.call->dump();
         return intr;
     }
 
