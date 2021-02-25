@@ -231,9 +231,13 @@ extern "C"
         return dom::to_tristate( ref( v.ptr ) ).value;
     }
 
+    bool __lamp_to_bool( __lamp_ptr v )
+    {
+        return __lava::lower( __lamp_to_tristate( v) );
+    }
+
     __lamp_ptr __lamp_assume( __lamp_ptr a, bool c ) { return wrap( dom::assume, a, c ); }
     __lamp_ptr __lamp_extract( __lamp_ptr a, bw s, bw e ) { return wrap( dom::op_extract, a, s, e ); }
-    bool __lamp_decide( uint8_t tr ) { return __lava::lower( __lava::tristate( tr ) ); }
 
     //void __lamp_dealloca( void * addr, uint64_t size ) { __lamp_dealloca_impl( addr, size ); }
 }
