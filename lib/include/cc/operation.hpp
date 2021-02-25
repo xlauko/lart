@@ -61,6 +61,8 @@ namespace lart::op
 
         llvm::Value *_what;
         llvm::Instruction *_where;
+
+        std::optional< llvm::Value* > replaces;
     };
 
     struct with_taints_base : base
@@ -256,7 +258,9 @@ namespace lart::op
     {
         tobool( llvm::BranchInst *br )
             : with_taints_base( br, br )
-        {}
+        {
+            replaces = br->getCondition();
+        }
 
         std::string name() const { return "tobool"; }
         std::string impl() const { return "__lamp_to_bool"; }
@@ -292,6 +296,7 @@ namespace lart::op
     static auto arguments = detail::invoke( [] (const auto &o) { return o.arguments(); } );
     static auto default_value = detail::invoke( [] (const auto &o) { return o.default_value(); } );
     static auto with_taints = detail::invoke( [] (const auto &o) { return o.with_taints(); } );
+    static auto replaces = detail::invoke( [] (const auto &o) { return o.replaces; } );
 
     inline bool returns_value( const operation &o )
     {
