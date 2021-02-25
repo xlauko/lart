@@ -153,6 +153,26 @@ namespace lart::op
         }
     };
 
+    struct cast : with_taints_base
+    {
+        std::string name() const { return "cast"; }
+        std::string impl() const
+        {
+            auto c = llvm::cast< llvm::CastInst >( _what );
+            return "__lamp_" + std::string(c->getOpcodeName());
+        }
+
+        args_t arguments() const
+        {
+            auto c = llvm::cast< llvm::CastInst >( _what );
+            auto dst = static_cast< uint8_t >( sc::bytes( c->getDestTy() ) );
+            return {
+                { c->getOperand( 0 ), argtype::lift },
+                { sc::i8( dst ), argtype::concrete }
+            };
+        }
+    };
+
     struct alloc : with_taints_base
     {
         std::string name() const { return "alloca"; }
@@ -203,7 +223,7 @@ namespace lart::op
 
     using operation = std::variant<
         melt, freeze,
-        binary,
+        binary, cast,
         alloc, store, load,
         stash, unstash >;
 

@@ -68,8 +68,16 @@ namespace lart
             [&] ( llvm::BinaryOperator * ) {
                 result = op::binary( val );
             },
+            [&] ( llvm::CastInst * ) {
+                if ( util::is_one_of< llvm::BitCastInst
+                                    , llvm::PtrToIntInst
+                                    , llvm::IntToPtrInst >( val ) )
+                    return; // ignore
+                result = op::cast( val );
+            },
             [&] ( llvm::CallInst *call ) {
                 if ( is_lamp_call(call) ) {
+                    // TODO does return nonvoid
                     result = op::unstash(call, {});
                 } else {
                     // TODO
