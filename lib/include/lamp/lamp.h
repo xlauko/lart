@@ -139,6 +139,8 @@ __lamp_ptr __lamp_fptosi ( __lamp_ptr a, __lamp_bw  b ) __lart_stub;
 __lamp_ptr __lamp_fptoui ( __lamp_ptr a, __lamp_bw  b ) __lart_stub;
 
 __lamp_export uint8_t __lamp_to_tristate( __lamp_ptr v ) __lart_stub;
+__lamp_export bool __lamp_to_bool( __lamp_ptr v ) __lart_stub;
+
 __lamp_ptr __lamp_assume( __lamp_ptr a, bool c ) __lart_stub;
 __lamp_ptr __lamp_extract( __lamp_ptr a, __lamp_bw s, __lamp_bw e ) __lart_stub;
 __lamp_export bool __lamp_decide( uint8_t tristate ) __lart_stub;
