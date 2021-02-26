@@ -4,6 +4,7 @@ project( lart-native )
 
 add_library( native
   STATIC
+    choose.cpp
     shadow.cpp
     stash.cpp
     taint.cpp
@@ -21,7 +22,7 @@ target_link_options( native PUBLIC -Wl,-rpath,${LLVM_INSTALL_DIR}/lib )
 target_include_directories( native
   PUBLIC
     $<INSTALL_INTERFACE:include>
-    ${PROJECT_SOURCE_DIR}/lib/include/runtime
+    ${PROJECT_SOURCE_DIR}/../../include/runtime
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )

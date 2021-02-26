@@ -17,6 +17,7 @@
 #include "stash.hpp"
 #include "taint.hpp"
 #include "shadow.hpp"
+#include "choose.hpp"
 
 extern "C"
 {
@@ -42,7 +43,7 @@ extern "C"
 
     int __lart_choose(int count)
     {
-        return 0; // TODO
+        return __lart::rt::choose(count);
     }
 
     void __lart_cancel() { /* TODO */ }
