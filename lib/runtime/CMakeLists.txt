@@ -22,7 +22,7 @@ configure_file(
 )
 
 configure_file(
-    ${PROJECT_SOURCE_DIR}/lib/runtime/native/dfsan-blacklist.txt
-    ${PROJECT_BINARY_DIR}/runtime/dfsan-blacklist.txt
+    ${PROJECT_SOURCE_DIR}/lib/runtime/native/runner.py
+    ${PROJECT_BINARY_DIR}/runtime/runner.py
     COPYONLY
 )
