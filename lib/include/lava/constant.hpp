@@ -209,6 +209,14 @@ namespace __lava
                 __builtin_trap();
             }
         }
+
+        static const char* trace( cr c )
+        {
+            // TODO deal with leak
+            char *buffer = static_cast< char* >( malloc(10) );
+            sprintf( buffer, "%lu", c->value );
+            return buffer;
+        }
     };
 
     static_assert( sizeof( constant ) == 8 );
