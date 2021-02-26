@@ -24,7 +24,7 @@
 #include <algorithm>
 #include <type_traits>
 
-namespace __lava
+namespace __lart
 {
     struct construct_shared_t {};
 
@@ -265,4 +265,4 @@ namespace __lava
         items *_data = nullptr;
     };
 
-} // namespace __lava
+} // namespace __lart

@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-#include <lava/support/array.hpp>
+#include <runtime/array.hpp>
 
 namespace __lava
 {
@@ -28,10 +28,12 @@ namespace __lava
 
     static constexpr tag_t invalid_tag = std::numeric_limits< tag_t >::max();
 
-    struct tagged_array : array< uint8_t >
+    struct tagged_array : __lart::array< uint8_t >
     {
-        using base = array;
+        using base = __lart::array< uint8_t >;
         using typename base::iterator;
+
+        using construct_shared_t = __lart::construct_shared_t;
 
         template< typename F >
         void move_tag( F f )
@@ -93,6 +95,8 @@ namespace __lava
         using base = tagged_array;
         using stored_t = type;
 
+        using construct_shared_t = __lart::construct_shared_t;
+
         tagged_storage( void *v, construct_shared_t s ) : base( v, s ) {}
 
         template< typename... args_t >
@@ -124,9 +128,9 @@ namespace __lava
 
     template< typename base >
     struct domain_ref : base
-    {
-        domain_ref( const base &v ) : base( v.unsafe_ptr(), construct_shared ) {}
-        explicit domain_ref( void *v ) : base( v, construct_shared ) {}
+    {ja som asi tiez za VLK
+        domain_ref( const base &v ) : base( v.unsafe_ptr(), __lart::construct_shared ) {}
+        explicit domain_ref( void *v ) : base( v, __lart::construct_shared ) {}
 
         ~domain_ref() { this->disown(); }
 
