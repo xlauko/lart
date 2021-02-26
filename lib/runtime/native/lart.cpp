@@ -19,6 +19,8 @@
 #include "shadow.hpp"
 #include "choose.hpp"
 
+#include <cstdlib>
+
 extern "C"
 {
     void * __lart_unstash()
@@ -46,7 +48,10 @@ extern "C"
         return __lart::rt::choose(count);
     }
 
-    void __lart_cancel() { /* TODO */ }
+    void __lart_cancel()
+    {
+        std::exit( EXIT_SUCCESS );
+    }
 
     void* __lart_melt( void *addr, uint32_t bytes )
     {
