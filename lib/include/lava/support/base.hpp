@@ -128,7 +128,7 @@ namespace __lava
 
     template< typename base >
     struct domain_ref : base
-    {ja som asi tiez za VLK
+    {
         domain_ref( const base &v ) : base( v.unsafe_ptr(), __lart::construct_shared ) {}
         explicit domain_ref( void *v ) : base( v, __lart::construct_shared ) {}
 
@@ -323,6 +323,8 @@ namespace __lava
         static st op_load_at( sr, sr, bw ) { return fail( "load_at" ); }
 
         static void op_dealloca( sr s ) { s.~self_t(); }
+
+        static const char* trace( sr ) { return "trace is not implemented"; }
     };
 
     struct base {};
