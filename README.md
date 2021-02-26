@@ -28,7 +28,7 @@ cmake --build build
 ## Run Compiler
 
 ```
-./build/lib/cc/lartcc in.c
+./build/lib/cc/lartcc <domain> <compiler arguments> in.c
 ```
 
 ## OPT
