@@ -1,14 +1,16 @@
 #!/bin/bash
 
+domain=$1
+
 LART_INTERFACE="@PROJECT_BINARY_DIR@/include/"
 RUNTIME="@PROJECT_BINARY_DIR@/lib/runtime/native/libnative.a"
-DOMAIN="@PROJECT_BINARY_DIR@/lib/lamp/libunit.a"
+DOMAIN="@PROJECT_BINARY_DIR@/lib/lamp/lib$domain.a"
 PASS="@CMAKE_CURRENT_BINARY_DIR@/liblart_module.so"
 
 exec @CLANG_BINARY@                             \
      -Xclang -load -Xclang "$PASS"              \
      -fsanitize=dataflow                        \
-     "$@"                                       \
+     "${@:2}"                                   \
      "$RUNTIME"                                 \
      "$DOMAIN"                                  \
      -Wl,-rpath,"@{LLVM_INSTALL_DIR}/lib"       \
