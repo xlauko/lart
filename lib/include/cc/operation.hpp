@@ -206,6 +206,26 @@ namespace lart::op
         }
     };
 
+    struct assume : with_taints_base
+    {
+        assume( llvm::Value *what, llvm::Instruction *where, llvm::Constant *exp )
+            : with_taints_base( what, where ), expected( exp )
+        {}
+
+        std::string name() const { return "assume"; }
+        std::string impl() const { return "__lamp_assume"; }
+
+        args_t arguments() const
+        {
+            return {
+                { _what, argtype::lift },
+                { expected, argtype::concrete },
+            };
+        }
+
+        llvm::Constant *expected;
+    };
+
     struct alloc : with_taints_base
     {
         std::string name() const { return "alloca"; }
@@ -280,7 +300,7 @@ namespace lart::op
     using operation = std::variant<
         melt, freeze,
         binary, cast, cmp,
-        tobool,
+        tobool, assume,
         alloc, store, load,
         stash, unstash >;
 
