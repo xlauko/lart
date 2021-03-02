@@ -48,7 +48,7 @@ namespace __lava
         template< typename scalar >
         static unit op_store( unit, scalar, uint8_t ) { return {}; }
 
-        static void assume( unit, bool b ) { printf( "assume %d", b ); }
+        static void assume( unit, bool ) {}
 
         static tristate to_tristate( unit ) { return maybe; }
 
