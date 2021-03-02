@@ -25,9 +25,9 @@
 
 namespace lart::backend
 {
-    struct exec : base
+    struct native : base
     {
-        exec( llvm::Module &m ) : module( m )
+        native( llvm::Module &m ) : module( m )
         {
             auto getfunction = [&] ( auto name, auto fty ) {
                 return llvm::cast< llvm::Function >(

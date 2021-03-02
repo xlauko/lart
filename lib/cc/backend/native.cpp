@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cc/backend/exec.hpp>
+#include <cc/backend/native.hpp>
 #include <cc/taint.hpp>
 
 #include <sc/builder.hpp>
@@ -23,7 +23,7 @@
 
 namespace lart::backend
 {
-    void exec::lower( ir::intrinsic i, testtaint )
+    void native::lower( ir::intrinsic i, testtaint )
     {
         auto fn = i.call->getCalledFunction();
         if ( !fn->empty() )
@@ -92,7 +92,7 @@ namespace lart::backend
         }
     }
 
-    void exec::lower( callinst call, op::unstash )
+    void native::lower( callinst call, op::unstash )
     {
         call->setCalledFunction( unstash_fn );
     }

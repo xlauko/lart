@@ -20,7 +20,7 @@
 #include <cc/syntactic.hpp>
 #include <cc/logger.hpp>
 
-#include <cc/backend/exec.hpp>
+#include <cc/backend/native.hpp>
 
 #include <sc/ranges.hpp>
 
@@ -41,7 +41,7 @@ namespace lart
         // propagate abstraction type from annotated roots
         auto types = dfa::analysis::run_on( module );
 
-        // 3. syntactic pass
+        // syntactic pass
         std::vector< ir::intrinsic > intrinsics;
         syntactic syn( module, types );
         for ( const auto &op : syn.toprocess() )
@@ -58,7 +58,7 @@ namespace lart
         // 7. interrupts ?
 
         // TODO pick backend based on cmd arguments
-        auto backend = lart::backend::exec( module );
+        auto backend = lart::backend::native( module );
         for ( auto intr : intrinsics )
             backend.lower( intr );
 

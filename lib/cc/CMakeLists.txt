@@ -10,7 +10,7 @@ add_library( lart
     taint.cpp
 
     backend/base.cpp
-    backend/exec.cpp
+    backend/native.cpp
 )
 
 set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)
