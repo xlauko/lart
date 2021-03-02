@@ -1,5 +1,6 @@
 add_library( lart
   OBJECT
+    assume.cpp
     alias.cpp
     driver.cpp
     dfa.cpp

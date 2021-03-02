@@ -16,12 +16,12 @@
 
 #include <cc/syntactic.hpp>
 
+#include <cc/assume.hpp>
 #include <cc/logger.hpp>
 #include <cc/ir.hpp>
 #include <cc/taint.hpp>
 
 #include <sc/ranges.hpp>
-
 
 
 namespace lart
@@ -109,7 +109,12 @@ namespace lart
                 continue;
             auto cond = br->getCondition();
             if ( types.count(cond) && types[cond].maybe_abstract() )
-                co_yield op::tobool(br);
+            {
+                co_yield op::tobool( br );
+
+                for ( auto intr : constrain::assume( br ) )
+                    co_yield intr;
+            }
         }
     }
 

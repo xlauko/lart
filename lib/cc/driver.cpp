@@ -16,6 +16,7 @@
 
 #include <cc/driver.hpp>
 
+#include <cc/assume.hpp>
 #include <cc/dfa.hpp>
 #include <cc/syntactic.hpp>
 #include <cc/logger.hpp>
@@ -46,12 +47,6 @@ namespace lart
         syntactic syn( module, types );
         for ( const auto &op : syn.toprocess() )
             intrinsics.push_back( syn.process( op ) );
-
-        /* Abstract IR */
-
-        // 4. add assumes
-
-        // 5. substitution
 
         // 6. release ?
 
