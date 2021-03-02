@@ -125,11 +125,10 @@ namespace __lava
             return tristate( static_cast< bool >( val->value ) );
         }
 
-        static constant assume( const constant &c, bool expect )
+        static void assume( const constant &c, bool expect )
         {
             if ( c->value != expect )
                 __lart_cancel();
-            return c;
         }
 
         using cv = constant;

@@ -120,9 +120,9 @@ extern "C"
     __lamp_ptr __lamp_wrap_f64( f64 v )     { return wrap( dom::lift_f64, v ); }
 
     __lamp_ptr  __lamp_wrap_ptr( void *v )   { return wrap( dom::lift_ptr, v ); }
-     void *__lamp_lift_ptr( void *v ) { return lift( dom::lift_ptr, v ); }
 
-     void *__lamp_lift_arr( void *v, i32 s ) { return lift( dom::lift_arr, v, s ); }
+    void* __lamp_lift_ptr( void *v ) { return lift( dom::lift_ptr, v ); }
+    void* __lamp_lift_arr( void *v, i32 s ) { return lift( dom::lift_arr, v, s ); }
 
     i1  __lamp_lower_i1 ( __lamp_ptr v ) { return lower<  i1 >( v ); }
     i8  __lamp_lower_i8 ( __lamp_ptr v ) { return lower<  i8 >( v ); }
@@ -138,15 +138,15 @@ extern "C"
     f32   __lamp_any_f32()   { return any< dom, f32 >(); }
     f64   __lamp_any_f64()   { return any< dom, f64 >(); }
 
-     void *__lamp_any_ptr() { return any< dom, void * >(); }
-     char *__lamp_any_array() { return any< dom, char * >(); }
+    void* __lamp_any_ptr() { return any< dom, void * >(); }
+    char* __lamp_any_array() { return any< dom, char * >(); }
 
-     __lamp_ptr __lamp_alloca( __lamp_ptr size, bw w )
+    __lamp_ptr __lamp_alloca( __lamp_ptr size, bw w )
     {
         return wrap( []( const auto &... x ) { return dom::op_alloca( x... ); }, size, w );
     }
 
-    /*8void __lamp_freeze( void *val, void *addr, bw size )
+    /*void __lamp_freeze( void *val, void *addr, bw size )
     {
         __lamp_freeze_impl( val, addr, size );
     }
@@ -240,7 +240,7 @@ extern "C"
         return lowered;
     }
 
-    __lamp_ptr __lamp_assume( __lamp_ptr a, bool c ) { return wrap( dom::assume, a, c ); }
+    void __lamp_assume( __lamp_ptr a, bool c ) { dom::assume( ref( a.ptr ), c ); }
     __lamp_ptr __lamp_extract( __lamp_ptr a, bw s, bw e ) { return wrap( dom::op_extract, a, s, e ); }
 
     //void __lamp_dealloca( void * addr, uint64_t size ) { __lamp_dealloca_impl( addr, size ); }
