@@ -223,6 +223,11 @@ namespace lart::op
             };
         }
 
+        std::optional< default_wrapper > default_value() const
+        {
+            return std::nullopt;
+        }
+
         llvm::Constant *expected;
     };
 
