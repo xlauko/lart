@@ -235,7 +235,9 @@ extern "C"
 
     bool __lamp_to_bool( __lamp_ptr v )
     {
-        return __lava::lower( __lamp_to_tristate( v) );
+        bool lowered = __lava::lower( __lamp_to_tristate( v ) );
+        __lart_set_taint( &lowered, sizeof( lowered ) );
+        return lowered;
     }
 
     __lamp_ptr __lamp_assume( __lamp_ptr a, bool c ) { return wrap( dom::assume, a, c ); }
