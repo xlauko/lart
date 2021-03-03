@@ -178,7 +178,7 @@ namespace lart::op
         args_t arguments() const
         {
             auto c = llvm::cast< llvm::CastInst >( _what );
-            auto dst = static_cast< uint8_t >( sc::bytes( c->getDestTy() ) );
+            auto dst = static_cast< uint8_t >( sc::bits( c->getDestTy() ) );
             return {
                 { c->getOperand( 0 ), argtype::lift },
                 { sc::i8( dst ), argtype::concrete }
