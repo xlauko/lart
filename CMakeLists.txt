@@ -56,6 +56,9 @@ include( cmake/static_analyzers.cmake )
 # Set this to a valid LLVM installation dir
 set( LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory" )
 
+set( LIBCXX_INSTALL_DIR "" CACHE PATH "LIBCXX installation directory" )
+
+
 # A bit of a sanity checking
 set( LLVM_INCLUDE_DIR "${LLVM_INSTALL_DIR}/include/llvm" )
 if( NOT EXISTS "${LLVM_INCLUDE_DIR}" )

@@ -20,6 +20,7 @@ if ( BUILD_LART_RUNTIME )
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             -DCMAKE_CXX_COMPILER=${CLANGPP_BINARY}
             -DCMAKE_C_COMPILER=${CLANG_BINARY}
+            -DLIBCXX_INSTALL_DIR=${LIBCXX_INSTALL_DIR}
     )
 
     configure_file(
