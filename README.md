@@ -36,17 +36,3 @@ cmake --build build
 ```
 opt -load build/lib/cc/libcc.so -lart < in.bc > out.bc
 ```
-
-## Native Execution
-
-To run path with specific choices define path as environment variable:
-
-```
-export LART_PATH="1-0-1-1" && <transformed-binary>
-```
-
-To explore all possible paths execute binary with a runner script:
-
-```
-python ./build/runtime/runner.py <transformed-binary>
-```

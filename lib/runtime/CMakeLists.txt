@@ -20,9 +20,3 @@ configure_file(
     ${PROJECT_BINARY_DIR}/include/lart.h
     COPYONLY
 )
-
-configure_file(
-    ${PROJECT_SOURCE_DIR}/lib/runtime/native/runner.py
-    ${PROJECT_BINARY_DIR}/runtime/runner.py
-    COPYONLY
-)
