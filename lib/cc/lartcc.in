@@ -13,8 +13,8 @@ if [[ ! -v $LIBCXX ]]; then
     >&2 echo "Please set $LIBCXX to the directory containing libc++ build with dfsan"
     exit 255
 else
-    LIBCXX_CFLAGS="-stdlib=libc++ -I${!LIBCXX}/include/c++/v1"
-    LIBCXX_LDFLAGS="-L${!LIBCXX}/lib -Wl,--start-group,-lc++abi"
+    LIBCXX_CFLAGS="-stdlib=libc++ -nostdinc++ -I${!LIBCXX}/include/c++/v1"
+    LIBCXX_LDFLAGS="-L${!LIBCXX}/lib -Wl,-rpath,${!LIBCXX}/lib"
 fi
 
 exec @CLANGPP_BINARY@                           \
