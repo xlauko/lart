@@ -39,4 +39,3 @@ add_library( lart_static STATIC $<TARGET_OBJECTS:lart> )
 target_link_libraries( lart_static PUBLIC lart )
 
 configure_file("lartcc.in" "lartcc" @ONLY)
-configure_file("lartcc++.in" "lartcc++" @ONLY)
