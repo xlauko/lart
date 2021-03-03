@@ -22,7 +22,7 @@
 #include <lava/support/base.hpp>
 
 #include <cassert>
-
+#include <string>
 namespace __lava
 {
     struct [[gnu::packed]] constant_data
@@ -209,12 +209,9 @@ namespace __lava
             }
         }
 
-        static const char* trace( cr c )
+        static std::string trace( cr c )
         {
-            // TODO deal with leak
-            char *buffer = static_cast< char* >( malloc(10) );
-            sprintf( buffer, "%lu", c->value );
-            return buffer;
+            return std::to_string( c->value );
         }
     };
 

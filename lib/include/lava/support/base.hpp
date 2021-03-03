@@ -18,6 +18,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 #include <runtime/array.hpp>
 
@@ -324,7 +325,7 @@ namespace __lava
 
         static void op_dealloca( sr s ) { s.~self_t(); }
 
-        static const char* trace( sr ) { return "trace is not implemented"; }
+        static std::string trace( sr ) { return "trace is not implemented"; }
     };
 
     struct base {};

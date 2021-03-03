@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include <lart.h>
+#include <string>
 
 __lart_ignore_diagnostic
 
@@ -146,10 +147,10 @@ __lamp_ptr __lamp_extract( __lamp_ptr a, __lamp_bw s, __lamp_bw e ) __lart_stub;
 
 __lamp_export void __lamp_dealloca( void *p, uint64_t size ) __lart_stub;
 
-const char* __lamp_trace( void *twin );
-
 #ifdef __cplusplus
 }
 #endif
+
+std::string __lamp_trace( void *twin );
 
 __lart_pop_diagnostic

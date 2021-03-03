@@ -122,7 +122,7 @@ namespace __lava
         static unit op_zext( unit, bw ) { return {}; }
         static unit op_zfit( unit, bw ) { return {}; }
 
-        static const char* trace( unit ) { return "unit"; }
+        static std::string trace( unit ) { return "unit"; }
     };
 
 } // namespace __lava

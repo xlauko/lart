@@ -25,6 +25,8 @@
 
 #include <runtime/lart.h>
 
+#include <string>
+
 typedef struct { void *ptr; } __lamp_ptr;
 
 using dom = __lamp::meta_domain;
@@ -245,7 +247,8 @@ extern "C"
 
     //void __lamp_dealloca( void * addr, uint64_t size ) { __lamp_dealloca_impl( addr, size ); }
 
-    const char* __lamp_trace( void *twin )
+}
+    std::string __lamp_trace( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< char* >( twin ) ) ) {
             ref a( __lart_melt( twin, 0 ) );
@@ -253,4 +256,3 @@ extern "C"
         }
         return "concrete";
     }
-}
