@@ -15,36 +15,21 @@
  */
 
 #include "choose.hpp"
-#include "utils.hpp"
-#include "array.hpp"
 
-#include <cstdlib>
-#include <cstring>
-#include <cstdio>
+#include <unistd.h>
+#include <sys/wait.h>
 
 namespace __lart::rt
 {
-    __lart::array< int > lart_path;
-
     int choose( int count )
     {
-        static int choice = 0; // TODO make thread local?
-
-        int result = 0;
-        if ( choice < lart_path.size() )
-            result = lart_path[choice];
-        fprintf(stderr, "[lart-choice]: %d\n", result );
-        return result;
+        if ( count == 1 )
+            return 0;
+        auto pid = fork();
+        if ( pid == 0 )
+            return count - 1;
+        int status;
+        pid_t done = wait(&status);
+        return choose( count - 1 );
     }
-
-    constructor void choose_config() noexcept
-    {
-        char *path = getenv("LART_PATH");
-        char *choice= strtok( path, "-" );
-        while( choice != NULL ) {
-            lart_path.push_back( atoi( choice ) );
-            choice = strtok( NULL, "-" );
-        }
-    }
-
 } // namespace __lart::rt
