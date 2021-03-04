@@ -7,15 +7,10 @@ RUNTIME="@PROJECT_BINARY_DIR@/lib/runtime/native/libnative.a"
 DOMAIN="@PROJECT_BINARY_DIR@/lib/lamp/lib$domain.a"
 PASS="@CMAKE_CURRENT_BINARY_DIR@/liblart_module.so"
 
-LIBCXX=LARTCC_LIBCXX_PATH
+LIBCXX="@LIBCXX_INSTALL_DIR@"
 
-if [[ ! -v $LIBCXX ]]; then
-    >&2 echo "Please set $LIBCXX to the directory containing libc++ build with dfsan"
-    exit 255
-else
-    LIBCXX_CFLAGS="-stdlib=libc++ -nostdinc++ -I${!LIBCXX}/include/c++/v1"
-    LIBCXX_LDFLAGS="-L${!LIBCXX}/lib -Wl,-rpath,${!LIBCXX}/lib"
-fi
+LIBCXX_CFLAGS="-stdlib=libc++ -nostdinc++ -I${LIBCXX}/include/c++/v1"
+LIBCXX_LDFLAGS="-L${LIBCXX}/lib -Wl,-rpath,${LIBCXX}/lib"
 
 exec @CLANGPP_BINARY@                           \
      -Xclang -load -Xclang "$PASS"              \
