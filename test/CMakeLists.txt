@@ -13,6 +13,13 @@ configure_file( "${LART_TEST_SITE_CFG_INPUT}"
   "${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg.py" @ONLY
 )
 
-add_test( NAME lart COMMAND larttests )
+add_test(
+    NAME lit
+    COMMAND
+        ${LLVM_INSTALL_DIR}/bin/llvm-lit -v "${CMAKE_CURRENT_BINARY_DIR}"
+)
 
-add_test( NAME lit COMMAND lit -v "${CMAKE_CURRENT_BINARY_DIR}")
+set_tests_properties( lit
+    PROPERTIES
+        ENVIROMENT "LARTCC_LIBCXX_PATH=${LIBCXX_INSTALL_DIR}"
+)
