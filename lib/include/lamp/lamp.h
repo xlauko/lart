@@ -4,7 +4,10 @@
 #include <stdbool.h>
 
 #include <lart.h>
+
+#ifdef __cplusplus
 #include <string>
+#endif
 
 __lart_ignore_diagnostic
 
@@ -22,7 +25,7 @@ typedef uint8_t __lamp_bw;
 #define __lamp_scalar __lamp_export __annotate( lart.abstract.return.scalar )
 #define __lamp_pointer  __lamp_export __annotate( lart.abstract.return.pointer )
 
-__lamp_scalar bool     __lamp_lift_i1 ( bool     v ) __lart_stub;
+__lamp_scalar _Bool    __lamp_lift_i1 ( _Bool   v ) __lart_stub;
 __lamp_scalar uint8_t  __lamp_lift_i8 ( uint8_t  v ) __lart_stub;
 __lamp_scalar uint16_t __lamp_lift_i16( uint16_t v ) __lart_stub;
 __lamp_scalar uint32_t __lamp_lift_i32( uint32_t v ) __lart_stub;
@@ -65,7 +68,7 @@ double   __lamp_any_f64  ( void ) __lart_stub;
 void    *__lamp_any_ptr  ( void ) __lart_stub;
 char    *__lamp_any_array( void ) __lart_stub;
 
-bool     __lamp_lower_i1 ( __lamp_ptr v ) __lart_stub;
+_Bool    __lamp_lower_i1 ( __lamp_ptr v ) __lart_stub;
 uint8_t  __lamp_lower_i8 ( __lamp_ptr v ) __lart_stub;
 uint16_t __lamp_lower_i16( __lamp_ptr v ) __lart_stub;
 uint32_t __lamp_lower_i32( __lamp_ptr v ) __lart_stub;
@@ -140,7 +143,7 @@ __lamp_ptr __lamp_fptosi ( __lamp_ptr a, __lamp_bw  b ) __lart_stub;
 __lamp_ptr __lamp_fptoui ( __lamp_ptr a, __lamp_bw  b ) __lart_stub;
 
 __lamp_export uint8_t __lamp_to_tristate( __lamp_ptr v ) __lart_stub;
-__lamp_export bool __lamp_to_bool( __lamp_ptr v ) __lart_stub;
+__lamp_export _Bool __lamp_to_bool( __lamp_ptr v ) __lart_stub;
 
 void __lamp_assume( __lamp_ptr a, bool c ) __lart_stub;
 __lamp_ptr __lamp_extract( __lamp_ptr a, __lamp_bw s, __lamp_bw e ) __lart_stub;
@@ -151,6 +154,8 @@ __lamp_export void __lamp_dealloca( void *p, uint64_t size ) __lart_stub;
 }
 #endif
 
+#ifdef __cplusplus
 std::string __lamp_trace( void *twin );
+#endif
 
 __lart_pop_diagnostic
