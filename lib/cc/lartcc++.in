@@ -7,10 +7,17 @@ RUNTIME="@PROJECT_BINARY_DIR@/lib/runtime/native/libnative.a"
 DOMAIN="@PROJECT_BINARY_DIR@/lib/lamp/lib$domain.a"
 PASS="@CMAKE_CURRENT_BINARY_DIR@/liblart_module.so"
 
-exec @CLANG_BINARY@                             \
+LIBCXX="@LIBCXX_INSTALL_DIR@"
+
+LIBCXX_CFLAGS="-stdlib=libc++ -nostdinc++ -I${LIBCXX}/include/c++/v1"
+LIBCXX_LDFLAGS="-L${LIBCXX}/lib -Wl,-rpath,${LIBCXX}/lib"
+
+exec @CLANGPP_BINARY@                           \
      -Xclang -load -Xclang "$PASS"              \
      -fsanitize=dataflow                        \
+     $LIBCXX_CFLAGS                             \
      "${@:2}"                                   \
+     $LIBCXX_LDFLAGS                            \
      "$RUNTIME"                                 \
      "$DOMAIN"                                  \
      -Wl,-rpath,"@{LLVM_INSTALL_DIR}/lib"       \
