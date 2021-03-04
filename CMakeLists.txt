@@ -105,7 +105,7 @@ add_subdirectory( lib )
 
 option( BUILD_TESTS "Build tests" OFF )
 
-if ( BUILD_TESTS )
+if ( ${BUILD_TESTS} )
   enable_testing()
   add_subdirectory( test )
 endif()
