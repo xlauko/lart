@@ -16,3 +16,7 @@ config.test_exec_root = os.path.join(config.my_obj_root)
 
 # Let the main config do the real work.
 lit_config.load_config(config, os.path.join(config.my_src_root, "lit.cfg.py"))
+
+config.substitutions += [
+    ("%filecheck", "FileCheck @LART_FILECHECK_ARGS@"),
+]
