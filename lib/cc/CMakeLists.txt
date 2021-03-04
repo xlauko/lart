@@ -38,4 +38,12 @@ target_link_libraries( lart_module PRIVATE lart_project_options lart_project_war
 add_library( lart_static STATIC $<TARGET_OBJECTS:lart> )
 target_link_libraries( lart_static PUBLIC lart )
 
-configure_file("lartcc.in" "lartcc" @ONLY)
+configure_file( "lartcc.in"
+  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/lartcc @ONLY
+)
+
+file(
+    COPY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/lartcc
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+    FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
