@@ -31,7 +31,8 @@ config.test_exec_root = os.path.join(config.my_obj_root, 'test')
 config.excludes = []
 
 tool_substitutions = [
-    ToolSubst('%lartcc', os.path.join(config.my_obj_root, '../lib/cc/lartcc'))
+    ToolSubst('%lartcc', os.path.join(config.my_obj_root, '../lib/cc/lartcc')),
+    ToolSubst('%lartcc++', os.path.join(config.my_obj_root, '../lib/cc/lartcc++'))
 ]
 
 llvm_config.add_tool_substitutions(tool_substitutions)
@@ -46,3 +47,5 @@ llvm_config.add_tool_substitutions(tools, config.llvm_tools_dir)
 config.substitutions.append(('%shlibext', config.llvm_shlib_ext))
 # The LIT variable to hold the location of plugins/libraries
 config.substitutions.append(('%shlibdir', config.llvm_shlib_dir))
+
+
