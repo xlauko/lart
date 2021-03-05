@@ -86,10 +86,20 @@ namespace lart
             return std::ranges::count_if( args, with_taint );
         }
 
-        auto final_args( const std::vector< argument > &args )
+        auto final_args( llvm::BasicBlock *where
+                       , const std::vector< argument > &args
+                       , const auto &types )
         {
             std::vector< llvm::Value* > fargs;
-            std::ranges::transform( args, std::back_inserter(fargs), final );
+            std::ranges::transform( args, std::back_inserter(fargs), [&] (const auto &a) {
+                auto value = final( a );
+                auto dst = types[ fargs.size() ];
+                if  ( value->getType() != dst ) {
+                    llvm::IRBuilder<> irb( where );
+                    return irb.CreateZExtOrBitCast( value, dst );
+                }
+                return value;
+            });
             return fargs;
         }
 
@@ -192,7 +202,9 @@ namespace lart
         }
 
         auto impl = module.getFunction( op::impl(op) );
-        bld | sc::action::call( impl, detail::final_args( args ) ) | sc::action::ret();
+        auto types = impl->getFunctionType()->params();
+        bld | sc::action::call( impl, detail::final_args( *bld.current_block, args, types ) )
+            | sc::action::ret();
     }
 
 } // namespace lart
