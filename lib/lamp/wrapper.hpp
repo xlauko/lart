@@ -25,7 +25,9 @@
 
 #include <runtime/lart.h>
 
-#include <string>
+#ifdef __lart_cpp_runtime
+    #include <string>
+#endif
 
 typedef struct { void *ptr; } __lamp_ptr;
 
@@ -89,7 +91,6 @@ static T lower( __lamp_ptr v )
 {
     return cast< false /* unsigned */, bitwidth_v< T > >( dom::lower( ref( v.ptr ) )->value );
 }
-
 
 extern "C"
 {
@@ -246,8 +247,9 @@ extern "C"
     __lamp_ptr __lamp_extract( __lamp_ptr a, bw s, bw e ) { return wrap( dom::op_extract, a, s, e ); }
 
     //void __lamp_dealloca( void * addr, uint64_t size ) { __lamp_dealloca_impl( addr, size ); }
-
 }
+
+#ifdef __lart_cpp_runtime
     std::string __lamp_trace( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< char* >( twin ) ) ) {
@@ -256,3 +258,4 @@ extern "C"
         }
         return "concrete";
     }
+#endif
