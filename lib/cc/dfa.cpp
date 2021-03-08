@@ -213,12 +213,6 @@ namespace lart::dfa::detail
         assert( pag != nullptr && "SVF Module is null" );
 
         aliases.init( pag );
-        /* for ( auto & fn : m ) {
-            if ( lart::tag::has( &fn, tag::abstract ) )
-                types.emplace( &fn, type_from_meta( &fn ) );
-        }*/
-
-        // abstract_meta( types, dfg, cr ).attach( m );
 
         for ( const auto&[call, kind] : roots ) {
             auto *inst = call.getInstruction();

@@ -32,7 +32,7 @@ namespace lart::aa
     {
         void init( SVF::PAG * pag )
         {
-            pta = SVF::AndersenWaveDiff::createAndersenWaveDiff( pag );
+            pta = SVF::AndersenWaveDiff::createAndersenWaveDiff( pag, false /* disable stats */ );
         }
 
         inline auto node( const llvm::Value *value )
