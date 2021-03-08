@@ -4,6 +4,7 @@ project( lart-native )
 
 add_library( native
   STATIC
+    config.cpp
     choose.cpp
     shadow.cpp
     stash.cpp
