@@ -96,7 +96,7 @@ namespace lart
                 auto dst = types[ fargs.size() ];
                 if  ( value->getType() != dst ) {
                     llvm::IRBuilder<> irb( where );
-                    return irb.CreateZExtOrBitCast( value, dst );
+                    return irb.CreatePointerCast( value, dst );
                 }
                 return value;
             });
