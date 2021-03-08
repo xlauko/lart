@@ -31,8 +31,8 @@ config.test_exec_root = os.path.join(config.my_obj_root, 'test')
 config.excludes = []
 
 tool_substitutions = [
-    ToolSubst('%lartcc', os.path.join(config.my_obj_root, '../lib/cc/lartcc')),
-    ToolSubst('%lartcc++', os.path.join(config.my_obj_root, '../lib/cc/lartcc++'))
+    ToolSubst('%lartcc', os.path.join(config.my_obj_root, '../bin/lartcc')),
+    ToolSubst('%lartcc++', os.path.join(config.my_obj_root, '../bin/lartcc++'))
 ]
 
 llvm_config.add_tool_substitutions(tool_substitutions)

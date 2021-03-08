@@ -28,11 +28,11 @@ cmake --build build
 ## Run Compiler
 
 ```
-./build/lib/cc/lartcc <domain> <compiler arguments> in.c
+./build/bin/lartcc <domain> <compiler arguments> in.c
 ```
 
 ## OPT
 
 ```
-opt -load build/lib/cc/libcc.so -lart < in.bc > out.bc
+opt -load build/lib/cc/liblart_module.so -lart < in.bc > out.bc
 ```
