@@ -15,13 +15,15 @@
  */
 
 #include "choose.hpp"
+#include "config.hpp"
+#include "trace.hpp"
 
 #include <unistd.h>
 #include <sys/wait.h>
 
 namespace __lart::rt
 {
-    int choose( int count )
+    int fork_choose( int count )
     {
         if ( count == 1 )
             return 0;
@@ -30,6 +32,15 @@ namespace __lart::rt
             return count - 1;
         int status;
         pid_t done = wait(&status);
-        return choose( count - 1 );
+        return fork_choose( count - 1 );
     }
+
+    int choose( int count )
+    {
+        int result = fork_choose( count );
+        if ( config.trace_choices )
+            trace.push_choice( result );
+        return result;
+    }
+
 } // namespace __lart::rt
