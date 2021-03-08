@@ -10,6 +10,7 @@ add_library( native
     stash.cpp
     taint.cpp
     lart.cpp
+    trace.cpp
 )
 
 set_property( TARGET native PROPERTY POSITION_INDEPENDENT_CODE ON )
