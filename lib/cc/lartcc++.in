@@ -12,6 +12,11 @@ LIBCXX="@LIBCXX_INSTALL_DIR@"
 LIBCXX_CFLAGS="-stdlib=libc++ -nostdinc++ -I${LIBCXX}/include/c++/v1"
 LIBCXX_LDFLAGS="-L${LIBCXX}/lib -Wl,-rpath,${LIBCXX}/lib"
 
+if [ -z $domain ]; then
+     echo -e "${RED}[LART ERROR]${NC} No domain provided. Please specify a domain name."
+     exit 1
+fi
+
 exec @CLANGPP_BINARY@                           \
      -Xclang -load -Xclang "$PASS"              \
      -fsanitize=dataflow                        \
