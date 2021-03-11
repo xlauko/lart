@@ -1,8 +1,13 @@
 add_subdirectory( cc )
 
-option( BUILD_LART_RUNTIME "Build LART Runtime" OFF )
+option( BUILD_LART_RUNTIME "Build LART Runtime" ON )
 
 if ( BUILD_LART_RUNTIME )
+    
+    if ( NOT LIBCXX_INSTALL_DIR )
+      message( FATAL_ERROR "Sanitized libc++ not found." )
+    endif()
+
     add_subdirectory( runtime )
 
     include(ExternalProject)
