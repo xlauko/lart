@@ -1,6 +1,6 @@
 add_subdirectory( cc )
 
-option( BUILD_LART_RUNTIME "Build LART Runtime" ON )
+option( BUILD_LART_RUNTIME "Build LART Runtime" OFF )
 
 if ( BUILD_LART_RUNTIME )
     
