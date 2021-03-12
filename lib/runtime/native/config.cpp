@@ -28,7 +28,7 @@ namespace __lart::rt
 
     constructor void load_config()
     {
-        if ( auto opt = std::getenv( "LART_TRACE_CHOICES" ); strcmp( opt, "ON" ) == 0 ) {
+        if ( auto opt = std::getenv( "LART_TRACE_CHOICES" ); opt && strcmp( opt, "ON" ) == 0 ) {
             fprintf( stderr, "[lart config] trace choices\n" );
             config.trace_choices = true;
         }
