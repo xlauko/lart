@@ -2,7 +2,11 @@ cmake_minimum_required( VERSION 3.17 )
 
 project( lamp-project )
 
-function( register_domain domain )
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake;"
+)
+
+macro( register_domain domain )
   option( ${domain}_build "Build domain ${domain}" ON )
 
   if ( ${domain}_build )
@@ -35,7 +39,14 @@ function( register_domain domain )
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
   endif()
-endfunction()
+endmacro()
 
 register_domain( unit )
 register_domain( constant )
+
+register_domain( term )
+if ( term_build )
+  find_package( Z3 4.8 REQUIRED )
+  target_link_libraries( term PUBLIC ${Z3_LIBRARIES} )
+  target_include_directories( term PUBLIC ${Z3_INCLUDE_DIRS} )
+endif()
