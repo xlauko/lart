@@ -1,0 +1,2 @@
+fun:Z3_*=uninstrumented
+fun:Z3_*=discard

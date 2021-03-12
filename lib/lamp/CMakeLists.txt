@@ -20,8 +20,10 @@ macro( register_domain domain )
 
     target_compile_options( ${domain} PUBLIC
       -fno-exceptions -fno-rtti -fsanitize=dataflow
+      -fsanitize-blacklist=${CMAKE_CURRENT_SOURCE_DIR}/dataflow-blacklist.txt
       -nostdinc++
     )
+
     target_link_options( ${domain}
       PUBLIC
         -Wl,-rpath,${LLVM_INSTALL_DIR}/lib
