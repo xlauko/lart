@@ -26,6 +26,7 @@ if ( BUILD_LART_RUNTIME )
             -DCMAKE_CXX_COMPILER=${CLANGPP_BINARY}
             -DCMAKE_C_COMPILER=${CLANG_BINARY}
             -DLIBCXX_INSTALL_DIR=${LIBCXX_INSTALL_DIR}
+            -DZ3_INSTALL_DIR=${Z3_INSTALL_DIR}
     )
 
     configure_file(

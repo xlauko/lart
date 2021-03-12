@@ -46,7 +46,10 @@ register_domain( constant )
 
 register_domain( term )
 if ( term_build )
-  find_package( Z3 4.8 REQUIRED )
-  target_link_libraries( term PUBLIC ${Z3_LIBRARIES} )
-  target_include_directories( term PUBLIC ${Z3_INCLUDE_DIRS} )
+  add_library( libz3 STATIC IMPORTED )
+  set_target_properties( libz3 PROPERTIES 
+    IMPORTED_LOCATION ${Z3_INSTALL_DIR}/lib/libz3.a
+    INTERFACE_INCLUDE_DIRECTORIES ${Z3_INSTALL_DIR}/include
+  )
+  target_link_libraries( term PUBLIC libz3 )
 endif()
