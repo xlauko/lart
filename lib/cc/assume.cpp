@@ -69,14 +69,14 @@ namespace lart::constrain
 
     generator< op::operation > assume( llvm::BranchInst *br )
     {
-        auto to_i1 = llvm::cast< llvm::CallInst >( br->getCondition() );
+        auto cond = br->getCondition();
         auto &ctx = br->getContext();
 
         assume_edge true_br = { br->getParent(), br->getSuccessor( 0 ) };
-        co_yield true_br.assume( { to_i1, llvm::ConstantInt::getTrue( ctx ) } );
+        co_yield true_br.assume( { cond, llvm::ConstantInt::getTrue( ctx ) } );
 
         assume_edge false_br = { br->getParent(), br->getSuccessor( 1 ) };
-        co_yield false_br.assume( { to_i1, llvm::ConstantInt::getFalse( ctx ) } );
+        co_yield false_br.assume( { cond, llvm::ConstantInt::getFalse( ctx ) } );
     }
 
 } // namespace lart::constrain

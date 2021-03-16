@@ -110,10 +110,10 @@ namespace lart
             auto cond = br->getCondition();
             if ( types.count(cond) && types[cond].maybe_abstract() )
             {
-                co_yield op::tobool( br );
-
                 for ( auto intr : constrain::assume( br ) )
                     co_yield intr;
+            
+                co_yield op::tobool( br );
             }
         }
     }
