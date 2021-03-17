@@ -130,7 +130,7 @@ namespace lart
 
     ir::intrinsic syntactic::process( operation o )
     {
-        spdlog::info( "process {}", op::name(o) );
+        spdlog::debug( "process {}", op::name(o) );
 
         auto intr = make_intrinsic( module, o );
 

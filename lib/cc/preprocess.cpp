@@ -36,7 +36,7 @@ namespace lart
         if ( !util::tag_function_with_metadata( *fn, preprocessor::tag ) )
             return;
 
-        spdlog::info( "preprocess {}", fn->getName().str() );
+        spdlog::debug( "preprocess {}", fn->getName().str() );
 
         // TODO:
         // auto lse = std::unique_ptr< llvm::FunctionPass >( lart::createLowerSelectPass() );

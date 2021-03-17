@@ -281,7 +281,7 @@ namespace lart::op
 
     struct tobool : with_taints_base
     {
-        tobool( llvm::BranchInst *br )
+        explicit tobool( llvm::BranchInst *br )
             : with_taints_base( br, br )
         {
             replaces = br->getCondition();

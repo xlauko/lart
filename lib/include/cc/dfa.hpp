@@ -286,7 +286,7 @@ namespace detail
 
         static types run_on( llvm::Module &m )
         {
-            spdlog::info( "start dataflow analysis" );
+            spdlog::debug( "start dataflow analysis" );
             analysis dfa( m );
             auto roots = gather_roots( m );
             return dfa.impl.run_from( roots );

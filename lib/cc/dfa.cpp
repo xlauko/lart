@@ -31,7 +31,7 @@ namespace lart::dfa::detail
 {
     void dataflow_analysis::push( edge &&e ) noexcept
     {
-        spdlog::info( "push {}", e );
+        spdlog::debug( "push {}", e );
         worklist.push( e );
     }
 
@@ -51,7 +51,7 @@ namespace lart::dfa::detail
     {
         auto e = worklist.front();
         worklist.pop();
-        spdlog::info( "pop {}", e );
+        spdlog::debug( "pop {}", e );
         return e;
     }
 
@@ -204,7 +204,7 @@ namespace lart::dfa::detail
 
     type_map dataflow_analysis::run_from( const roots_map &roots )
     {
-        spdlog::info( "setup svf module" );
+        spdlog::debug( "setup svf module" );
         auto svfmodule = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule( module );
         assert( svfmodule != nullptr && "SVF Module is null" );
 
@@ -253,7 +253,7 @@ namespace lart::dfa::detail
             }
         } ();
 
-        spdlog::info( "{} v {} = {}", from, to, joined );
+        spdlog::debug( "{} v {} = {}", from, to, joined );
         push_change( e.to, joined );
     }
 
