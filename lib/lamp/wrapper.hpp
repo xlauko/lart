@@ -247,6 +247,15 @@ extern "C"
     __lamp_ptr __lamp_extract( __lamp_ptr a, bw s, bw e ) { return wrap( dom::op_extract, a, s, e ); }
 
     //void __lamp_dealloca( void * addr, uint64_t size ) { __lamp_dealloca_impl( addr, size ); }
+
+    void __lamp_dump( void *twin )
+    {
+        if ( twin && __lart_test_taint( *static_cast< char* >( twin ) ) ) {
+            ref a( __lart_melt( twin, 0 ) );
+            return dom::dump( a ); // TODO size?
+        }
+        printf( "concrete\n" );
+    }
 }
 
 #ifdef __lart_cpp_runtime

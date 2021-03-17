@@ -209,6 +209,11 @@ namespace __lava
             }
         }
 
+        static void dump( cr c )
+        {
+            printf( "%lu\n", c->value );
+        }
+
         static std::string trace( cr c )
         {
             return std::to_string( c->value );

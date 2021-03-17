@@ -150,6 +150,8 @@ __lamp_ptr __lamp_extract( __lamp_ptr a, __lamp_bw s, __lamp_bw e ) __lart_stub;
 
 __lamp_export void __lamp_dealloca( void *p, uint64_t size ) __lart_stub;
 
+void __lamp_dump( void *twin );
+
 #ifdef __cplusplus
 }
 #endif
