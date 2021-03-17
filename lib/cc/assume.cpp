@@ -67,9 +67,8 @@ namespace lart::constrain
         // ( "BasicBlock 'to' is not a successor of BasicBlock 'from'." );
     }
 
-    generator< op::operation > assume( llvm::BranchInst *br )
+    generator< op::operation > assume( llvm::BranchInst *br, llvm::Value *cond )
     {
-        auto cond = br->getCondition();
         auto &ctx = br->getContext();
 
         assume_edge true_br = { br->getParent(), br->getSuccessor( 0 ) };

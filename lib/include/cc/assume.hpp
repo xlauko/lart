@@ -57,6 +57,6 @@ namespace lart::constrain
 
     template< typename T > using generator = cppcoro::generator< T >;
 
-    generator< op::operation > assume( llvm::BranchInst *br );
+    generator< op::operation > assume( llvm::BranchInst *br, llvm::Value *cond );
 
 } // namespace lart::constrain
