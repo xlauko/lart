@@ -149,12 +149,12 @@ namespace lart::op
 
     struct binary : with_taints_base
     {
-        std::string name() const { return "bin"; }
-        std::string impl() const
+        std::string name() const
         {
             auto bin = llvm::cast< llvm::BinaryOperator >( _what );
-            return "__lamp_" + std::string(bin->getOpcodeName());
+            return std::string( bin->getOpcodeName() );
         }
+        std::string impl() const { return "__lamp_" + name(); }
 
         args_t arguments() const
         {
@@ -168,12 +168,12 @@ namespace lart::op
 
     struct cast : with_taints_base
     {
-        std::string name() const { return "cast"; }
-        std::string impl() const
-        {
+        std::string name() const
+        { 
             auto c = llvm::cast< llvm::CastInst >( _what );
-            return "__lamp_" + std::string(c->getOpcodeName());
+            return std::string(c->getOpcodeName());
         }
+        std::string impl() const { return "__lamp_" + name(); }
 
         args_t arguments() const
         {
@@ -188,13 +188,13 @@ namespace lart::op
 
     struct cmp : with_taints_base
     {
-        std::string name() const { return "cmp"; }
-        std::string impl() const
+        std::string name() const
         {
             auto c = llvm::cast< llvm::CmpInst >( _what );
             auto pred = llvm::CmpInst::getPredicateName( c->getPredicate() );
-            return "__lamp_" + std::string( pred );
+            return std::string( pred );
         }
+        std::string impl() const { return "__lamp_" + name(); }
 
         args_t arguments() const
         {
