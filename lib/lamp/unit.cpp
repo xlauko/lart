@@ -19,6 +19,6 @@
 namespace __lamp
 {
     using meta_domain = __lava::unit;
-}
+} // namespace __lamp
 
 #include "wrapper.hpp"

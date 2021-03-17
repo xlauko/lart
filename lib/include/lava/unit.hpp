@@ -22,15 +22,17 @@
 namespace __lava
 {
     struct unit : tagged_array, domain_mixin< unit > {
- using index_dom = unit;
+        using index_dom = unit;
 
         using tagged_array::tagged_array;
         using base = domain_mixin< unit >;
 
+        using ur = const unit &;
+
         template< typename type > static unit lift( type ) { return {}; }
         template< typename type > static unit any() { return {}; }
 
-        static constant lower( unit )
+        static constant lower( ur )
         {
             base::fail();
             __builtin_unreachable();
@@ -42,85 +44,85 @@ namespace __lava
         template< typename size >
         static unit op_alloca( const size&, uint8_t ) { return {}; }
 
-        static unit op_load( unit, uint8_t ) { return {}; }
-        static unit op_load_at( unit, unit, uint8_t ) { return {}; }
+        static unit op_load( ur, uint8_t ) { return {}; }
+        static unit op_load_at( ur, ur, uint8_t ) { return {}; }
 
         template< typename scalar >
-        static unit op_store( unit, scalar, uint8_t ) { return {}; }
+        static unit op_store( ur, scalar, uint8_t ) { return {}; }
 
-        static void assume( unit, bool ) {}
+        static void assume( ur, bool ) {}
 
-        static tristate to_tristate( unit ) { return maybe; }
+        static tristate to_tristate( ur ) { return maybe; }
 
         /* arithmetic operations */
-        static unit op_add ( unit, unit ) { return {}; }
-        static unit op_fadd( unit, unit ) { return {}; }
-        static unit op_sub ( unit, unit ) { return {}; }
-        static unit op_fsub( unit, unit ) { return {}; }
-        static unit op_mul ( unit, unit ) { return {}; }
-        static unit op_fmul( unit, unit ) { return {}; }
-        static unit op_udiv( unit, unit ) { return {}; }
-        static unit op_sdiv( unit, unit ) { return {}; }
-        static unit op_fdiv( unit, unit ) { return {}; }
-        static unit op_urem( unit, unit ) { return {}; }
-        static unit op_srem( unit, unit ) { return {}; }
-        static unit op_frem( unit, unit ) { return {}; }
+        static unit op_add ( ur, ur ) { return {}; }
+        static unit op_fadd( ur, ur ) { return {}; }
+        static unit op_sub ( ur, ur ) { return {}; }
+        static unit op_fsub( ur, ur ) { return {}; }
+        static unit op_mul ( ur, ur ) { return {}; }
+        static unit op_fmul( ur, ur ) { return {}; }
+        static unit op_udiv( ur, ur ) { return {}; }
+        static unit op_sdiv( ur, ur ) { return {}; }
+        static unit op_fdiv( ur, ur ) { return {}; }
+        static unit op_urem( ur, ur ) { return {}; }
+        static unit op_srem( ur, ur ) { return {}; }
+        static unit op_frem( ur, ur ) { return {}; }
 
-        static unit op_fneg( unit ) { return {}; }
+        static unit op_fneg( ur ) { return {}; }
 
         /* bitwise operations */
-        static unit op_shl ( unit, unit ) { return {}; }
-        static unit op_lshr( unit, unit ) { return {}; }
-        static unit op_ashr( unit, unit ) { return {}; }
-        static unit op_and ( unit, unit ) { return {}; }
-        static unit op_or  ( unit, unit ) { return {}; }
-        static unit op_xor ( unit, unit ) { return {}; }
+        static unit op_shl ( ur, ur ) { return {}; }
+        static unit op_lshr( ur, ur ) { return {}; }
+        static unit op_ashr( ur, ur ) { return {}; }
+        static unit op_and ( ur, ur ) { return {}; }
+        static unit op_or  ( ur, ur ) { return {}; }
+        static unit op_xor ( ur, ur ) { return {}; }
 
         using bw = uint8_t;
 
         /* comparison operations */
-        static unit op_foeq( unit, unit ) { return {}; }
-        static unit op_fogt( unit, unit ) { return {}; }
-        static unit op_foge( unit, unit ) { return {}; }
-        static unit op_folt( unit, unit ) { return {}; }
-        static unit op_fole( unit, unit ) { return {}; }
-        static unit op_fone( unit, unit ) { return {}; }
-        static unit op_ford( unit, unit ) { return {}; }
-        static unit op_funo( unit, unit ) { return {}; }
-        static unit op_fueq( unit, unit ) { return {}; }
-        static unit op_fugt( unit, unit ) { return {}; }
-        static unit op_fuge( unit, unit ) { return {}; }
-        static unit op_fult( unit, unit ) { return {}; }
-        static unit op_fule( unit, unit ) { return {}; }
-        static unit op_fune( unit, unit ) { return {}; }
+        static unit op_foeq( ur, ur ) { return {}; }
+        static unit op_fogt( ur, ur ) { return {}; }
+        static unit op_foge( ur, ur ) { return {}; }
+        static unit op_folt( ur, ur ) { return {}; }
+        static unit op_fole( ur, ur ) { return {}; }
+        static unit op_fone( ur, ur ) { return {}; }
+        static unit op_ford( ur, ur ) { return {}; }
+        static unit op_funo( ur, ur ) { return {}; }
+        static unit op_fueq( ur, ur ) { return {}; }
+        static unit op_fugt( ur, ur ) { return {}; }
+        static unit op_fuge( ur, ur ) { return {}; }
+        static unit op_fult( ur, ur ) { return {}; }
+        static unit op_fule( ur, ur ) { return {}; }
+        static unit op_fune( ur, ur ) { return {}; }
 
-        static unit op_eq ( unit, unit ) { return {}; }
-        static unit op_ne ( unit, unit ) { return {}; }
-        static unit op_ugt( unit, unit ) { return {}; }
-        static unit op_uge( unit, unit ) { return {}; }
-        static unit op_ult( unit, unit ) { return {}; }
-        static unit op_ule( unit, unit ) { return {}; }
-        static unit op_sgt( unit, unit ) { return {}; }
-        static unit op_sge( unit, unit ) { return {}; }
-        static unit op_slt( unit, unit ) { return {}; }
-        static unit op_sle( unit, unit ) { return {}; }
+        static unit op_eq ( ur, ur ) { return {}; }
+        static unit op_ne ( ur, ur ) { return {}; }
+        static unit op_ugt( ur, ur ) { return {}; }
+        static unit op_uge( ur, ur ) { return {}; }
+        static unit op_ult( ur, ur ) { return {}; }
+        static unit op_ule( ur, ur ) { return {}; }
+        static unit op_sgt( ur, ur ) { return {}; }
+        static unit op_sge( ur, ur ) { return {}; }
+        static unit op_slt( ur, ur ) { return {}; }
+        static unit op_sle( ur, ur ) { return {}; }
 
-        static unit op_ffalse( unit, unit ) { return {}; }
-        static unit op_ftrue( unit, unit ) { return {}; }
+        static unit op_ffalse( ur, ur ) { return {}; }
+        static unit op_ftrue( ur, ur ) { return {}; }
 
 
-        static unit op_fpext( unit, bw ) { return {}; }
-        static unit op_fptosi( unit, bw ) { return {}; }
-        static unit op_fptoui( unit, bw ) { return {}; }
-        static unit op_fptrunc( unit, bw ) { return {}; }
-        static unit op_inttoptr( unit, bw ) { return {}; }
-        static unit op_ptrtoint( unit, bw ) { return {}; }
-        static unit op_sext( unit, bw ) { return {}; }
-        static unit op_sitofp( unit, bw ) { return {}; }
-        static unit op_trunc( unit, bw ) { return {}; }
-        static unit op_uitofp( unit, bw ) { return {}; }
-        static unit op_zext( unit, bw ) { return {}; }
-        static unit op_zfit( unit, bw ) { return {}; }
+        static unit op_fpext( ur, bw ) { return {}; }
+        static unit op_fptosi( ur, bw ) { return {}; }
+        static unit op_fptoui( ur, bw ) { return {}; }
+        static unit op_fptrunc( ur, bw ) { return {}; }
+        static unit op_inttoptr( ur, bw ) { return {}; }
+        static unit op_ptrtoint( ur, bw ) { return {}; }
+        static unit op_sext( ur, bw ) { return {}; }
+        static unit op_sitofp( ur, bw ) { return {}; }
+        static unit op_trunc( ur, bw ) { return {}; }
+        static unit op_uitofp( ur, bw ) { return {}; }
+        static unit op_zext( ur, bw ) { return {}; }
+        static unit op_zfit( ur, bw ) { return {}; }
 
         static std::string trace( unit ) { return "unit"; }
     };
