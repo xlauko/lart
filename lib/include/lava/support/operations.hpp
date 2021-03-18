@@ -143,4 +143,20 @@ namespace __lava::op
 
     static constexpr auto dealloca = []( auto a ) { return decltype( a )::op_dealloca; };
     static constexpr auto free = []( auto a ) { return decltype( a )::fn_free; };
+
+    static constexpr auto run = []( const auto &op, const auto & ... bind  ) __inline
+    {
+        return [=]( const auto &arg, const auto & ... args ) __inline
+        {
+            return op( arg )( arg, args..., bind... );
+        };
+    };
+
+    static constexpr auto wrap = []( const auto &op, const auto & ... bind  ) __inline
+    {
+        return [=]( const auto &arg, const auto & ... args ) __inline
+        {
+            return op( arg )( arg, args..., bind... );
+        };
+    };
 } // namespace __lava::op
