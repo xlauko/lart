@@ -45,6 +45,7 @@ endmacro()
 
 register_domain( unit )
 register_domain( constant )
+register_domain( trivial )
 
 register_domain( term )
 if ( term_build )
