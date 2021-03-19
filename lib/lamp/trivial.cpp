@@ -42,6 +42,8 @@ namespace __lamp
         }
     };
 
-    using meta_domain = semilattice< trivial >;;
+    using meta_domain = semilattice< trivial >;
 
 } // namespace __lamp
+
+#include "wrapper.hpp"
