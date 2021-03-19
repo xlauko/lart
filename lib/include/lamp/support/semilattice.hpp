@@ -145,7 +145,7 @@ namespace __lamp
 
                 if ( v.tag() == idx )
                 {
-                    coerce_t coerce( v.unsafe_ptr(), v.construct_shared );
+                    coerce_t coerce( v.unsafe_ptr(), __lart::construct_shared );
                     if constexpr ( std::is_void_v< decltype( op( coerce ) ) > )
                     {
                         op( coerce );
@@ -208,8 +208,8 @@ namespace __lamp
         template< typename val_t >
         static self any() { return sl::scalar_any_dom::template any< val_t >(); }
 
-        static void assume( sref a, bool c ) { op( wrap( op::assume, c ), a ); }
-        static tristate to_tristate( sref a )
+        static void assume( sref a, bool c ) { cast( wrap( op::assume, c ), a  ); }
+        static tristate to_tristate( sref a ) {
         {
             return cast( [&]( const auto &v ) { return std::decay_t< decltype( v ) >::to_tristate( v ); }, a );
         }
