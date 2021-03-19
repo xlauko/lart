@@ -21,6 +21,5 @@ exec @CLANG_BINARY@                             \
      "${@:2}"                                   \
      "$RUNTIME"                                 \
      "$DOMAIN"                                  \
-     -Wl,-rpath,"@{LLVM_INSTALL_DIR}/lib"       \
      -I"$LART_INTERFACE"                        \
      -Qunused-arguments

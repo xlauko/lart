@@ -25,6 +25,5 @@ exec @CLANGPP_BINARY@                           \
      $LIBCXX_LDFLAGS                            \
      "$RUNTIME"                                 \
      "$DOMAIN"                                  \
-     -Wl,-rpath,"@{LLVM_INSTALL_DIR}/lib"       \
      -I"$LART_INTERFACE"                        \
      -Qunused-arguments
