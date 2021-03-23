@@ -27,6 +27,7 @@
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
+#include <llvm/Support/ErrorHandling.h>
 
 #include <sc/init.hpp>
 #include <sc/format.hpp>
@@ -191,7 +192,7 @@ namespace detail
                 onion = onion.make_abstract(); break;
             case abstract_kind::pointer:
                 onion = onion.make_abstract_pointer(); break;
-            default: __builtin_unreachable();
+            default: llvm_unreachable( "unsupported onion kind" );
             }
 
             return onion;
@@ -232,7 +233,7 @@ namespace detail
                     return "cexpr";
                 if ( util::is_one_of< llvm::Argument, llvm::Instruction >( v ) )
                     return sc::get_function( v )->getName().str();
-                __builtin_unreachable();
+                llvm_unreachable( "unknown llvm place" );
             };
 
             auto pf = llvm_place( e.from );

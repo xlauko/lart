@@ -15,6 +15,7 @@
  */
 
 #include <cc/backend/base.hpp>
+#include <llvm/Support/ErrorHandling.h>
 
 namespace lart::backend
 {
@@ -28,7 +29,7 @@ namespace lart::backend
 
     void base::lower( llvm::CallInst *, op::operation )
     {
-        __builtin_unreachable(); // not implementeted lowering operation
+        llvm_unreachable( "not implementeted lowering operation" );
     }
 
 } // namespace lart::backend

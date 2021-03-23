@@ -14,12 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "sc/format.hpp"
 #include <cc/dfa.hpp>
 
 #include <cc/alias.hpp>
 #include <cc/util.hpp>
 #include <cc/logger.hpp>
 
+#include <llvm/Support/ErrorHandling.h>
 #include <svf/SVF-FE/PAGBuilder.h>
 #include <svf/SVF-FE/LLVMModule.h>
 #include <svf/WPA/Andersen.h>
@@ -118,8 +120,9 @@ namespace lart::dfa::detail
                 [&] ( llvm::Instruction  * inst ) { use( v, inst ); },
                 [&] ( llvm::ConstantExpr * expr ) { use( v, expr ); },
                 [&] ( llvm::GlobalVariable * gv ) { use( v, gv ); },
-                []  ( llvm::Value */*v*/ ) {
-                    //UNREACHABLE( "unsupported edge", to_string( v ) );
+                []  ( llvm::Value *val ) {
+                    std::string msg = "unsupported edge"s + sc::fmt::llvm_to_string( val );
+                    llvm_unreachable( msg.c_str() );
                 }
             );
         };
@@ -196,7 +199,11 @@ namespace lart::dfa::detail
             },
             [] ( llvm::BranchInst *)    { /* ignore */ },
             [] ( llvm::ConstantData * ) { /* ignore */ },
-            [] ( llvm::Value * ) { /*UNREACHABLE( "unsupported edge", to_string( v ) );*/ }
+            [] ( llvm::Value * v )
+            {
+                std::string msg = "unsupported edge"s + sc::fmt::llvm_to_string( v );
+                llvm_unreachable( msg.c_str() );
+            }
         );
 
         return edges;
@@ -249,7 +256,7 @@ namespace lart::dfa::detail
                     return join( to, from );
                 case edge::type::load:     return join( to, peel( e.from ) );
                 case edge::type::store:    return join( to, wrap( e.from ) );
-                default: __builtin_unreachable();
+                default: llvm_unreachable( "unknown edge type" );
             }
         } ();
 

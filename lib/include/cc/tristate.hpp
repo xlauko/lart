@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <llvm/Support/ErrorHandling.h>
+
 namespace lart
 {
     struct tristate
@@ -38,7 +40,7 @@ namespace lart
                 case no: return s << "no";
                 case yes: return s << "yes";
                 case maybe: return s << "maybe";
-                default: __builtin_unreachable();
+                default: llvm_unreachable( "unknown tristate value" );
             }
         }
     };

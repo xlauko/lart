@@ -22,6 +22,7 @@
 #include <sc/constant.hpp>
 
 #include <llvm/IR/Value.h>
+#include <llvm/Support/ErrorHandling.h>
 
 #include <variant>
 #include <experimental/iterator>
@@ -94,8 +95,8 @@ namespace lart::op
                     case argtype::test: return "test";
                     case argtype::lift: return "lift";
                     case argtype::concrete: return "concrete";
+                    default: llvm_unreachable( "unknown arg type" );
                 }
-                __builtin_unreachable();
             } ();
 
             return s << sc::fmt::llvm_name( a.value ) << ":" << lift;

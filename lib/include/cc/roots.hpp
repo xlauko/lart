@@ -20,6 +20,7 @@
 #include <sc/case.hpp>
 
 #include <llvm/IR/CallSite.h>
+#include <llvm/Support/ErrorHandling.h>
 
 #include <map>
 #include <queue>
@@ -36,7 +37,7 @@ namespace lart
             return abstract_kind::scalar;
         if ( ann.name() == "pointer" )
             return abstract_kind::pointer;
-        __builtin_unreachable();
+        llvm_unreachable( "unknown annotation kind" );
     }
 
     inline roots_map gather_roots( llvm::Module &m )

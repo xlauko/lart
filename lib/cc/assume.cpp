@@ -16,6 +16,7 @@
 
 #include <cc/assume.hpp>
 
+#include <llvm/Support/ErrorHandling.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
 namespace lart::constrain
@@ -63,8 +64,7 @@ namespace lart::constrain
             if ( term->getSuccessor( i ) == to )
                 return i;
 
-        __builtin_unreachable();
-        // ( "BasicBlock 'to' is not a successor of BasicBlock 'from'." );
+        llvm_unreachable( "BasicBlock 'to' is not a successor of BasicBlock 'from'." );
     }
 
     generator< op::operation > assume( llvm::BranchInst *br, llvm::Value *cond )
