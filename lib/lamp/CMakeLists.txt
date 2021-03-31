@@ -50,9 +50,14 @@ register_domain( trivial )
 register_domain( term )
 if ( term_build )
   add_library( libz3 STATIC IMPORTED )
-  set_target_properties( libz3 PROPERTIES 
+  set_target_properties( libz3 PROPERTIES
     IMPORTED_LOCATION ${Z3_INSTALL_DIR}/lib/libz3.a
     INTERFACE_INCLUDE_DIRECTORIES ${Z3_INSTALL_DIR}/include
   )
   target_link_libraries( term PUBLIC libz3 )
+endif()
+
+register_domain( pa )
+if ( pa_build )
+  target_link_libraries( pa PUBLIC libz3 )
 endif()
