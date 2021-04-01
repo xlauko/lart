@@ -32,7 +32,7 @@ namespace __lamp
 
     template< typename base >
     using domain_ref = __lava::domain_ref< base >;
-  
+
     template< typename type, typename tag >
     struct tagged : type, tag
     {
@@ -198,6 +198,12 @@ namespace __lamp
         {
             return __lava::op::wrap( std::forward< Ts >( xs )... );
         }
+
+        self clone() const
+        {
+            return cast( [&]( const auto &v ) -> self { return v.clone(); }, *this );
+        }
+
 
         template< typename val_t >
         static self lift( const val_t &val ) { return sl::scalar_lift_dom::lift( val ); }
