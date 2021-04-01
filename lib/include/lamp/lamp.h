@@ -160,6 +160,8 @@ __lamp_ptr __lamp_fpext  ( __lamp_ptr a, __lamp_bw  b ) __lart_stub;
 __lamp_ptr __lamp_fptosi ( __lamp_ptr a, __lamp_bw  b ) __lart_stub;
 __lamp_ptr __lamp_fptoui ( __lamp_ptr a, __lamp_bw  b ) __lart_stub;
 
+__lamp_ptr __lamp_load( __lamp_ptr a, __lamp_bw w ) __lart_stub;
+
 __lamp_export uint8_t __lamp_to_tristate( __lamp_ptr v ) __lart_stub;
 __lamp_export bool __lamp_to_bool( __lamp_ptr v ) __lart_stub;
 
