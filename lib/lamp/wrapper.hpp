@@ -248,6 +248,13 @@ extern "C"
 
     //void __lamp_dealloca( void * addr, uint64_t size ) { __lamp_dealloca_impl( addr, size ); }
 
+
+    __lamp_ptr __lamp_copy( __lamp_ptr p )
+    {
+        using ref = domain_ref< dom >;
+        return { ref( p.ptr ).clone().disown() };
+    }
+
     void __lamp_dump( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< char* >( twin ) ) ) {
