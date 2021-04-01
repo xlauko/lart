@@ -62,10 +62,10 @@ namespace __lamp
         semilattice( const semilattice& ) = delete;
         semilattice( semilattice&& ) noexcept = default;
 
-        semilattice( void *v, __lart::construct_shared_t s ) : base( v, s ) {}
+        semilattice( void *v, __lart::rt::construct_shared_t s ) : base( v, s ) {}
 
         template< typename dom_t, typename = std::enable_if_t< doms::template idx< dom_t > >= 0 > >
-        semilattice( dom_t &&v ) : base( v.disown(), __lart::construct_shared )
+        semilattice( dom_t &&v ) : base( v.disown(), __lart::rt::construct_shared )
         {
             base::tag() = doms::template idx< dom_t >;
         }
@@ -145,7 +145,7 @@ namespace __lamp
 
                 if ( v.tag() == idx )
                 {
-                    coerce_t coerce( v.unsafe_ptr(), __lart::construct_shared );
+                    coerce_t coerce( v.unsafe_ptr(), __lart::rt::construct_shared );
                     if constexpr ( std::is_void_v< decltype( op( coerce ) ) > )
                     {
                         op( coerce );
