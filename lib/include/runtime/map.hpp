@@ -266,7 +266,7 @@ namespace {
         {
             auto it = this->find( key );
             if ( it == this->end() )
-                throw std::out_of_range( "array_map::at" );
+                __builtin_trap();
             return it->second;
         }
 
@@ -275,7 +275,7 @@ namespace {
         {
             auto it = this->find( key );
             if ( it == this->cend() )
-                throw std::out_of_range( "array_map::at" );
+                __builtin_trap();
             return it->second;
         }
     };
@@ -283,5 +283,5 @@ namespace {
 }
     template < typename Key, typename Val>
     using array_map = array_map< Key, Val, insert_sort< less_map >,
-                                 array< std::pair< Key, Val > > >
+                                 array< std::pair< Key, Val > > >;
 } // namespace __lart::rt
