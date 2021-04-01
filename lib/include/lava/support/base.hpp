@@ -228,6 +228,16 @@ namespace __lava
             __builtin_trap();
         }
 
+        st clone() const
+        {
+            if constexpr ( std::is_copy_constructible_v< self_t > )
+            {
+                return st( static_cast< const self_t& >( *this ) );
+            }
+
+            return fail( "clone" );
+        }
+
         static st lift_i1( i1 v )   { return st::lift( v ); }
         static st lift_i8( i8 v )   { return st::lift( v ); }
         static st lift_i16( i16 v ) { return st::lift( v ); }
