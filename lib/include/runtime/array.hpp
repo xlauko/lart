@@ -24,7 +24,7 @@
 #include <algorithm>
 #include <type_traits>
 
-namespace __lart
+namespace __lart::rt
 {
     struct construct_shared_t {};
 
@@ -265,4 +265,4 @@ namespace __lart
         items *_data = nullptr;
     };
 
-} // namespace __lart
+} // namespace __lart::rt

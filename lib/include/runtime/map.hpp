@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <functional>
 
-namespace __lart
+namespace __lart::rt
 {
 namespace {
 
@@ -284,4 +284,4 @@ namespace {
     template < typename Key, typename Val>
     using array_map = array_map< Key, Val, insert_sort< less_map >,
                                  array< std::pair< Key, Val > > >
-} // namespace __lart
+} // namespace __lart::rt
