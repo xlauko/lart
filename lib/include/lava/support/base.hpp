@@ -29,9 +29,9 @@ namespace __lava
 
     static constexpr tag_t invalid_tag = std::numeric_limits< tag_t >::max();
 
-    struct tagged_array : __lart::array< uint8_t >
+    struct tagged_array : __lart::rt::array< uint8_t >
     {
-        using base = __lart::array< uint8_t >;
+        using base = __lart::rt::array< uint8_t >;
         using typename base::iterator;
 
         using construct_shared_t = __lart::construct_shared_t;
