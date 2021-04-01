@@ -46,6 +46,12 @@ namespace lart::backend
                           | sc::action::call( testtaint_fn, { std::nullopt } );
                 return bld.stack.back();
             }
+            else if ( arg->getType()->isPointerTy() ) {
+                bld = bld | sc::action::ptrtoint( arg, sc::i8() )
+                          | sc::action::call( testtaint_fn, { std::nullopt } );
+                return bld.stack.back();
+
+            }
             return arg;
         };
 
