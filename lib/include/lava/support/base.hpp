@@ -34,7 +34,7 @@ namespace __lava
         using base = __lart::rt::array< uint8_t >;
         using typename base::iterator;
 
-        using construct_shared_t = __lart::construct_shared_t;
+        using construct_shared_t = __lart::rt::construct_shared_t;
 
         template< typename F >
         void move_tag( F f )
@@ -96,7 +96,7 @@ namespace __lava
         using base = tagged_array;
         using stored_t = type;
 
-        using construct_shared_t = __lart::construct_shared_t;
+        using construct_shared_t = __lart::rt::construct_shared_t;
 
         tagged_storage( void *v, construct_shared_t s ) : base( v, s ) {}
 
@@ -130,8 +130,8 @@ namespace __lava
     template< typename base >
     struct domain_ref : base
     {
-        domain_ref( const base &v ) : base( v.unsafe_ptr(), __lart::construct_shared ) {}
-        explicit domain_ref( void *v ) : base( v, __lart::construct_shared ) {}
+        domain_ref( const base &v ) : base( v.unsafe_ptr(), __lart::rt::construct_shared ) {}
+        explicit domain_ref( void *v ) : base( v, __lart::rt::construct_shared ) {}
 
         ~domain_ref() { this->disown(); }
 
