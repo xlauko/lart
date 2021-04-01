@@ -227,9 +227,9 @@ extern "C"
     /*__lamp_ptr __lamp_store( __lamp_ptr a, __lamp_ptr b, bw w )
     {
         return wrap( []( const auto &... x ) { return dom::op_store( x... ); }, a, b, w );
-    }
+    }*/
 
-    __lamp_ptr __lamp_load( __lamp_ptr a, bw w ) { return wrap( dom::op_load, a, w ); }*/
+    __lamp_ptr __lamp_load( __lamp_ptr a, bw w ) { return wrap( dom::op_load, a, w ); }
 
     uint8_t __lamp_to_tristate( __lamp_ptr v )
     {
