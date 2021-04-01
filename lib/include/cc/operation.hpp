@@ -170,7 +170,7 @@ namespace lart::op
     struct cast : with_taints_base
     {
         std::string name() const
-        { 
+        {
             auto c = llvm::cast< llvm::CastInst >( _what );
             return std::string(c->getOpcodeName());
         }
@@ -250,7 +250,17 @@ namespace lart::op
     {
         std::string name() const { return "load"; }
         std::string impl() const { return "__lamp_load"; }
-        args_t arguments() const { return {}; }
+        args_t arguments() const
+        {
+            auto what = llvm::cast< llvm::LoadInst >( _what );
+            auto ptr = what->getPointerOperand();
+            auto elem = ptr->getType()->getPointerElementType();
+            return {
+                { ptr, argtype::lift },
+                { sc::i8( static_cast< uint8_t >( sc::bytes( elem ) ) )
+                , argtype::concrete }
+            };
+        }
     };
 
     struct stash_base
