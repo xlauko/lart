@@ -15,6 +15,7 @@
  */
 
 #include <cc/lifter.hpp>
+#include <cc/util.hpp>
 
 #include <sc/ranges.hpp>
 #include <sc/builder.hpp>
