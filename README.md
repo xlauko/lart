@@ -21,7 +21,12 @@ While most traditional abstraction engines work as interpreters, abstractions ca
 
 ```
 mkdir build
-cmake -DLLVM_INSTALL_DIR=<path to llvm to use> -B build -S .
+
+cmake -DLLVM_INSTALL_DIR=<path to llvm to use> \
+      -DLIBCXX_INSTALL_DIR=<path to sanitized libcxx> \
+      -B build \
+      -S .
+
 cmake --build build
 ```
 
