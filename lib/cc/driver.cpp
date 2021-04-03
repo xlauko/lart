@@ -20,6 +20,7 @@
 #include <cc/dfa.hpp>
 #include <cc/syntactic.hpp>
 #include <cc/logger.hpp>
+#include <cc/preprocess.hpp>
 
 #include <cc/backend/native.hpp>
 
@@ -41,6 +42,17 @@ namespace lart
 
         // propagate abstraction type from annotated roots
         auto types = dfa::analysis::run_on( module );
+
+        // lower pointer arithmetic to scalar operations
+        for ( auto &[val, type] : types ) {
+            if ( auto gep = llvm::dyn_cast< llvm::GetElementPtrInst >( val ) ) {
+                for ( auto [src, inst] : lower_pointer_arithmetic( gep ) ) {
+                    if ( types.count(src) )
+                        types[inst] = types[src];
+                }
+                gep->eraseFromParent();
+            }
+        }
 
         // syntactic pass
         std::vector< ir::intrinsic > intrinsics;
