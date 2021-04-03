@@ -16,6 +16,12 @@
 
 #pragma once
 
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/GetElementPtrTypeIterator.h>
+
+#include <cc/operation.hpp>
+
 #include <sc/init.hpp>
 
 #include <llvm/IR/Function.h>
@@ -25,6 +31,9 @@
 
 namespace lart
 {
+    template< typename T > using generator = cppcoro::generator< T >;
+
+    using operation = lart::op::operation;
 
     struct preprocessor : sc::with_context
     {
@@ -38,5 +47,9 @@ namespace lart
 
         llvm::Module &module;
     };
+
+    using dependence = std::pair< llvm::Value*, llvm::Instruction* >;
+
+    generator< dependence > lower_pointer_arithmetic( llvm::GetElementPtrInst *gep );
 
 } // namespace lart

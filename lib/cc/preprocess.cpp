@@ -14,6 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "sc/ir.hpp"
 #include <cc/preprocess.hpp>
 
 #include <cc/util.hpp>
@@ -92,4 +93,115 @@ namespace lart
         for ( auto cmp : cmps | std::views::filter( nonbr ) )
             lower( cmp );
     }
-}
+
+    namespace
+    {
+        void canonicalize( llvm::GetElementPtrInst *gep )
+        {
+            auto dl = llvm::DataLayout( sc::get_module( gep ) );
+
+            auto *pty = dl.getIntPtrType( gep->getType() );
+            auto gti = llvm::gep_type_begin( *gep );
+            for ( auto *i = gep->op_begin() + 1; i != gep->op_end(); ++i, ++gti ) {
+                // Skip struct member indices which must be i32.
+                if ( gti.isSequential() )
+                    if ( (*i)->getType() != pty )
+                        *i = llvm::CastInst::CreateIntegerCast(*i, pty, true, "idxprom", gep );
+            }
+        }
+
+        auto constant( llvm::Value *value ) { return llvm::cast< llvm::ConstantInt >( value ); }
+        auto constant( llvm::Type *ty, auto v ) { return llvm::ConstantInt::get( ty, v ); }
+
+        auto instruction( llvm::Value * val ) {
+            val->dump();
+            return llvm::cast< llvm::Instruction >( val );
+        }
+
+        uint64_t accumulate_byte_offset( llvm::GetElementPtrInst *gep )
+        {
+            auto dl = llvm::DataLayout( sc::get_module( gep ) );
+
+            uint64_t offset = 0;
+            auto gti = llvm::gep_type_begin( *gep );
+
+            for ( unsigned i = 1; i != gep->getNumOperands(); ++i, ++gti ) {
+                if ( !gti.isSequential() ) {
+                    auto ty = gti.getStructType();
+                    auto field = constant( gep->getOperand( i ) )->getZExtValue();
+                    // Skip field 0 as the offset is always 0.
+                    if ( field != 0 )
+                        offset += dl.getStructLayout( ty )->getElementOffset( unsigned( field ) );
+                }
+            }
+
+            return offset;
+        }
+
+        generator< dependence > lower_to_arithmetic( llvm::GetElementPtrInst * gep, uint64_t accum_offset )
+        {
+            auto dl = llvm::DataLayout( sc::get_module( gep ) );
+
+            llvm::IRBuilder irb( gep );
+            auto pty = dl.getIntPtrType( gep->getType() );
+
+            auto res = instruction( irb.CreatePtrToInt( gep->getOperand( 0 ), pty ) );
+            auto gti = llvm::gep_type_begin( *gep );
+
+            // Create ADD/SHL/MUL arithmetic operations for each sequential indices. We
+            // don't create arithmetics for structure indices, as they are accumulated
+            // in the constant offset index.
+            for ( unsigned i = 1; i != gep->getNumOperands(); ++i, ++gti ) {
+                if ( gti.isSequential() ) {
+                    auto idx = gep->getOperand( i );
+                    // Skip zero indices.
+                    if ( auto ci = llvm::dyn_cast< llvm::ConstantInt >( idx ) )
+                        if ( ci->isZero() )
+                            continue;
+
+                    auto element_size = llvm::APInt( pty->getIntegerBitWidth(),
+                                                     dl.getTypeAllocSize( gti.getIndexedType() ) );
+
+                    // Scale the index by element size.
+                    if ( element_size != 1 ) {
+                        llvm::Value * val = nullptr;
+                        if ( element_size.isPowerOf2() ) {
+                            val = irb.CreateShl( idx, constant( pty, element_size.logBase2() ) );
+                            if ( auto ival = llvm::dyn_cast< llvm::Instruction >( val ) )
+                                co_yield { idx, ival };
+                        } else {
+                            val = irb.CreateMul( idx, constant( pty, element_size ) );
+                            if ( auto ival = llvm::dyn_cast< llvm::Instruction >( val ) )
+                                co_yield { idx, ival };
+                        }
+
+                        idx = val;
+                    }
+
+                    // Create an ADD for each index.
+                    res = instruction( irb.CreateAdd( res, idx ) );
+                    co_yield { gep, res };
+                }
+            }
+
+            // Create an ADD for the constant offset index.
+            if ( accum_offset != 0 ) {
+                res = instruction( irb.CreateAdd( res, constant( pty, accum_offset ) ) );
+                co_yield { gep, res };
+            }
+
+            res = instruction( irb.CreateIntToPtr( res, gep->getType() ) );
+            gep->replaceAllUsesWith( res );
+            co_yield { gep, res };
+        }
+    } // anonymous namespace
+
+    generator< dependence > lower_pointer_arithmetic( llvm::GetElementPtrInst *gep )
+    {
+        canonicalize( gep );
+        auto offset = accumulate_byte_offset( gep );
+        for ( auto dep : lower_to_arithmetic( gep, offset ) )
+            co_yield dep;
+    }
+
+} // namespace lart
