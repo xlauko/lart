@@ -19,5 +19,38 @@
 
 namespace __lamp
 {
-    using meta_domain = semilattice< adaptor::pointers< __lava::term > >;
+    using pointers = adaptor::pointers< __lava::term >;
+    using meta_domain = semilattice< pointers >;
+
 } // namespace __lamp
+
+#include "wrapper.hpp"
+
+namespace __lava
+{
+    void * __pointers_state;
+}
+
+[[gnu::constructor]] void __lamp_pointers_init()
+{
+    using namespace __lava;
+    using state_t = __lamp::pointers::pa::state_t;
+    __pointers_state = malloc( sizeof( state_t ) );
+    new ( __pointers_state ) state_t;
+}
+
+[[gnu::destructor]] void __lamp_pointers_fini()
+{
+    using namespace __lava;
+    using state_t = __lamp::pointers::pa::state_t;
+
+    auto state = static_cast< state_t* >( __pointers_state );
+    state->map.clear();
+    free( state );
+}
+
+
+extern "C" void* __lamp_lift_objid( void* p )
+{
+    return lift( __lamp::pointers::lift_objid, p );
+}

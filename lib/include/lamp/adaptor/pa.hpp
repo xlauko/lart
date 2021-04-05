@@ -53,6 +53,8 @@ namespace __lamp::adaptor
                 return pa_idx;
             return ar_idx;
         }
+
+        static pa lift_objid( void* p ) { return pa::lift_objid( p ); }
     };
 
 } // namespace __lamp::adaptor
