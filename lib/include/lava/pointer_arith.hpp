@@ -22,8 +22,11 @@
 #include <lava/support/reference.hpp>
 #include <lava/constant.hpp>
 
+#include <runtime/map.hpp>
+
 namespace __lava
 {
+    extern "C" void *__pointers_state;
 
     template< typename arithmetic >
     struct [[gnu::packed]] pointer_data
@@ -33,6 +36,10 @@ namespace __lava
         pointer_data( void *p, arithmetic &&n )
             : ptr( p ), num( std::move( n ) )
         {}
+
+        ~pointer_data() {
+            printf("destroy data\n");
+        }
 
         [[nodiscard]] raw_t raw() const { return raw_t( ptr ); }
 
@@ -62,17 +69,75 @@ namespace __lava
         using bw = typename base::bw;
         using ptr = void*;
 
-        template< typename type > static pv lift( type ) { return {}; }
-        template< typename type > static pv any() { return {}; }
+        template< typename type > static pv any() { return base::fail(); }
 
-        static constant lower( pr ) { return {}; };
+        static pv lift( const constant& con ) { return constant::lift_to< pointer_arith >( con ); }
+        static pv lift( const arithmetic&   ) { return base::fail(); }
+
+        template< typename type >
+        static pv lift( const type &value )
+        {
+            void * ptr = [&value] {
+                if constexpr ( std::is_integral_v< type > )
+                    return reinterpret_cast< void * >( uintptr_t( value ) );
+                else
+                    return reinterpret_cast< void * >( value );
+            } ();
+
+            printf( "--- lift value %p\n", ptr );
+
+            if ( alive( ptr ) )
+                base::fail();
+            //    return lift_objid( ptr );
+
+            auto lifted = av::lift( value );
+            printf( "lifted %p\n", lifted.unsafe_ptr() );
+            return { ptr, std::move( lifted ) };
+        }
+
+        static pv lift_objid( void *ptr )
+        {
+            printf( "--- lift pointer %p\n", ptr );
+            auto vp = pointer_split( ptr );
+
+            if ( !vp.obj )
+                return { ptr, av::lift( uintptr_t( ptr ) ) };
+
+            aref obj = abstract_objid( vp.obj );
+
+            // auto obj = lift_objid( vp.obj );
+            // auto off = as::lift( vp.off );
+
+            auto cl = obj.clone();
+            printf( "clone %p to %p\n", obj.unsafe_ptr(), cl.unsafe_ptr() );
+            return { ptr, std::move( cl ) };//as::concat( obj, off ) };
+        }
+
+        static aref abstract_objid( uint32_t obj )
+        {
+            auto st = state();
+
+            auto abstract = av::template any< uintptr_t >();
+
+            // ensure that abstract objid is unique and nonnull
+            // as::assume( abstract != av::lift( uintptr_t( 0 ) ) );
+            // for ( auto [key, val] : st->map )
+            //    as::assume( abstract != val );
+
+            printf( "abstract obj %p\b", abstract.unsafe_ptr() );
+            auto [it, inserted] = st->map.emplace( obj, std::move( abstract ) );
+            printf( "ret abstract obj %p\n", it->second.unsafe_ptr() );
+            return aref( it->second.disown() );
+        }
+
+        static constant lower( pr ) { __builtin_unreachable(); };
 
         static void assume( pr, bool ) {}
 
         static tristate to_tristate( pr ) { return maybe; }
 
-        //static bool alive( uint32_t obj ) { return obj && state()->map.count( obj ); }
-        //static bool alive( void * ptr ) { return alive( __vm_pointer_split( ptr ).obj ); }
+        static bool alive( uint32_t obj ) { return obj && state()->map.count( obj ); }
+        static bool alive( void * ptr ) { return alive( pointer_split( ptr ).obj ); }
 
         template< typename op_t, typename ...args_t >
         static pv apply( op_t op, args_t... args )
@@ -80,7 +145,7 @@ namespace __lava
             return { ptr( op( args->raw() ... ) ), op( aref( args->num ) ... ) };
         }
 
-        template< typename op_t >
+        /*template< typename op_t >
         static arithmetic cmp( op_t op, pr a, pr b )
         {
             return op( aref( a->num ), aref( b->num ) );
@@ -100,7 +165,7 @@ namespace __lava
         static pv cast( pr p, bw w, op_t op )
         {
             return { set_bw( p->raw(), w ), op( p->num, w ) };
-        }
+        }*/
 
         static pv op_add ( pr a, pr b ) { return apply( std::plus(), a, b ); }
         static pv op_sub ( pr a, pr b ) { return apply( std::minus(), a, b ); }
@@ -114,7 +179,7 @@ namespace __lava
         static pv op_or ( pr a, pr b ) { return apply( std::bit_or(), a, b ); }
         static pv op_xor( pr a, pr b ) { return apply( std::bit_xor(), a, b ); }
 
-        static constexpr auto shl = [] ( const auto &a, const auto &b ) { return a << b; };
+        /*static constexpr auto shl = [] ( const auto &a, const auto &b ) { return a << b; };
         static constexpr auto shr = [] ( const auto &a, const auto &b ) { return a >> b; };
 
         static pv op_shl ( pr a, pr b ) { return apply( shl, a, b ); }
@@ -129,7 +194,22 @@ namespace __lava
 
         static pv op_trunc( pr p, bw w ) { return cast( p, w, av::op_trunc ); }
         static pv op_zext(  pr p, bw w ) { return cast( p, w, av::op_zext ); }
-        static pv op_zfit(  pr p, bw w ) { return cast( p, w, av::op_zfit ); }
+        static pv op_zfit(  pr p, bw w ) { return cast( p, w, av::op_zfit ); }*/
+
+        struct state_t
+        {
+            using objid = uint32_t;
+            using pointer = arithmetic;
+
+            void erase( void * ptr )
+            {
+                map.erase( pointer_split( ptr ).obj );
+            }
+
+            __lart::rt::array_map< objid, arithmetic > map; /* maps objids to abstract representations */
+        };
+
+        static state_t * state() { return static_cast< state_t * >( __pointers_state ); }
     };
 
 } // namespace __lava
