@@ -34,4 +34,11 @@ if ( BUILD_LART_RUNTIME )
         ${PROJECT_BINARY_DIR}/include/lamp.h
         COPYONLY
     )
+
+    configure_file(
+        ${PROJECT_SOURCE_DIR}/lib/include/lamp/lamp-pointers.h
+        ${PROJECT_BINARY_DIR}/include/lamp-pointers.h
+        COPYONLY
+    )
+
 endif()
