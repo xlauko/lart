@@ -79,10 +79,9 @@ namespace lart
                 result = op::cmp( val );
             },
             [&] ( llvm::CastInst * ) {
-                if ( util::is_one_of< llvm::BitCastInst
-                                    , llvm::PtrToIntInst
-                                    , llvm::IntToPtrInst >( val ) )
-                    return; // ignore
+                if ( is_identity_cast( val ) )
+                    result = op::identity( val );
+                else
                 result = op::cast( val );
             },
             [&] ( llvm::CallInst *call ) {
