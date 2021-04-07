@@ -134,8 +134,6 @@ namespace __lava
         explicit domain_ref( void *v ) : base( v, __lart::rt::construct_shared ) {}
 
         ~domain_ref() { this->disown(); }
-
-        base copy_from() const { return this->template storage_copy< base >(); }
     };
 
     using i1  = bool;
