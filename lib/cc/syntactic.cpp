@@ -45,6 +45,13 @@ namespace lart
         return call.getCalledFunction()->getName().startswith( "__lamp" );
     }
 
+    bool is_identity_cast( llvm::Value *inst )
+    {
+        return util::is_one_of< llvm::BitCastInst
+                              , llvm::PtrToIntInst
+                              , llvm::IntToPtrInst >( inst );
+    }
+
     std::optional< operation > syntactic::make_operation( llvm::Value *val )
     {
         std::optional< operation > result;
