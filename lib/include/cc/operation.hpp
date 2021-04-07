@@ -321,12 +321,18 @@ namespace lart::op
         }
     };
 
+    struct identity : without_taints_base {
+        std::string name() const { return "identity"; }
+        std::string impl() const { llvm_unreachable( "invalid op" ); }
+        args_t arguments() const { llvm_unreachable( "invalid op" ); }
+    };
+
     using operation = std::variant<
         melt, freeze,
         binary, cast, cmp,
         tobool, assume,
         alloc, store, load,
-        stash, unstash >;
+        stash, unstash, identity >;
 
     namespace detail
     {
