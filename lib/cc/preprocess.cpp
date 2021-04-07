@@ -143,6 +143,7 @@ namespace lart
             auto pty = dl.getIntPtrType( gep->getType() );
 
             auto res = instruction( irb.CreatePtrToInt( gep->getOperand( 0 ), pty ) );
+            co_yield { gep, res };
             auto gti = llvm::gep_type_begin( *gep );
 
             // Create ADD/SHL/MUL arithmetic operations for each sequential indices. We
