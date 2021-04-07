@@ -120,12 +120,13 @@ namespace lart::op
         args_t arguments() const
         {
             auto load = llvm::cast< llvm::LoadInst >( _what );
-            auto ptr = load->getPointerOperand();
+            auto ptr  = load->getPointerOperand();
             auto elem = ptr->getType()->getPointerElementType();
+            auto dl   = sc::data_layout( load );
             return {
                 { load, argtype::test },
                 { ptr, argtype::concrete },
-                { sc::i32( sc::bytes( elem ) ), argtype::concrete }
+                { sc::i32( sc::bytes( elem, dl ) ), argtype::concrete }
             };
         }
     };
@@ -140,10 +141,11 @@ namespace lart::op
             auto store = llvm::cast< llvm::StoreInst >( _what );
             auto ptr = store->getPointerOperand();
             auto elem = ptr->getType()->getPointerElementType();
+            auto dl   = sc::data_layout( store );
             return {
                 { store->getValueOperand(), argtype::lift },
                 { ptr, argtype::concrete },
-                { sc::i32( sc::bytes( elem ) ), argtype::concrete }
+                { sc::i32( sc::bytes( elem, dl ) ), argtype::concrete }
             };
         }
 
@@ -184,7 +186,7 @@ namespace lart::op
         args_t arguments() const
         {
             auto c = llvm::cast< llvm::CastInst >( _what );
-            auto dst = static_cast< uint8_t >( sc::bits( c->getDestTy() ) );
+            auto dst = uint8_t( sc::bits( c ) );
             return {
                 { c->getOperand( 0 ), argtype::lift },
                 { sc::i8( dst ), argtype::concrete }
@@ -260,9 +262,10 @@ namespace lart::op
             auto what = llvm::cast< llvm::LoadInst >( _what );
             auto ptr = what->getPointerOperand();
             auto elem = ptr->getType()->getPointerElementType();
+            auto dl   = sc::data_layout( what );
             return {
                 { ptr, argtype::lift },
-                { sc::i8( static_cast< uint8_t >( sc::bytes( elem ) ) )
+                { sc::i8( static_cast< uint8_t >( sc::bytes( elem, dl ) ) )
                 , argtype::concrete }
             };
         }
