@@ -113,10 +113,7 @@ namespace lart
         auto constant( llvm::Value *value ) { return llvm::cast< llvm::ConstantInt >( value ); }
         auto constant( llvm::Type *ty, auto v ) { return llvm::ConstantInt::get( ty, v ); }
 
-        auto instruction( llvm::Value * val ) {
-            val->dump();
-            return llvm::cast< llvm::Instruction >( val );
-        }
+        auto instruction( llvm::Value * val ) { return llvm::cast< llvm::Instruction >( val ); }
 
         uint64_t accumulate_byte_offset( llvm::GetElementPtrInst *gep )
         {
