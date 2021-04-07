@@ -134,9 +134,44 @@ namespace lart
         return { op::make_call( op, args, name ), op };
     }
 
-    ir::intrinsic syntactic::process( operation o )
+    void syntactic::propagate_identity( llvm::Value *from )
+    {
+        if ( auto id = identity.find( from ); id != identity.end() ) {
+            auto &[src, dst] = *id;
+            assert( !abstract.count(dst) );
+            if ( abstract.count(src) ) {
+                abstract[dst] = abstract[src];
+                update_places( dst );
+                propagate_identity( dst );
+            }
+        }
+    }
+
+    void syntactic::update_places( llvm::Value *concrete )
+    {
+        auto abs = abstract[concrete];
+        
+        // Update placeholders where result of abstract operation
+        // should be used instead. That are arguments of already
+        // abstracted users of concrete variant of the operation.
+        if ( auto args = places.find( concrete ); args != places.end() ) {
+            for ( auto &place : args->second )
+                place.abstract.set( abs );
+            places.erase(args);
+        }
+    }
+
+    std::optional< ir::intrinsic > syntactic::process( operation o )
     {
         spdlog::debug( "process {}", op::name(o) );
+
+        if ( std::holds_alternative< op::identity >( o ) ) {
+            auto cast = llvm::cast< llvm::CastInst >( op::value(o) );
+            auto src = cast->getOperand( 0 );
+            identity[src] = cast;
+            propagate_identity(src);
+            return std::nullopt;
+        }
 
         auto intr = make_intrinsic( module, o );
 
@@ -144,14 +179,8 @@ namespace lart
             auto concrete = op::value(o);
             abstract[concrete] = intr.call;
 
-            // Update placeholders where result of this operation
-            // should be used instead. That are arguments of already
-            // abstracted users of concrete variant of this operation.
-            if ( auto args = places.find( concrete ); args != places.end() ) {
-                for ( auto &place : args->second )
-                    place.abstract.set( intr.call );
-                places.erase(args);
-            }
+            update_places( concrete );
+            propagate_identity( concrete );
         }
 
         if ( op::with_taints( intr.op ) ) {

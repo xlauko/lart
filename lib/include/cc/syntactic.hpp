@@ -39,9 +39,14 @@ namespace lart
         std::optional< operation > make_operation( llvm::Value *value );
 
         generator< operation > toprocess();
-        ir::intrinsic process( operation op );
+        std::optional< ir::intrinsic > process( operation op );
+
+        void propagate_identity( llvm::Value *from );
+
+        void update_places( llvm::Value *concrete );
 
         std::map< llvm::Value*, llvm::Value* > abstract;
+        std::map< llvm::Value*, llvm::Value* > identity;
         std::map< llvm::Value*, std::vector< ir::arg::liftable > > places;
 
         const dfa::types &types;
