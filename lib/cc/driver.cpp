@@ -58,7 +58,8 @@ namespace lart
         std::vector< ir::intrinsic > intrinsics;
         syntactic syn( module, types );
         for ( const auto &op : syn.toprocess() )
-            intrinsics.push_back( syn.process( op ) );
+            if ( auto intr = syn.process( op ) )
+                intrinsics.push_back( intr.value() );
 
         // 6. release ?
 
