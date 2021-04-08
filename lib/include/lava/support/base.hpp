@@ -196,11 +196,11 @@ namespace __lava
     auto call( bitwidth_t bw, fn_t fn, args_t&&... args )
     {
         switch ( bw ) {
-            case 1 : return fn( cast< signedness,  1 >( args )...  );
-            case 8 : return fn( cast< signedness,  8 >( args )...  );
-            case 16: return fn( cast< signedness, 16 >( args )...  );
-            case 32: return fn( cast< signedness, 32 >( args )...  );
-            case 64: return fn( cast< signedness, 64 >( args )...  );
+            case 1 : return fn( cast< signedness,  1 >( std::forward< args_t >( args ) )...  );
+            case 8 : return fn( cast< signedness,  8 >( std::forward< args_t >( args ) )...  );
+            case 16: return fn( cast< signedness, 16 >( std::forward< args_t >( args ) )...  );
+            case 32: return fn( cast< signedness, 32 >( std::forward< args_t >( args ) )...  );
+            case 64: return fn( cast< signedness, 64 >( std::forward< args_t >( args ) )...  );
         }
         __builtin_unreachable();
     }
