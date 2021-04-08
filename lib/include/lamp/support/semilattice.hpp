@@ -87,7 +87,7 @@ namespace __lamp
         }
 
         template< typename to, typename from >
-        __inline static auto lift_to( const from &f )
+        __inline static decltype(auto) lift_to( const from &f )
         {
             if constexpr ( std::is_base_of_v< index_tag, from > )
             {
