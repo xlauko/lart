@@ -52,5 +52,7 @@ namespace __lava
 
 extern "C" void* __lamp_lift_objid( void* p )
 {
-    return lift( __lamp::pointers::lift_objid, p );
+    return lift( [] ( auto ptr ) {
+        return __lamp::meta_domain( __lamp::pointers::lift_objid( ptr ) );
+    }, p );
 }
