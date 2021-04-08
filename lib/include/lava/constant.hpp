@@ -77,7 +77,7 @@ namespace __lava
         template< typename T >
         static T lift_to( const constant & con )
         {
-            auto lift = [] ( auto v ) { return T::lift( v ); };
+            auto lift = [] ( const auto &v ) { return T::lift( v ); };
             return callu( con->bw, lift, con->value );
         }
 
