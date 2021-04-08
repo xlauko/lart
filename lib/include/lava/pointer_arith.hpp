@@ -108,9 +108,8 @@ namespace __lava
             // auto obj = lift_objid( vp.obj );
             // auto off = as::lift( vp.off );
 
-            auto cl = obj.clone();
-            printf( "clone %p to %p\n", obj.unsafe_ptr(), cl.unsafe_ptr() );
-            return { ptr, std::move( cl ) };//as::concat( obj, off ) };
+            //auto cl = obj.clone();
+            return { ptr, aref( obj.clone().disown() ) };//as::concat( obj, off ) };
         }
 
         static aref abstract_objid( uint32_t obj )
@@ -124,10 +123,8 @@ namespace __lava
             // for ( auto [key, val] : st->map )
             //    as::assume( abstract != val );
 
-            printf( "abstract obj %p\b", abstract.unsafe_ptr() );
-            auto [it, inserted] = st->map.emplace( obj, std::move( abstract ) );
-            printf( "ret abstract obj %p\n", it->second.unsafe_ptr() );
-            return aref( it->second.disown() );
+            st->map.emplace( obj, abstract );
+            return aref( abstract.disown() );
         }
 
         static constant lower( pr ) { __builtin_unreachable(); };
