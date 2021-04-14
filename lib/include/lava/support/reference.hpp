@@ -53,7 +53,7 @@ namespace __lava
             }
         }
 
-        friend sref concat( sref a, sref b ) { return { dom::op_concat( a.self(), b.self() ) }; }
+        friend dom concat( sref a, sref b ) { return { dom::op_concat( a.self(), b.self() ) }; }
 
         static constexpr auto bv_div = _signed ? dom::op_sdiv : dom::op_udiv;
         static constexpr auto bv_rem = _signed ? dom::op_srem : dom::op_urem;
@@ -71,31 +71,31 @@ namespace __lava
 
         static constexpr auto shr = _signed ? dom::op_ashr : dom::op_lshr;
 
-        friend sref operator+( sref a, sref b ) { return add( a.self(), b.self() ); }
-        friend sref operator-( sref a, sref b ) { return sub( a.self(), b.self() ); }
-        friend sref operator*( sref a, sref b ) { return mul( a.self(), b.self() ); }
-        friend sref operator/( sref a, sref b ) { return div( a.self(), b.self() ); }
-        friend sref operator%( sref a, sref b ) { return rem( a.self(), b.self() ); }
+        friend dom operator+( sref a, sref b ) { return add( a.self(), b.self() ); }
+        friend dom operator-( sref a, sref b ) { return sub( a.self(), b.self() ); }
+        friend dom operator*( sref a, sref b ) { return mul( a.self(), b.self() ); }
+        friend dom operator/( sref a, sref b ) { return div( a.self(), b.self() ); }
+        friend dom operator%( sref a, sref b ) { return rem( a.self(), b.self() ); }
 
-        friend sref operator&( sref a, sref b ) { return dom::op_and( a.self(), b.self() ); }
-        friend sref operator|( sref a, sref b ) { return dom::op_or( a.self(), b.self() ); }
-        friend sref operator^( sref a, sref b ) { return dom::op_xor( a.self(), b.self() ); }
+        friend dom operator&( sref a, sref b ) { return dom::op_and( a.self(), b.self() ); }
+        friend dom operator|( sref a, sref b ) { return dom::op_or( a.self(), b.self() ); }
+        friend dom operator^( sref a, sref b ) { return dom::op_xor( a.self(), b.self() ); }
 
-        friend sref operator==( sref a, sref b ) { return dom::op_eq( a.self(), b.self() ); }
-        friend sref operator!=( sref a, sref b ) { return dom::op_ne( a.self(), b.self() ); }
-        friend sref operator>=( sref a, sref b ) { return ge( a.self(), b.self() ); }
-        friend sref operator<=( sref a, sref b ) { return le( a.self(), b.self() ); }
-        friend sref operator< ( sref a, sref b ) { return lt( a.self(), b.self() ); }
-        friend sref operator> ( sref a, sref b ) { return gt( a.self(), b.self() ); }
+        friend dom operator==( sref a, sref b ) { return dom::op_eq( a.self(), b.self() ); }
+        friend dom operator!=( sref a, sref b ) { return dom::op_ne( a.self(), b.self() ); }
+        friend dom operator>=( sref a, sref b ) { return ge( a.self(), b.self() ); }
+        friend dom operator<=( sref a, sref b ) { return le( a.self(), b.self() ); }
+        friend dom operator< ( sref a, sref b ) { return lt( a.self(), b.self() ); }
+        friend dom operator> ( sref a, sref b ) { return gt( a.self(), b.self() ); }
 
-        friend sref operator!( sref a ) { return dom::op_not( a.self() ); }
-        friend sref operator&&( sref a, sref b ) { return dom::op_and( !!a.self(), !!b.self() ); }
-        friend sref operator||( sref a, sref b ) { return dom::op_or ( !!a.self(), !!b.self() ); }
+        friend dom operator!( sref a ) { return dom::op_not( a.self() ); }
+        friend dom operator&&( sref a, sref b ) { return dom::op_and( !!a.self(), !!b.self() ); }
+        friend dom operator||( sref a, sref b ) { return dom::op_or ( !!a.self(), !!b.self() ); }
 
-        friend sref operator<<( sref a, sref b ) { return dom::op_shl( a.self(), b.self() ); }
-        friend sref operator>>( sref a, sref b ) { return shr( a.self(), b.self()); }
+        friend dom operator<<( sref a, sref b ) { return dom::op_shl( a.self(), b.self() ); }
+        friend dom operator>>( sref a, sref b ) { return shr( a.self(), b.self()); }
 
-        friend sref zfit( sref a, int w ) { return dom::op_zfit( a.self(), w ); }
+        friend dom zfit( sref a, int w ) { return dom::op_zfit( a.self(), w ); }
 
         static void assume( sref a )
         {
