@@ -24,15 +24,14 @@
 
 namespace __lamp::adaptor
 {
-    using namespace __lava;
-
-    template< typename arithmetic >
+    template< template< typename > typename storage, typename arithmetic >
     struct pointers
     {
-        using pa = pointer_arith< arithmetic >;
+        using pa       = __lava::pointer_arith< tagged_storage, arithmetic >;
+        using constant = __lava::constant< tagged_storage >;
 
         using doms = domain_list< constant, arithmetic, pa >;
-        using top = arithmetic;
+        using top  = arithmetic;
 
         static constexpr auto pa_idx = doms::template idx< pa >;
         static constexpr auto ar_idx = doms::template idx< arithmetic >;
