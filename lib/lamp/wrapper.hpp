@@ -44,22 +44,22 @@ struct wrapper
     __inline static __lamp_ptr wrap( op_t op ) { return { op().disown() }; }
 
     template< typename op_t, typename... args_t >
-    __inline static __lamp_ptr wrap( op_t op, __lamp_ptr arg, args_t... args )
+    __inline static __lamp_ptr wrap( op_t op, __lamp_ptr arg, args_t ...args )
     {
         ref a( arg.ptr );
-        return wrap( [&]( const auto & ... args_ ) __inline { return op( a, args_... ); }, args... );
+        return wrap( [&]( auto ...args_ ) __inline { return op( a, args_... ); }, args... );
     }
 
     template< typename op_t, typename arg_t, typename... args_t >
-    __inline static auto wrap( op_t op, const arg_t &arg, args_t... args )
+    __inline static auto wrap( op_t op, const arg_t &arg, args_t ...args )
         -> std::enable_if_t< !std::is_same_v< arg_t, dom >, __lamp_ptr >
     {
-        return wrap( [&] ( const auto & ... args_ ) __inline { return op( arg, args_... ); }, args... );
+        return wrap( [&] ( auto ...args_ ) __inline { return op( arg, args_... ); }, args... );
     }
 };
 
 template< typename... args_t >
-__inline static auto wrap( const args_t & ... args ) { return wrapper::wrap( args... ); }
+__inline static __lamp_ptr wrap( const args_t & ...args ) { return wrapper::wrap( args... ); }
 
 template< typename type >
 inline type defualt_tainted_value() {
