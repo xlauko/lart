@@ -44,14 +44,20 @@ namespace lart
         auto types = dfa::analysis::run_on( module );
 
         // lower pointer arithmetic to scalar operations
+        std::vector< llvm::Instruction * > toerase;
         for ( auto &[val, type] : types ) {
             if ( auto gep = llvm::dyn_cast< llvm::GetElementPtrInst >( val ) ) {
                 for ( auto [src, inst] : lower_pointer_arithmetic( gep ) ) {
                     if ( types.count(src) )
                         types[inst] = types[src];
                 }
-                gep->eraseFromParent();
+                toerase.push_back(gep);
             }
+        }
+
+        for ( auto v : toerase ) {
+            types.erase(v);
+            v->eraseFromParent();
         }
 
         // syntactic pass
