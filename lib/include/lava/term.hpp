@@ -18,20 +18,16 @@
 
 #include <lava/support/tristate.hpp>
 #include <lava/support/base.hpp>
-#include <lava/constant.hpp>
 
 #include <set>
 #include <stdio.h>
 #include <type_traits>
 #include <z3++.h>
 
-#include <iostream>
-
 using namespace std::string_literals;
 
 namespace __lava
 {
-    
     struct term_state_t
     {
         term_state_t()
@@ -50,19 +46,19 @@ namespace __lava
 
     term_state_t state;
     
-    using term_storage = tagged_storage< z3::expr >;
-
-    struct term : term_storage, domain_mixin< term >
+    template< template< typename > typename storage >
+    struct term : storage< z3::expr >
+                , domain_mixin< term< storage > >
     {
-        using term_storage::term_storage;
-        using base = domain_mixin< term >;
+        using base = storage< z3::expr >;
+        using mixin = domain_mixin< term >;
+
+        using bw = typename mixin::bw;
+        using base::base;
 
         using tr = const term &;
-  
-        term( z3::expr e ) : term_storage( e ) {}
-        term( void *v, construct_shared_t s ) : term_storage( v, s ) {}
 
-        template< typename type > static term lift( type value )
+        template< typename type > static term lift( const type &value )
         {
             auto &ctx = state.ctx;
 
@@ -140,8 +136,6 @@ namespace __lava
         static term op_or  ( tr a, tr b ) { return a.get() | b.get(); }
         static term op_xor ( tr a, tr b ) { return a.get() ^ b.get(); }
 
-        using bw = uint8_t;
-
         /* comparison operations */
         static term op_eq ( tr a, tr b ) { return a.get() == b.get(); }
         static term op_ne ( tr a, tr b ) { return a.get() != b.get(); }
@@ -165,7 +159,6 @@ namespace __lava
             return z3::zext( v, b - v.get_sort().bv_size() );
         }
         // static term op_zfit( tr t, bw ) { return {}; }
-
 
         static void dump( tr t )
         {
