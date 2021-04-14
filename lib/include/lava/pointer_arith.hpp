@@ -58,6 +58,7 @@ namespace __lava
         using base::base;
 
         using av = arithmetic;
+        using ar = const arithmetic &;
         
         using pv = pointer_arith;
         using pr = const pointer_arith &;
@@ -66,15 +67,6 @@ namespace __lava
         using aref = scalar_domain_ref< av >;
 
         using ptr = void*;
-        /*using data = pointer_data< arithmetic >;
-
-        using aref = scalar_domain_ref< av >;
-
-        using pv = pointer_arith;
-        using pr = const pointer_arith &;
-
-        using bw = typename base::bw;
-        */
 
         template< typename type > static pv any() { return mixin::fail(); }
 
@@ -101,6 +93,13 @@ namespace __lava
             return { ptr, av::lift( value ) };
         }
 
+        static void assume_add_no_overflow( ar a, ar b )
+        {
+            auto max = av::lift( std::numeric_limits< uintptr_t >() );
+            auto diff = aref( max ) - aref( b );
+            aref::assume( aref( a ) < aref( diff ) );
+        }
+
         static pv lift_objid( void *ptr )
         {
             auto vp = pointer_split( ptr );
@@ -109,31 +108,33 @@ namespace __lava
                 return { ptr, av::lift( uintptr_t( ptr ) ) };
 
             auto obj = abstract_objid( vp.obj );
-
-            // auto obj = lift_objid( vp.obj );
-            // auto off = as::lift( vp.off );
-
-            //auto cl = obj.clone();
-            return { ptr, arithmetic( obj.disown(), construct_shared ) };//as::concat( obj, off ) };
+            auto off = av::lift( uintptr_t( vp.off ) );
+            
+            assume_add_no_overflow( obj, off );
+            return { ptr, av::op_add( obj, off ) };
         }
 
-        static av abstract_objid( uint32_t obj )
+        static aref abstract_objid( uint32_t obj )
         {
             auto st = state();
 
-            // FIXME possible leak
+            if ( auto it = st->map.find( obj ); it != st->map.end() ) {
+                return it->second;
+            }
+            
             auto abstract = av::template any< uintptr_t >();
-
+            auto null     = av::lift( uintptr_t( 0 ) );
+            
             // ensure that abstract objid is unique and nonnull
-            // as::assume( abstract != av::lift( uintptr_t( 0 ) ) );
-            // for ( auto [key, val] : st->map )
-            //    as::assume( abstract != val );
+            aref::assume( aref( abstract ) != aref( null ) );
+            for ( auto &[key, val] : st->map )
+                aref::assume( aref( abstract ) != aref( val ) );
 
-            st->map.emplace( obj, arithmetic( abstract.unsafe_ptr(), construct_shared ) );
-            return abstract;
+            auto it = st->map.emplace( obj, std::move( abstract ) ).first;
+            return it->second;
         }
 
-        static void assume( pr, bool ) {}
+        static void assume( pr, bool ) { mixin::fail(); }
 
         static tristate to_tristate( pr ) { return maybe; }
 
