@@ -19,7 +19,8 @@
 
 namespace __lamp
 {
-    using pointers = adaptor::pointers< __lava::term >;
+    using term     = __lava::term< tagged_storage >;
+    using pointers = adaptor::pointers< tagged_storage, term >;
     using meta_domain = semilattice< pointers >;
 
 } // namespace __lamp
@@ -35,7 +36,7 @@ namespace __lava
 {
     using namespace __lava;
     using state_t = __lamp::pointers::pa::state_t;
-    __pointers_state = malloc( sizeof( state_t ) );
+    __pointers_state = std::malloc( sizeof( state_t ) );
     new ( __pointers_state ) state_t;
 }
 
@@ -46,7 +47,7 @@ namespace __lava
 
     auto state = static_cast< state_t* >( __pointers_state );
     state->map.clear();
-    free( state );
+    std::free( state );
 }
 
 

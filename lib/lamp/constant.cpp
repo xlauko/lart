@@ -14,11 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <lava/unit.hpp>
+#include <lava/constant.hpp>
+#include <lamp/support/storage.hpp>
 
 namespace __lamp
 {
-    using meta_domain = __lava::constant;
+    using meta_domain = __lava::constant< wrapped_storage >;
 }
 
 #include "wrapper.hpp"

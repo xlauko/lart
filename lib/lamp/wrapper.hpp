@@ -21,6 +21,7 @@
  * (build) of this file. See e.g. trivial.cpp for an example. */
 
 #include <lava/support/base.hpp> /* iN */
+#include <lamp/support/storage.hpp> /* domain_ref */
 #include <lava/constant.hpp>
 
 #include <runtime/lart.h>

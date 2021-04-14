@@ -19,13 +19,14 @@
 #include <lava/constant.hpp>
 
 #include <lamp/support/semilattice.hpp>
+#include <lamp/support/storage.hpp>
 
 namespace __lamp
 {
-    using namespace __lava;
-
     struct trivial
     {
+        using unit = __lava::unit< tagged_storage >;
+        using constant = __lava::constant< tagged_storage >;
         using doms = domain_list< unit, constant >;
 
         using scalar_lift_dom = constant;

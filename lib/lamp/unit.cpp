@@ -15,10 +15,11 @@
  */
 
 #include <lava/unit.hpp>
+#include <lamp/support/storage.hpp>
 
 namespace __lamp
 {
-    using meta_domain = __lava::unit;
+    using meta_domain = __lava::unit< wrapped_storage >;
 } // namespace __lamp
 
 #include "wrapper.hpp"
