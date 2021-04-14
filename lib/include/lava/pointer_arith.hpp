@@ -33,46 +33,56 @@ namespace __lava
     {
         using raw_t = uintptr_t;
 
-        pointer_data( void *p, arithmetic &&n )
-            : ptr( p ), num( std::move( n ) )
+        [[nodiscard]] raw_t raw() const { return raw_t( ptr ); }
+
+        pointer_data( const pointer_data &o )
+            : pointer_data( o.ptr, o.num.clone() )
         {}
 
-        ~pointer_data() {
-            printf("destroy data\n");
-        }
-
-        [[nodiscard]] raw_t raw() const { return raw_t( ptr ); }
+        pointer_data( void *ptr, arithmetic &&n )
+            : ptr( ptr ), num( std::move( n ) )
+        {}
 
         void *ptr;
         arithmetic num;
     };
 
-    template< typename arithmetic >
-    using pointer_storage = tagged_storage< pointer_data< arithmetic > >;
-
-
-    template< typename arithmetic >
-    struct pointer_arith : pointer_storage< arithmetic >
-                         , domain_mixin< pointer_arith< arithmetic > >
+    template< template< typename > typename storage, typename arithmetic >
+    struct pointer_arith : storage< pointer_data< arithmetic > >
+                         , domain_mixin< pointer_arith< storage, arithmetic > >
     {
-        using base = domain_mixin< pointer_arith >;
+        using base = storage< pointer_data< arithmetic > >;
+        using mixin = domain_mixin< pointer_arith >;
 
-        using storage = pointer_storage< arithmetic >;
-        using storage::storage;
+        using bw = typename mixin::bw;
+        using base::base;
 
         using av = arithmetic;
+        
+        using pv = pointer_arith;
+        using pr = const pointer_arith &;
+        
+        using ref = domain_ref< pv >;
+        using aref = scalar_domain_ref< av >;
+
+        using ptr = void*;
+        /*using data = pointer_data< arithmetic >;
+
         using aref = scalar_domain_ref< av >;
 
         using pv = pointer_arith;
         using pr = const pointer_arith &;
 
         using bw = typename base::bw;
-        using ptr = void*;
+        */
 
-        template< typename type > static pv any() { return base::fail(); }
+        template< typename type > static pv any() { return mixin::fail(); }
 
-        static pv lift( const constant& con ) { return constant::lift_to< pointer_arith >( con ); }
-        static pv lift( const arithmetic&   ) { return base::fail(); }
+        static pv lift( const constant< storage >& con )
+        {
+            return constant< storage >::template lift_to< pointer_arith >( con );
+        }
+        static pv lift( const arithmetic&   ) { return mixin::fail(); }
 
         template< typename type >
         static pv lift( const type &value )
@@ -84,38 +94,34 @@ namespace __lava
                     return reinterpret_cast< void * >( value );
             } ();
 
-            printf( "--- lift value %p\n", ptr );
-
             if ( alive( ptr ) )
-                base::fail();
+                mixin::fail();
             //    return lift_objid( ptr );
 
-            auto lifted = av::lift( value );
-            printf( "lifted %p\n", lifted.unsafe_ptr() );
-            return { ptr, std::move( lifted ) };
+            return { ptr, av::lift( value ) };
         }
 
         static pv lift_objid( void *ptr )
         {
-            printf( "--- lift pointer %p\n", ptr );
             auto vp = pointer_split( ptr );
 
             if ( !vp.obj )
                 return { ptr, av::lift( uintptr_t( ptr ) ) };
 
-            aref obj = abstract_objid( vp.obj );
+            auto obj = abstract_objid( vp.obj );
 
             // auto obj = lift_objid( vp.obj );
             // auto off = as::lift( vp.off );
 
             //auto cl = obj.clone();
-            return { ptr, aref( obj.clone().disown() ) };//as::concat( obj, off ) };
+            return { ptr, arithmetic( obj.disown(), construct_shared ) };//as::concat( obj, off ) };
         }
 
-        static aref abstract_objid( uint32_t obj )
+        static av abstract_objid( uint32_t obj )
         {
             auto st = state();
 
+            // FIXME possible leak
             auto abstract = av::template any< uintptr_t >();
 
             // ensure that abstract objid is unique and nonnull
@@ -123,11 +129,9 @@ namespace __lava
             // for ( auto [key, val] : st->map )
             //    as::assume( abstract != val );
 
-            st->map.emplace( obj, abstract );
-            return aref( abstract.disown() );
+            st->map.emplace( obj, arithmetic( abstract.unsafe_ptr(), construct_shared ) );
+            return abstract;
         }
-
-        static constant lower( pr ) { __builtin_unreachable(); };
 
         static void assume( pr, bool ) {}
 
@@ -137,16 +141,13 @@ namespace __lava
         static bool alive( void * ptr ) { return alive( pointer_split( ptr ).obj ); }
 
         template< typename op_t, typename ...args_t >
-        static pv apply( op_t op, args_t... args )
+        static pv apply( op_t op, const args_t &... args )
         {
             return { ptr( op( args->raw() ... ) ), op( aref( args->num ) ... ) };
         }
 
-        /*template< typename op_t >
-        static arithmetic cmp( op_t op, pr a, pr b )
-        {
-            return op( aref( a->num ), aref( b->num ) );
-        }
+        template< typename op_t >
+        static av cmp( op_t op, pr a, pr b ) { return op( aref( a->num ), aref( b->num ) ); }
 
         static uintptr_t mask( bw w )
         {
@@ -162,7 +163,7 @@ namespace __lava
         static pv cast( pr p, bw w, op_t op )
         {
             return { set_bw( p->raw(), w ), op( p->num, w ) };
-        }*/
+        }
 
         static pv op_add ( pr a, pr b ) { return apply( std::plus(), a, b ); }
         static pv op_sub ( pr a, pr b ) { return apply( std::minus(), a, b ); }
@@ -176,7 +177,7 @@ namespace __lava
         static pv op_or ( pr a, pr b ) { return apply( std::bit_or(), a, b ); }
         static pv op_xor( pr a, pr b ) { return apply( std::bit_xor(), a, b ); }
 
-        /*static constexpr auto shl = [] ( const auto &a, const auto &b ) { return a << b; };
+        static constexpr auto shl = [] ( const auto &a, const auto &b ) { return a << b; };
         static constexpr auto shr = [] ( const auto &a, const auto &b ) { return a >> b; };
 
         static pv op_shl ( pr a, pr b ) { return apply( shl, a, b ); }
@@ -191,7 +192,7 @@ namespace __lava
 
         static pv op_trunc( pr p, bw w ) { return cast( p, w, av::op_trunc ); }
         static pv op_zext(  pr p, bw w ) { return cast( p, w, av::op_zext ); }
-        static pv op_zfit(  pr p, bw w ) { return cast( p, w, av::op_zfit ); }*/
+        static pv op_zfit(  pr p, bw w ) { return cast( p, w, av::op_zfit ); }
 
         struct state_t
         {
