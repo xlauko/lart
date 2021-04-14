@@ -61,15 +61,15 @@ namespace lart
                     result = op::alloc(val);
             },
             [&] ( llvm::LoadInst * ) {
-                if ( is_abstract_pointer( types[val] ) )
+               /* if ( is_abstract_pointer( types[val] ) )
                     result = op::load(val);
-                else
-                    result = op::melt(val);
+                else*/
+                result = op::melt(val);
             },
-            [&] ( llvm::StoreInst *store ) {
-                if ( is_abstract_pointer( types[ store->getPointerOperand() ] ) )
+            [&] ( llvm::StoreInst * ) {
+                /*if ( is_abstract_pointer( types[ store->getPointerOperand() ] ) )
                     result = op::store(val);
-                else if ( is_abstract( types[ store->getValueOperand() ] ) )
+                else if ( is_abstract( types[ store->getValueOperand() ] ) )*/
                     result = op::freeze(val);
             },
             [&] ( llvm::BinaryOperator * ) {
@@ -82,7 +82,7 @@ namespace lart
                 if ( is_identity_cast( val ) )
                     result = op::identity( val );
                 else
-                result = op::cast( val );
+                    result = op::cast( val );
             },
             [&] ( llvm::CallInst *call ) {
                 if ( is_lamp_call(call) ) {
@@ -99,9 +99,12 @@ namespace lart
 
     generator< operation > syntactic::toprocess()
     {
-        for ( const auto &[val, type] : types )
-            if ( auto op = make_operation(val); op.has_value() )
+        for ( const auto &[val, type] : types ) {
+            if ( auto op = make_operation(val); op.has_value() ) {
+                val->dump();
                 co_yield op.value();
+            }
+        }
 
         for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
             auto ptr = store->getPointerOperand();
