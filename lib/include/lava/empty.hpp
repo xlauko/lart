@@ -22,20 +22,28 @@
 
 namespace __lava
 {
+    struct empty_storage {};
+
     /* Minimal domain example. */
-    struct empty : tagged_array, domain_mixin< empty >
+    template< template< typename > typename storage >
+    struct empty : storage< empty_storage >
+                 , domain_mixin< empty< storage > >
     {
-        using tagged_array::tagged_array;
-        using base = domain_mixin< empty >;
+        using base = storage< empty_storage >;
+        using mixin = domain_mixin< unit >;
+        using bw = typename mixin::bw;
 
-        template< typename type > static empty lift( type ) { return {}; }
-        template< typename type > static empty any() { return {}; }
+        using base::base;
 
-        static constant lower( empty ) { return {}; };
+        using ev = empty;
+        using er = const empty &;
 
-        static void assume( empty, bool ) {}
+        template< typename type > static ev lift( const type& ) { return {}; }
+        template< typename type > static ev any() { return {}; }
 
-        static tristate to_tristate( empty ) { return maybe; }
+        static void assume( er, bool ) {}
+
+        static tristate to_tristate( er ) { return maybe; }
     };
 
 } // namespace __lava
