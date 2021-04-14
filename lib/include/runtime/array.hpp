@@ -62,12 +62,8 @@ namespace __lart::rt
         array() noexcept = default;
         ~array() noexcept( nothrow_dtor ) { clear(); }
 
-        array( const array< T > &other, construct_shared_t ) noexcept
-            : _data( other._data )
-        {}
-
         array( void *ptr, construct_shared_t ) noexcept
-            : _data( static_cast< items* >( ptr ) )
+            : _data( reinterpret_cast< items* >( reinterpret_cast< size_type* >( ptr ) - 1 ) )
         {}
 
         array( const array& other ) noexcept ( nothrow_copy )
