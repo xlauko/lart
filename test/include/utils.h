@@ -26,3 +26,5 @@ void unreachable()
                     exit( EXIT_SUCCESS );                                     \
             };                                                                \
     } while ( 0 )
+
+#define noinline __attribute__((__noinline__))
