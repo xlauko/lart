@@ -150,7 +150,10 @@ namespace lart
         auto args = sv::freeze( detail::arguments( *this ) );
 
         auto wrap = [&] ( auto val ) {
-            auto name = "__lamp_wrap_" + sc::fmt::llvm_name( val->getType() );
+            auto name = "__lamp_wrap_" + [&] {
+                auto ty = val->getType();
+                return ty->isPointerTy() ? "ptr" : sc::fmt::llvm_name( ty );
+            } ();
             return module.getFunction( name );
         };
 
