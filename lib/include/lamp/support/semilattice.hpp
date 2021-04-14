@@ -22,19 +22,17 @@
 #include <lava/support/tristate.hpp>
 #include <lava/support/operations.hpp>
 
+#include <lamp/support/storage.hpp>
+
 #include "domain_list.hpp"
 
 namespace __lamp
 {
     using bw = __lava::bitwidth_t;
     using tristate = __lava::tristate;
-    using constant = __lava::constant;
-
-    template< typename base >
-    using domain_ref = __lava::domain_ref< base >;
 
     template< typename type, typename tag >
-    struct tagged : type, tag
+    struct tagged_value : type, tag
     {
         using type::type;
         using unwrap = type;
@@ -43,38 +41,38 @@ namespace __lamp
     struct index_tag {};
     struct scalar_tag {};
 
-    template< typename dom_t > using index_t  = tagged< dom_t, index_tag >;
-    template< typename dom_t > using scalar_t = tagged< dom_t, scalar_tag >;
+    template< typename dom_t > using index_t  = tagged_value< dom_t, index_tag >;
+    template< typename dom_t > using scalar_t = tagged_value< dom_t, scalar_tag >;
 
-     namespace op = __lava::op;
+    namespace op = __lava::op;
 
     template< typename sl >
-    struct semilattice : __lava::tagged_array, __lava::domain_mixin< semilattice< sl > >
+    struct semilattice : any_tagged_storage, __lava::domain_mixin< semilattice< sl > >
     {
-        using base = __lava::tagged_array;
+        using base = any_tagged_storage;
+
         using doms = typename sl::doms;
         using self = semilattice;
         using sref = const self &;
 
+        using ref  = __lava::domain_ref< self >;
+
         template< int idx > using dom_type = typename doms::template type< idx >;
         template< typename type > static constexpr int dom_idx = doms::template idx< type >;
 
-        semilattice( const semilattice& ) = delete;
-        semilattice( semilattice&& ) noexcept = default;
-
-        semilattice( void *v, __lart::rt::construct_shared_t s ) : base( v, s ) {}
+        using base::base;
 
         template< typename dom_t, typename = std::enable_if_t< doms::template idx< dom_t > >= 0 > >
-        semilattice( dom_t &&v ) : base( v.disown(), __lart::rt::construct_shared )
+        semilattice( dom_t &&v ) : base( v.disown(), construct_shared )
         {
-            base::tag() = doms::template idx< dom_t >;
+            tag() = doms::template idx< dom_t >;
         }
 
-        semilattice& operator=( const semilattice& ) = delete;
-        semilattice& operator=( semilattice&& ) noexcept = default;
+        struct index_w  : ref { using ref::ref; };
+        struct scalar_w : ref { using ref::ref; };
 
-        struct index_w : domain_ref< self >  { using domain_ref< self >::domain_ref; };
-        struct scalar_w : domain_ref< self > { using domain_ref< self >::domain_ref; };
+        tag_t  tag() const { return store().tag(); }
+        tag_t& tag()       { return store().tag(); }
 
         static constexpr int join( int a ) { return a; }
 
@@ -145,7 +143,7 @@ namespace __lamp
 
                 if ( v.tag() == idx )
                 {
-                    coerce_t coerce( v.unsafe_ptr(), __lart::rt::construct_shared );
+                    coerce_t coerce( v.unsafe_ptr(), construct_shared );
                     if constexpr ( std::is_void_v< decltype( op( coerce ) ) > )
                     {
                         op( coerce );
@@ -204,12 +202,11 @@ namespace __lamp
             return cast( [&]( const auto &v ) -> self { return v.clone(); }, *this );
         }
 
-
         template< typename val_t >
         static self lift( const val_t &val ) { return sl::scalar_lift_dom::lift( val ); }
         static self lift( __lava::array_ref arr ) { return sl::array_lift_dom::lift( arr ); }
 
-        static constant lower( sref a ) { return cast( wrap( op::lower ), a ); }
+        // static constant lower( sref a ) { return cast( wrap( op::lower ), a ); }
 
         template< typename val_t >
         static self any() { return sl::scalar_any_dom::template any< val_t >(); }
