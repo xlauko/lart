@@ -102,12 +102,19 @@ namespace __lava
             __builtin_unreachable();
         }
 
-        static constant lower( tr ) { __builtin_unreachable(); };
+        static z3::expr tobool( const z3::expr &e )
+        {
+            assert( e.is_bv() );
+            assert( e.get_sort().bv_size() == 1 );
+            return e == state.ctx.bv_val( 1, 1 );
+        }
 
         static void assume( tr t, bool expected ) 
         {
             auto &solver = state.solver;
-            solver.add( expected ? t.get() : !(t.get()) );
+            const auto& e = t.get();
+            auto b = e.is_bool() ? e : tobool( e );
+            solver.add( expected ? b : !b );
             
             if ( solver.check() == z3::unsat ) {
                 __lart_cancel();
