@@ -153,6 +153,8 @@ namespace __lava
         static st lift_arr( void *v, unsigned s ) { return st::lift( array_ref{ v, s } ); }
         static st lift_ptr( void *v ) { return st::lift( v ); }
 
+        static st lower( sr ) { return fail( "lower" ); }
+
         template< typename size >
         static st op_alloca( const size&, bw ) { return fail( "alloca" ); }
 
