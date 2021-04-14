@@ -87,11 +87,11 @@ static auto any()
     return defualt_tainted_value< type >();
 }
 
-template< typename T >
-static T lower( __lamp_ptr v )
-{
-    return cast< false /* unsigned */, bitwidth_v< T > >( dom::lower( ref( v.ptr ) )->value );
-}
+// template< typename T >
+// static T lower( __lamp_ptr v )
+// {
+//     return cast< false /* unsigned */, bitwidth_v< T > >( dom::lower( ref( v.ptr ) )->value );
+// }
 
 extern "C"
 {
@@ -128,11 +128,11 @@ extern "C"
     void* __lamp_lift_ptr( void *v ) { return lift( dom::lift_ptr, v ); }
     void* __lamp_lift_arr( void *v, i32 s ) { return lift( dom::lift_arr, v, s ); }
 
-    i1  __lamp_lower_i1 ( __lamp_ptr v ) { return lower<  i1 >( v ); }
-    i8  __lamp_lower_i8 ( __lamp_ptr v ) { return lower<  i8 >( v ); }
-    i16 __lamp_lower_i16( __lamp_ptr v ) { return lower< i16 >( v ); }
-    i32 __lamp_lower_i32( __lamp_ptr v ) { return lower< i32 >( v ); }
-    i64 __lamp_lower_i64( __lamp_ptr v ) { return lower< i64 >( v ); }
+    // // i1  __lamp_lower_i1 ( __lamp_ptr v ) { return lower<  i1 >( v ); }
+    // // i8  __lamp_lower_i8 ( __lamp_ptr v ) { return lower<  i8 >( v ); }
+    // // i16 __lamp_lower_i16( __lamp_ptr v ) { return lower< i16 >( v ); }
+    // // i32 __lamp_lower_i32( __lamp_ptr v ) { return lower< i32 >( v ); }
+    // // i64 __lamp_lower_i64( __lamp_ptr v ) { return lower< i64 >( v ); }
 
     i8    __lamp_any_i8()    { return any< dom, i8  >(); }
     i16   __lamp_any_i16()   { return any< dom, i16 >(); }
