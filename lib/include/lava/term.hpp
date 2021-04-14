@@ -153,7 +153,10 @@ namespace __lava
         // static term op_sitofp( tr, bw ) { return {}; }
         static term op_trunc( tr t, bw b ) { return t.get().extract( b - 1, 0 ); }
         // static term op_uitofp( tr, bw ) { return {}; }
-        static term op_zext( tr t, bw b ) { return z3::zext( t.get(), b ); }
+        static term op_zext( tr t, bw b ) { 
+            auto &v = t.get();
+            return z3::zext( v, b - v.get_sort().bv_size() );
+        }
         // static term op_zfit( tr t, bw ) { return {}; }
 
 
