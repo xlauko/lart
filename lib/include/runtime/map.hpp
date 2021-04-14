@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <runtime/array.hpp>
+#include <runtime/vector.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -180,12 +180,15 @@ namespace {
             auto it = sort::lower_bound( begin(), end() - 1, _container.back() );
             if ( it == end() - 1 || !eq( *it, _container.back() ) )
             {
-                auto item = _container.back();
+                // TODO fix copying of value
+                auto &item = _container.back();
+                // TODO fix swapping
                 sort::sort( begin(), end() );
                 return { find( item ), true };
             }
 
-            auto item = *it;
+            // TODO fix copying of value
+            auto &item = *it;
             _container.pop_back();
             return { find( item ), false };
         }
@@ -283,5 +286,5 @@ namespace {
 }
     template < typename Key, typename Val>
     using array_map = array_map< Key, Val, insert_sort< less_map >,
-                                 array< std::pair< Key, Val > > >;
+                                 vector< std::pair< Key, Val > > >;
 } // namespace __lart::rt
