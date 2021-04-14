@@ -17,26 +17,26 @@
 
 #include <lava/support/base.hpp>
 #include <lava/support/tristate.hpp>
-#include <lava/constant.hpp>
 
 namespace __lava
 {
-    struct unit : tagged_array, domain_mixin< unit > {
-        using index_dom = unit;
+    struct empty_storage {};
 
-        using tagged_array::tagged_array;
-        using base = domain_mixin< unit >;
+    template< template< typename > typename storage >
+    struct unit : storage< empty_storage > 
+                , domain_mixin< unit< storage > >
+    {
+        using base = storage< empty_storage >;
+        using mixin = domain_mixin< unit >;
 
+        using bw = typename mixin::bw;
+        using base::base;
+
+        using uv = unit;
         using ur = const unit &;
 
-        template< typename type > static unit lift( type ) { return {}; }
+        template< typename type > static unit lift( const type& ) { return {}; }
         template< typename type > static unit any() { return {}; }
-
-        static constant lower( ur )
-        {
-            base::fail();
-            __builtin_unreachable();
-        }
 
         static unit lift_any() { return {}; }
         static unit lift_any_ptr() { return {}; }
@@ -48,7 +48,7 @@ namespace __lava
         static unit op_load_at( ur, ur, uint8_t ) { return {}; }
 
         template< typename scalar >
-        static unit op_store( ur, scalar, uint8_t ) { return {}; }
+        static unit op_store( ur, const scalar&, uint8_t ) { return {}; }
 
         static void assume( ur, bool ) {}
 
@@ -77,8 +77,6 @@ namespace __lava
         static unit op_and ( ur, ur ) { return {}; }
         static unit op_or  ( ur, ur ) { return {}; }
         static unit op_xor ( ur, ur ) { return {}; }
-
-        using bw = uint8_t;
 
         /* comparison operations */
         static unit op_foeq( ur, ur ) { return {}; }
