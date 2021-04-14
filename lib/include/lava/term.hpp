@@ -81,10 +81,10 @@ namespace __lava
 
         template< typename type > static term any()
         {
-            constexpr auto digits = std::numeric_limits< type >::digits;
+            constexpr auto digits = std::numeric_limits< unsigned >::digits;
             char name[5 + digits] = {};
             std::strncpy( name, "var_", 4 );
-            std::sprintf( name + 4, "%d", variable_counter() );
+            std::sprintf( name + 4, "%u", variable_counter() );
 
             auto &ctx = state.ctx;            
             if constexpr ( std::is_integral_v < type > )
