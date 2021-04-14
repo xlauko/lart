@@ -23,27 +23,29 @@
 
 #include <cassert>
 #include <string>
+
 namespace __lava
 {
-    struct [[gnu::packed]] constant_data
+    struct constant_data
     {
         uint64_t value;
-        enum type_t { bv, fp, ptr } type;
+        enum type { bv, fp, ptr } ty;
         bitwidth_t bw;
+
+        constant_data( uint64_t v, type t, bitwidth_t b ) 
+            : value( v ), ty( t ), bw( b )
+        {}
     };
 
-    using constant_storage = tagged_storage< constant_data >;
-
-    struct constant : constant_storage, domain_mixin< constant >
+    template< template< typename > typename storage >
+    struct constant : storage< constant_data >
+                    , domain_mixin< constant< storage > >
     {
-        using base = domain_mixin< constant >;
-        using sc = scalar< constant >;
+        using base = storage< constant_data >;
+        using mixin = domain_mixin< constant >;
 
-        constant() = default;
-        constant( void *v, construct_shared_t s ) : constant_storage( v, s ) {}
-        constant( constant_data::type_t t, bitwidth_t b, uint64_t v )
-            : tagged_storage< constant_data >( constant_data{ v, t, b } )
-        {}
+        using bw = typename mixin::bw;
+        using base::base;
 
         template< typename concrete_t >
         static auto lift( concrete_t value )
@@ -52,7 +54,7 @@ namespace __lava
             static_assert( sizeof( concrete_t ) <= 8 );
 
             uint64_t val;
-            constant_data::type_t type;
+            constant_data::type type;
 
             if constexpr ( std::is_pointer_v< concrete_t > )
             {
@@ -67,7 +69,7 @@ namespace __lava
             if constexpr ( std::is_floating_point_v< concrete_t > )
                 type = constant_data::fp;
 
-            return { type, bitwidth_v< concrete_t >, val };
+            return { val, type, bitwidth_v< concrete_t > };
         }
 
         static constant lift( array_ref ) { __builtin_unreachable(); }
@@ -96,12 +98,12 @@ namespace __lava
             auto f = [&]( const auto & ... x ) -> uint64_t { return static_cast< uint64_t >( f_( x... ) ); };
             auto unwrap = [] ( const constant &v ) -> uint64_t { return static_cast< uint64_t >( v->value ); };
 
-            if ( ( ( vals->type == constant_data::fp ) || ... ) )
-                base::fail();
+            if ( ( ( vals->ty == constant_data::fp ) || ... ) )
+                mixin::fail();
 
-            bool pt = ( ( ( vals->type == constant_data::ptr ) || ... ) );
+            bool pt = ( ( ( vals->ty == constant_data::ptr ) || ... ) );
             auto type = pt ? constant_data::ptr : constant_data::bv;
-            return { type, bw, call< signedness >( bw, f, unwrap( vals )... ) };
+            return { call< signedness >( bw, f, unwrap( vals )... ), type, bw };
         }
 
         static constexpr auto wtu = []( const auto & ... xs ) { return with_type< false >( xs... ); };
@@ -114,10 +116,7 @@ namespace __lava
 
         static constant set_bw( const constant &c, bitwidth_t bw )
         {
-            auto rv = c;
-            rv->bw = bw;
-            rv->value &= mask( bw );
-            return rv;
+            return constant( c->value & mask( bw ), c->ty, c->bw );
         }
 
         static tristate to_tristate( const constant &val )
@@ -168,21 +167,21 @@ namespace __lava
         static cv op_sle( cr a, cr b ) { return wts( std::less_equal(), a, b ); }
         static cv op_sge( cr a, cr b ) { return wts( std::greater_equal(), a, b ); }
 
-        static cv op_trunc( cv c, bw w ) { return set_bw( c, w ); }
-        static cv op_zext( cv c, bw w )  { return set_bw( c, w ); }
-        static cv op_zfit( cv c, bw w )  { return set_bw( c, w ); }
-        static cv op_sext( cv c, bw w )
+        static cv op_trunc( cr c, bw w ) { return set_bw( c, w ); }
+        static cv op_zext( cr c, bw w )  { return set_bw( c, w ); }
+        static cv op_zfit( cr c, bw w )  { return set_bw( c, w ); }
+        static cv op_sext( cr c, bw w )
         {
             return set_bw( wts( []( auto v ) { return int64_t( v ); }, c ), w );
         }
 
-        static cv op_concat( cv a, cv b )
+        /*static cv op_concat( cv a, cv b )
         {
             auto bw = lift( a->bw );
             a = op_zext( a, a->bw + b->bw );
             auto r = op_or( op_shl( a, bw ), b );
             return r;
-        }
+        }*/
 
         static void * pointer( cr c )
         {
@@ -219,7 +218,5 @@ namespace __lava
             return std::to_string( c->value );
         }
     };
-
-    static_assert( sizeof( constant ) == 8 );
 
 } // namespace __lava
