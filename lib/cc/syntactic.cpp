@@ -101,7 +101,6 @@ namespace lart
     {
         for ( const auto &[val, type] : types ) {
             if ( auto op = make_operation(val); op.has_value() ) {
-                val->dump();
                 co_yield op.value();
             }
         }
