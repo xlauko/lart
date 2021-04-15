@@ -102,11 +102,6 @@ namespace __lava::op
         return []( const auto & ... x ) { return std::decay_t< decltype( a ) >::op_store( x... ); };
     };
 
-    static constexpr auto store_at = []( const auto &a )
-    {
-        return []( const auto & ... x ) { return std::decay_t< decltype( a ) >::op_store_at( x... ); };
-    };
-
     static constexpr auto concat  = []( const auto &a ) { return std::decay_t< decltype( a ) >::op_concat; };
     static constexpr auto extract = []( const auto &a )
     {

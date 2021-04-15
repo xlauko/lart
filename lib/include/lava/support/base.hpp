@@ -228,10 +228,9 @@ namespace __lava
         static st op_concat ( sr, sr ) { return fail( "concat" ); }
         static st op_extract( sr, bw, bw ) { return fail( "extract" ); }
 
-        template< typename scal > static st op_store( sr, scal, bw ) { return fail( "store" ); }
-        template< typename scal > static st op_store_at( sr, sr, scal, bw ) { return fail( "store_at" ); }
+        template< typename scal > static void op_store( sr, const scal&, bw ) { fail( "store" ); }
+        
         static st op_load( sr, bw ) { return fail( "load" ); }
-        static st op_load_at( sr, sr, bw ) { return fail( "load_at" ); }
 
         static void op_dealloca( sr s ) { s.~self_t(); }
 

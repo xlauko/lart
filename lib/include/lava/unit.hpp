@@ -48,7 +48,7 @@ namespace __lava
         static unit op_load_at( ur, ur, uint8_t ) { return {}; }
 
         template< typename scalar >
-        static unit op_store( ur, const scalar&, uint8_t ) { return {}; }
+        static void op_store( ur, const scalar&, uint8_t ) {}
 
         static void assume( ur, bool ) {}
 
