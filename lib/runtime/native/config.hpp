@@ -21,6 +21,7 @@ namespace __lart::rt
     struct config_t
     {
         bool trace_choices = false;
+        bool ask_choices = false;
     };
 
     extern config_t config;

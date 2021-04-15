@@ -32,6 +32,11 @@ namespace __lart::rt
             fprintf( stderr, "[lart config] trace choices\n" );
             config.trace_choices = true;
         }
+
+        if ( auto opt = std::getenv( "LART_ASK_CHOICES" ); opt && strcmp( opt, "ON" ) == 0 ) {
+            fprintf( stderr, "[lart config] ask choices\n" );
+            config.ask_choices = true;
+        }
     }
 
 

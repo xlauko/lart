@@ -37,7 +37,12 @@ namespace __lart::rt
 
     int choose( int count )
     {
-        int result = fork_choose( count );
+        int result;
+        if ( config.ask_choices ) {
+            std::scanf( "%d", &result );
+        } else {
+            result = fork_choose( count );
+        }
         if ( config.trace_choices )
             trace.push_choice( result );
         return result;
