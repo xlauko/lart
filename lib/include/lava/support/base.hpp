@@ -126,8 +126,7 @@ namespace __lava
 
         static inline st fail( const char *msg = "" )
         {
-            // TODO log messgage
-            (void)msg;
+            fprintf( stderr, "failed: %s\n", msg );
             __builtin_trap();
         }
 
