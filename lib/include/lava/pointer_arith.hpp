@@ -195,6 +195,30 @@ namespace __lava
         static pv op_zext(  pr p, bw w ) { return cast( p, w, av::op_zext ); }
         static pv op_zfit(  pr p, bw w ) { return cast( p, w, av::op_zfit ); }
 
+        static constexpr auto store = [] ( auto p, auto v ) { *p = v; };
+
+        template< typename val >
+        static void op_store( pr p, const val &v, bitwidth_t bw )
+        {
+            if ( !p->ptr )
+                mixin::fail( "null pointer dereference" );
+
+            if constexpr ( std::is_same_v< val, constant< storage > > )
+            {
+                callu( bw, store, p->ptr, v->value );
+            }
+            else if constexpr( std::is_same_v< val, pointer_arith > )
+            {
+                callu( bw, store, p->ptr, v->raw() );
+            }
+            else
+            {
+                fprintf( stderr, "unsupported store %s", __PRETTY_FUNCTION__ );
+                __builtin_trap();
+            }
+        }
+
+
         struct state_t
         {
             using objid = uint32_t;
