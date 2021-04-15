@@ -8,7 +8,7 @@
 int main()
 {
     int val = 42;
-    auto ptr = (int*)__lamp_lift_objid( &val );
+    int *ptr = (int*)__lamp_lift_objid( &val );
     uint32_t hi = (uintptr_t)(ptr) >> 32;
     uint32_t lo = (uintptr_t)(ptr) & 0x00000000FFFFFFFF;
     int *res = (int *)(((uintptr_t)hi << 32) | lo);
