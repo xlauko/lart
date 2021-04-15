@@ -57,10 +57,30 @@ struct wrapper
     {
         return wrap( [&] ( auto ...args_ ) __inline { return op( arg, args_... ); }, args... );
     }
+
+    template< typename op_t >
+    __inline static void wrap_void( op_t op ) { op(); }
+
+    template< typename op_t, typename... args_t >
+    __inline static void wrap_void( op_t op, __lamp_ptr arg, args_t ...args )
+    {
+        ref a( arg.ptr );
+        wrap_void( [&]( auto ...args_ ) __inline { op( a, args_... ); }, args... );
+    }
+
+    template< typename op_t, typename arg_t, typename... args_t >
+    __inline static auto wrap_void( op_t op, const arg_t &arg, args_t ...args )
+        -> std::enable_if_t< !std::is_same_v< arg_t, dom >, void >
+    {
+        wrap_void( [&] ( auto ...args_ ) __inline { op( arg, args_... ); }, args... );
+    }
 };
 
 template< typename... args_t >
 __inline static __lamp_ptr wrap( const args_t & ...args ) { return wrapper::wrap( args... ); }
+
+template< typename... args_t >
+__inline static void wrap_void( const args_t & ...args ) { wrapper::wrap_void( args... ); }
 
 template< typename type >
 inline type defualt_tainted_value() {
