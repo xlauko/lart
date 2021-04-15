@@ -245,10 +245,10 @@ extern "C"
     __lamp_ptr __lamp_fptosi ( __lamp_ptr a, bw  b ) { return wrap( dom::op_fptosi,  a, b ); }
     __lamp_ptr __lamp_fptoui ( __lamp_ptr a, bw  b ) { return wrap( dom::op_fptoui,  a, b ); }
 
-    /*__lamp_ptr __lamp_store( __lamp_ptr a, __lamp_ptr b, bw w )
+    void __lamp_store( __lamp_ptr a, __lamp_ptr b, bw w )
     {
-        return wrap( []( const auto &... x ) { return dom::op_store( x... ); }, a, b, w );
-    }*/
+        wrap_void( []( const auto &... x ) { dom::op_store( x... ); }, a, b, w );
+    }
 
     __lamp_ptr __lamp_load( __lamp_ptr a, bw w ) { return wrap( dom::op_load, a, w ); }
 
