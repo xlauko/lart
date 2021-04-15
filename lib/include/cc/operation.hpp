@@ -250,7 +250,24 @@ namespace lart::op
     {
         std::string name() const { return "store"; }
         std::string impl() const { return "__lamp_store"; }
-        args_t arguments() const { return {}; }
+        args_t arguments() const
+        {
+            auto what = llvm::cast< llvm::StoreInst >( _what );
+            auto ptr = what->getPointerOperand();
+            auto val = what->getValueOperand();
+            auto elem = ptr->getType()->getPointerElementType();
+            auto dl   = sc::data_layout( what );
+            return {
+                { ptr, argtype::lift },
+                { val, argtype::lift },
+                { sc::i8( uint8_t( sc::bytes( elem, dl ) ) ), argtype::concrete }
+            };
+        }
+        
+        std::optional< default_wrapper > default_value() const
+        {
+            return std::nullopt;
+        }
     };
 
     struct load : with_taints_base
