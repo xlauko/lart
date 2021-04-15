@@ -71,13 +71,10 @@ namespace lart
                 auto v = store->getValueOperand();
 
                 if ( types.count(p) && is_abstract_pointer( types[p] ) ) {
-                    std::cerr << "store\n";
                     result = op::store(val);
                 } else if ( types.count(v) &&  is_abstract( types[v] ) ) {
-                    std::cerr << "freeze\n";
                     result = op::freeze(val);
                 }
-                store->dump();
             },
             [&] ( llvm::BinaryOperator * ) {
                 result = op::binary( val );
