@@ -98,7 +98,7 @@ namespace __lamp
             {
                 using orig = typename from::unwrap;
                 constexpr int orig_idx = dom_idx< orig >;
-                ASSERT_EQ( f.tag(), orig_idx );
+                //assert( f.tag() == orig_idx );
                 constexpr int goal = join( orig_idx, dom_idx< typename to::scalar_dom > );
                 static_assert( goal >= 0 );
                 return self::lift_to< dom_type< goal >, orig >( f );
@@ -144,18 +144,9 @@ namespace __lamp
                 if ( v.tag() == idx )
                 {
                     coerce_t coerce( v.unsafe_ptr(), construct_shared );
-                    if constexpr ( std::is_void_v< decltype( op( coerce ) ) > )
-                    {
-                        op( coerce );
-                        coerce.disown();
-                        return;
-                    }
-                    else
-                    {
-                        auto rv = op( coerce );
-                        coerce.disown();
-                        return rv;
-                    }
+                    auto rv = op( coerce );
+                    coerce.disown();
+                    return rv;
                 }
                 else
                     return self::cast_one< op_t, sl_t, idx + 1 >( op, v );
@@ -177,6 +168,48 @@ namespace __lamp
             return cast_one( rec, a );
         }
 
+        template< typename op_t, typename sl_t, int idx = 0 >
+        __inline static void cast_one_void( op_t op, const sl_t &v )
+        {
+            if constexpr ( idx < doms::size )
+            {
+                constexpr bool is_idx = std::is_same_v< sl_t, index_w >;
+                constexpr bool is_scl = std::is_same_v< sl_t, scalar_w >;
+
+                using to_type = typename doms::template type< idx >;
+                using index_type = index_t< to_type >;
+                using scalar_type = scalar_t< to_type >;
+                using coerce1_t = std::conditional_t< is_idx, index_type, to_type >;
+                using coerce_t = std::conditional_t< is_scl, scalar_type, coerce1_t >;
+
+                if ( v.tag() == idx ) {
+                    // TODO ref?
+                    coerce_t coerce( v.unsafe_ptr(), construct_shared );
+                    static_assert( std::is_void_v< decltype( op( coerce ) ) > );
+                    op( coerce );
+                    coerce.disown();
+                } else {
+                    self::cast_one_void< op_t, sl_t, idx + 1 >( op, v );
+                }
+            } else {
+                self::cast_one_void< op_t, sl_t, 0 >( ( __builtin_trap(), op ), v );
+            }
+        }
+
+        template< typename op_t >
+        __inline static void cast_void( op_t op ) { op(); }
+
+        template< typename op_t, typename arg_t, typename... args_t >
+        __inline static void cast_void( op_t op, const arg_t &a, const args_t & ... args )
+        {
+            auto rec = [&]( const auto &c ) __inline
+            {
+                cast_void( [&]( const auto & ... cs ) __inline { op( c, cs... ); }, args... );
+            };
+
+            cast_one_void( rec, a );
+        }
+
         template< typename op_t, typename... args_t >
         __inline static self op( op_t operation, const args_t & ... args )
         {
@@ -189,6 +222,36 @@ namespace __lamp
 
             return cast( downcasted, args... );
         }
+
+        template< typename op_t, int idx = 0, typename... args_t >
+        __inline static void in_domain_void( int dom, op_t op, const args_t & ... args )
+        {
+            if constexpr ( idx < doms::size )
+            {
+                constexpr int joined = join( idx, doms::template idx< args_t > ... );
+                static_assert( joined >= 0 );
+                if ( idx == dom )
+                    if constexpr ( joined == idx )
+                        return op( lift_to< typename doms::template type< idx > >( args ) ... );
+
+                in_domain_void< op_t, idx + 1 >( dom, op, args... );
+            }
+            else __builtin_unreachable();
+        }
+
+        template< typename op_t, typename... args_t >
+        __inline static void op_void( op_t operation, const args_t & ... args )
+        {
+            int dom = join( args.tag() ... );
+
+            auto downcasted = [&]( const auto & ... args ) __inline
+            {
+                in_domain_void( dom, operation, args... );
+            };
+
+            cast_void( downcasted, args... );
+        }
+
 
         template< typename... Ts >
         static constexpr auto wrap( Ts&&... xs )
@@ -211,7 +274,7 @@ namespace __lamp
         template< typename val_t >
         static self any() { return sl::scalar_any_dom::template any< val_t >(); }
 
-        static void assume( sref a, bool c ) { cast( wrap( op::assume, c ), a  ); }
+        static void assume( sref a, bool c ) { cast_void( wrap( op::assume, c ), a  ); }
         static tristate to_tristate( sref a )
         {
             return cast( [&]( const auto &v ) { return std::decay_t< decltype( v ) >::to_tristate( v ); }, a );
@@ -275,6 +338,12 @@ namespace __lamp
 
         static self op_concat ( sref a, sref b ) { return op( wrap( op::concat ), a, b ); }
         static self op_extract( sref a, bw f, bw t ) { return op( wrap( op::extract, f, t ), a ); }
+    
+        static void op_store( sref a, sref b, bw w )
+        {
+           op_void( wrap( op::store, w ), a, scalar_w( b ) );
+        }
+
     };
 
 } // namespace __lamp
