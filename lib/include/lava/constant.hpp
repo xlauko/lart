@@ -194,7 +194,7 @@ namespace __lava
         static cv op_load( cr p, bitwidth_t bw ) { return callu( bw, load, pointer( p ) ); }
 
         template< typename val >
-        static void op_store( cr p, val v, bitwidth_t bw )
+        static void op_store( cr p, const val &v, bitwidth_t bw )
         {
             if constexpr ( std::is_same_v< val, constant > )
             {
