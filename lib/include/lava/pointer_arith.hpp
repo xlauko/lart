@@ -95,7 +95,7 @@ namespace __lava
 
         static void assume_add_no_overflow( ar a, ar b )
         {
-            auto max = av::lift( std::numeric_limits< uintptr_t >() );
+            auto max = av::lift( std::numeric_limits< uintptr_t >::max() );
             auto diff = aref( max ) - aref( b );
             aref::assume( aref( a ) < aref( diff ) );
         }
