@@ -29,13 +29,14 @@ target_include_directories( lart
 add_dependencies( lart svflib )
 
 find_package( spdlog CONFIG REQUIRED )
-
+find_package( fmt CONFIG REQUIRED )
 find_package( cppcoro CONFIG REQUIRED )
 
 target_link_libraries( lart PRIVATE 
   llvmsc::llvmsc 
-  svflib 
-  spdlog::spdlog spdlog::spdlog_header_only
+  svflib
+  fmt::fmt-header-only
+  spdlog::spdlog_header_only
   cppcoro
 )
 
