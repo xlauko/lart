@@ -24,7 +24,9 @@ target_include_directories( lart
 
 add_dependencies( lart svflib )
 
-target_link_libraries( lart PRIVATE llvmsc::llvmsc svf::svf spdlog::spdlog_header_only )
+find_package( spdlog CONFIG REQUIRED )
+
+target_link_libraries( lart PRIVATE llvmsc::llvmsc svf::svf spdlog::spdlog spdlog::spdlog_header_only )
 target_link_libraries( lart PRIVATE lart_project_options lart_project_warnings )
 
 if( NOT LLVM_ENABLE_RTTI )
