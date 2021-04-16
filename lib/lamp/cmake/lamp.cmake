@@ -8,27 +8,32 @@ macro( register_domain domain )
 
     target_compile_options( ${domain}-prop INTERFACE
       -fno-exceptions -fno-rtti
-      -nostdinc++
     )
 
     target_include_directories( ${domain}-prop
       INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${LIBCXX_INSTALL_DIR}/include/c++/v1
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
-    target_link_options( ${domain}-prop
+    # dataflow sanitized domain options
+    add_library( ${domain}-dfs INTERFACE )
+
+    # TODO create libc++ target
+    target_include_directories( ${domain}-dfs
+      INTERFACE
+        ${LIBCXX_INSTALL_DIR}/include/c++/v1
+    )
+    
+    target_link_options( ${domain}-dfs
       INTERFACE
         -Wl,-rpath,${LLVM_INSTALL_DIR}/lib
         -L${LIBCXX_INSTALL_DIR}/lib
         -Wl,-rpath,${LIBCXX_INSTALL_DIR}/lib
     )
 
-    # dataflow sanitized domain options
-    add_library( ${domain}-dfs INTERFACE )
-
     target_compile_options( ${domain}-dfs INTERFACE
+      -nostdinc++
       -fsanitize=dataflow
       -fsanitize-blacklist=${CMAKE_CURRENT_SOURCE_DIR}/dataflow-blacklist.txt
     )
