@@ -19,8 +19,8 @@
 #include <lava/support/tristate.hpp>
 #include <lava/support/base.hpp>
 
-#include <set>
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
 #include <type_traits>
 #include <z3++.h>
 
