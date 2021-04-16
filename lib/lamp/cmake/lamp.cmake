@@ -13,7 +13,7 @@ macro( register_domain domain )
 
     target_include_directories( ${domain}-prop
       INTERFACE
-        ${PROJECT_SOURCE_DIR}/../include
+        ${CURRENT_SOURCE_DIR}/include
         ${LIBCXX_INSTALL_DIR}/include/c++/v1
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
