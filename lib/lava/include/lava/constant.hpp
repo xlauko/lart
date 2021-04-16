@@ -62,7 +62,7 @@ namespace __lava
                 type = constant_data::ptr;
             }
             else
-                val = value;
+                val = uint64_t( value );
 
             if constexpr ( std::is_integral_v< concrete_t > )
                 type = constant_data::bv;

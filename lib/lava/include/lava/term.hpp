@@ -44,7 +44,7 @@ namespace __lava
         return ++v;
     }
 
-    term_state_t state;
+    term_state_t __term_state;
     
     template< template< typename > typename storage >
     struct term : storage< z3::expr >
@@ -60,7 +60,7 @@ namespace __lava
 
         template< typename type > static term lift( const type &value )
         {
-            auto &ctx = state.ctx;
+            auto &ctx = __term_state.ctx;
 
             if constexpr ( std::is_same_v< type, bool > )
             {
@@ -82,7 +82,7 @@ namespace __lava
             std::strncpy( name, "var_", 4 );
             std::sprintf( name + 4, "%u", variable_counter() );
 
-            auto &ctx = state.ctx;            
+            auto &ctx = __term_state.ctx;            
             if constexpr ( std::is_integral_v < type > )
             {
                 return ctx.bv_const( name, bitwidth_v< type > );
@@ -102,12 +102,12 @@ namespace __lava
         {
             assert( e.is_bv() );
             assert( e.get_sort().bv_size() == 1 );
-            return e == state.ctx.bv_val( 1, 1 );
+            return e == __term_state.ctx.bv_val( 1, 1 );
         }
 
         static void assume( tr t, bool expected ) 
         {
-            auto &solver = state.solver;
+            auto &solver = __term_state.solver;
             const auto& e = t.get();
             auto b = e.is_bool() ? e : tobool( e );
             solver.add( expected ? b : !b );
@@ -162,12 +162,12 @@ namespace __lava
 
         static void dump( tr t )
         {
-            printf( "%s\n", Z3_ast_to_string( state.ctx, t.get() ) );
+            printf( "%s\n", Z3_ast_to_string( __term_state.ctx, t.get() ) );
         }
 
         static std::string trace( tr t )
         {
-            return Z3_ast_to_string( state.ctx, t.get() );
+            return Z3_ast_to_string( __term_state.ctx, t.get() );
         }
     };
 

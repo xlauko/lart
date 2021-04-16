@@ -58,7 +58,7 @@ namespace __lava
     struct array_ref { void *base; size_t size; };
 
     template< typename type >
-    constexpr int bitwidth_v = std::is_same_v< type, bool > ? 1 : sizeof( type ) * 8;
+    constexpr uint8_t bitwidth_v = std::is_same_v< type, bool > ? 1 : sizeof( type ) * 8;
 
     template< typename T > struct number_type { using type = T; };
     template< bool, int > struct number_;
