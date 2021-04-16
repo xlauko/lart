@@ -30,7 +30,15 @@ add_dependencies( lart svflib )
 
 find_package( spdlog CONFIG REQUIRED )
 
-target_link_libraries( lart PRIVATE llvmsc::llvmsc svflib spdlog::spdlog spdlog::spdlog_header_only )
+find_package( cppcoro CONFIG REQUIRED )
+
+target_link_libraries( lart PRIVATE 
+  llvmsc::llvmsc 
+  svflib 
+  spdlog::spdlog spdlog::spdlog_header_only
+  cppcoro
+)
+
 target_link_libraries( lart PRIVATE lart_project_options lart_project_warnings )
 
 if( NOT LLVM_ENABLE_RTTI )
@@ -48,12 +56,22 @@ configure_file( "lartcc.in"
   ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/lartcc @ONLY
 )
 
+configure_file( "lartll.in"
+  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/lartll @ONLY
+)
+
 configure_file( "lartcc++.in"
   ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/lartcc++ @ONLY
 )
 
 file(
     COPY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/lartcc
+    DESTINATION ${PROJECT_BINARY_DIR}/bin/
+    FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
+
+file(
+    COPY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/lartll
     DESTINATION ${PROJECT_BINARY_DIR}/bin/
     FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
