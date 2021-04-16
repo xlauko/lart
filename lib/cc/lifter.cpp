@@ -177,11 +177,12 @@ namespace lart
                 auto mbb = bld.block( merge_block );
                 auto lbb = bld.block( lift_block );
 
+                args_t wrap_args{ a->concrete };
                 bld = bld
                     | sc::action::condbr( a->taint, mbb, lbb )
                     | sc::action::set_block{ lift_block }
                     /* lift block */
-                    | sc::action::call( wrap( a->concrete ), args_t{ a->concrete } )
+                    | sc::action::call( wrap( a->concrete ), wrap_args )
                     | sc::action::inspect( [&]( auto *builder ) {
                         auto wrapped = builder->stack.back();
                         edges.push_back({ wrapped, *(builder->current_block) });
@@ -208,8 +209,8 @@ namespace lart
 
         auto impl = module.getFunction( op::impl(op) );
         auto types = impl->getFunctionType()->params();
-        auto final_args = detail::final_args( *bld.current_block, args, types );
-        bld | sc::action::call{ impl, ranges::to<std::vector>(final_args) }
+        auto final_args = detail::final_args( *bld.current_block, args, types ) | ranges::to_vector;
+        bld | sc::action::call{ impl, final_args }
             | sc::action::ret();
     }
 
