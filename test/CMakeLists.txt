@@ -1,5 +1,7 @@
 include( CTest )
 
+add_subdirectory( unittests )
+
 set( LART_TEST_SHLIBEXT "${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 
 set( LART_TEST_SITE_CFG_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/lit.site.cfg.py.in" )
