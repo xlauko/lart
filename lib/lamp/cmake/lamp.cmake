@@ -37,6 +37,7 @@ macro( register_domain domain )
     add_library( ${domain}-src STATIC ${domain}.cpp )
     target_link_libraries( ${domain}-src
       PUBLIC ${domain}-prop
+      PRIVATE lava
     )
 
     set_property( TARGET ${domain}-src PROPERTY POSITION_INDEPENDENT_CODE ON )
@@ -46,6 +47,7 @@ macro( register_domain domain )
     add_library( ${domain} STATIC ${domain}.cpp )
     target_link_libraries( ${domain}
       PUBLIC ${domain}-dfs ${domain}-prop
+      PRIVATE lava
     )
 
     set_property( TARGET ${domain} PROPERTY POSITION_INDEPENDENT_CODE ON )
