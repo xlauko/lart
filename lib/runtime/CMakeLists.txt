@@ -1,5 +1,5 @@
-add_library( runtime INTERFACE )
-target_include_directories( runtime 
+add_library( lart-runtime INTERFACE )
+target_include_directories( lart-runtime 
     INTERFACE
         $<INSTALL_INTERFACE:include>
         ${CMAKE_CURRENT_SOURCE_DIR}/include
