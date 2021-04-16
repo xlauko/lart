@@ -175,8 +175,8 @@ namespace __lamp
         return cons_reverse( cell.cdr(), cons< typename C::car_t, D >( cell.car(), rev ) );
     }
 
-    static auto cons_list() { return nil(); }
-    static auto cons_list_ref() { return nil(); }
+    // static auto cons_list() { return nil(); }
+    // static auto cons_list_ref() { return nil(); }
 
     template< typename T, typename... Ts >
     auto cons_list_ref( T &&t, Ts &&... ts )

@@ -272,13 +272,12 @@ extern "C"
 
     __lamp_ptr __lamp_copy( __lamp_ptr p )
     {
-        using ref = domain_ref< dom >;
         return { ref( p.ptr ).clone().disown() };
     }
 
     void __lamp_dump( void *twin )
     {
-        if ( twin && __lart_test_taint( *static_cast< char* >( twin ) ) ) {
+        if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
             ref a( __lart_melt( twin, 0 ) );
             return dom::dump( a ); // TODO size?
         }
@@ -289,7 +288,7 @@ extern "C"
 #ifdef __lart_cpp_runtime
     std::string __lamp_trace( void *twin )
     {
-        if ( twin && __lart_test_taint( *static_cast< char* >( twin ) ) ) {
+        if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
             ref a( __lart_melt( twin, 0 ) );
             return dom::trace( a ); // TODO size?
         }
