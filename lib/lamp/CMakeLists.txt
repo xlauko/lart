@@ -12,6 +12,13 @@ register_domain( trivial )
 register_domain( term )
 register_domain( pa )
 
+add_library( lamp-api INTERFACE )
+target_include_directories( lamp-api
+    INTERFACE
+        $<INSTALL_INTERFACE:include>
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/lamp.h
