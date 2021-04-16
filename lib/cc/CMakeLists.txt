@@ -15,7 +15,6 @@ add_library( lart
 )
 
 set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines" )
 
 target_include_directories( lart
   PUBLIC
