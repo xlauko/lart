@@ -6,6 +6,6 @@ target_include_directories( lava
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries( lava INTERFACE runtime )
+target_link_libraries( lava INTERFACE lart-runtime )
 
 target_link_libraries( lava INTERFACE lart_project_options lart_project_warnings )
