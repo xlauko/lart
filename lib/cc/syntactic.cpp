@@ -61,10 +61,10 @@ namespace lart
                     result = op::alloc(val);
             },
             [&] ( llvm::LoadInst * ) {
-               /* if ( is_abstract_pointer( types[val] ) )
-                    result = op::load(val);
-                else*/
-                result = op::melt(val);
+                //if ( is_abstract_pointer( types[val] ) )
+                //    result = op::load(val);
+                //else
+                    result = op::melt(val);
             },
             [&] ( llvm::StoreInst *store ) {
                 auto p = store->getPointerOperand();
@@ -123,7 +123,7 @@ namespace lart
             if ( types.count(cond) && types[cond].maybe_abstract() )
             {
                 co_yield op::tobool( br );
-                
+
                 for ( auto intr : constrain::assume( br, cond ) )
                     co_yield intr;
             }
@@ -156,7 +156,7 @@ namespace lart
     void syntactic::update_places( llvm::Value *concrete )
     {
         auto abs = abstract[concrete];
-        
+
         // Update placeholders where result of abstract operation
         // should be used instead. That are arguments of already
         // abstracted users of concrete variant of the operation.

@@ -180,9 +180,7 @@ namespace {
             auto it = sort::lower_bound( begin(), end() - 1, _container.back() );
             if ( it == end() - 1 || !eq( *it, _container.back() ) )
             {
-                // TODO fix copying of value
                 auto &item = _container.back();
-                // TODO fix swapping
                 sort::sort( begin(), end() );
                 return { find( item ), true };
             }
