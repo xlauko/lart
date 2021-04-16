@@ -108,9 +108,7 @@ add_custom_target( lit
 add_subdirectory( external )
 add_subdirectory( lib )
 
-option( BUILD_TESTS "Build tests" OFF )
-
-if ( ${BUILD_TESTS} )
+if ( ENABLE_TESTING )
   enable_testing()
   add_subdirectory( test )
 endif()
