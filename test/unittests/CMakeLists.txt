@@ -1,7 +1,8 @@
 find_package( Catch2 CONFIG REQUIRED )
+include(CTest)
+include(Catch)
 
-add_executable( unit-tests )
-
+# catch2 main
 add_library( catch-main STATIC catch-main.cpp )
 target_link_libraries( catch-main 
     PRIVATE lart_project_options
@@ -12,20 +13,19 @@ target_include_directories( catch-main
     PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
 )
 
-target_sources( unit-tests
-    PRIVATE
-        unit.cpp
-)
-
-target_link_libraries( unit-tests 
-    PRIVATE
+# test configs
+add_library( test-properties INTERFACE )
+target_link_libraries( test-properties
+    INTERFACE 
         catch-main 
         lamp-api
         lart-runtime
         lart_project_options
         lart_project_warnings
 )
+target_compile_options( test-properties INTERFACE "-g" )
 
-include(CTest)
-include(Catch)
-catch_discover_tests( unit-tests )
+# test packages
+add_executable( lamp-unit-tests unit.cpp )
+target_link_libraries( lamp-unit-tests PRIVATE unit-src test-properties )
+catch_discover_tests( lamp-unit-tests )
