@@ -20,7 +20,7 @@
 
 #include <cc/operation.hpp>
 
-#include <external/coro/generator.hpp>
+#include <cppcoro/generator.hpp>
 
 namespace lart::constrain
 {

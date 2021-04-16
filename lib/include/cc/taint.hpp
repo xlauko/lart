@@ -22,7 +22,7 @@
 #include <llvm/IR/Module.h>
 
 #include <bitset>
-#include <external/coro/generator.hpp>
+#include <cppcoro/generator.hpp>
 
 namespace lart::taint
 {

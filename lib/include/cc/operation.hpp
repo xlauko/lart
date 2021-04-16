@@ -29,7 +29,7 @@
 #include <variant>
 #include <experimental/iterator>
 
-#include <external/coro/generator.hpp>
+#include <cppcoro/generator.hpp>
 
 namespace lart::op
 {

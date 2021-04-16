@@ -24,7 +24,7 @@
 #include <svf/Graphs/PAG.h>
 #include <svf/WPA/Andersen.h>
 
-#include <external/coro/generator.hpp>
+#include <cppcoro/generator.hpp>
 
 namespace lart::aa
 {
