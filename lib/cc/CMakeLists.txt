@@ -23,7 +23,7 @@ set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories( lart
   PUBLIC
-    ${PROJECT_SOURCE_DIR}/lib/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 add_dependencies( lart svflib )
