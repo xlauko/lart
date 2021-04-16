@@ -21,6 +21,7 @@
 #include <sc/builder.hpp>
 
 #include <numeric>
+#include <range/v3/algorithm.hpp>
 
 namespace lart
 {
@@ -84,17 +85,17 @@ namespace lart
 
         auto count_taints( const std::vector< argument > &args )
         {
-            return std::ranges::count_if( args, with_taint );
+            return ranges::count_if( args, with_taint );
         }
 
         auto final_args( llvm::BasicBlock *where
                        , const std::vector< argument > &args
                        , const auto &types )
         {
-            std::vector< llvm::Value* > fargs;
-            std::ranges::transform( args, std::back_inserter(fargs), [&] (const auto &a) {
+            size_t count = 0;
+            auto fargs = args | ranges::views::transform( [&] (const auto &a) {
                 auto value = final( a );
-                auto dst = types[ fargs.size() ];
+                auto dst = types[ count++ ];
                 if  ( value->getType() != dst ) {
                     llvm::IRBuilder<> irb( where );
                     return irb.CreatePointerCast( value, dst );
@@ -144,10 +145,10 @@ namespace lart
         assert( function()->empty() );
 
         auto bld = sc::stack_builder()
-                 | sc::action::function( function() )
-                 | sc::action::create_block( "entry" );
+                 | sc::action::function{ function() }
+                 | sc::action::create_block{ "entry" };
 
-        auto args = sv::freeze( detail::arguments( *this ) );
+        auto args = detail::arguments( *this ) | ranges::to_vector;
 
         auto wrap = [&] ( auto val ) {
             auto name = "__lamp_wrap_" + [&] {
@@ -166,30 +167,30 @@ namespace lart
             std::string merge_block = "merge." + std::to_string(pos);
             if ( auto a = std::get_if< arg::with_taint >( &arg ) ) {
                 bld = bld
-                    | sc::action::create_block( lift_block )
-                    | sc::action::create_block( merge_block )
-                    | sc::action::set_block( entry_block )
+                    | sc::action::create_block{ lift_block }
+                    | sc::action::create_block{ merge_block }
+                    | sc::action::set_block{ entry_block }
                     /* entry block to lift section */
                     | sc::action::inspect( [&]( auto *builder ) {
-                        edges.emplace_back( a->abstract, *(builder->current_block) );
+                        edges.push_back({ a->abstract, *(builder->current_block) });
                     });
                 auto mbb = bld.block( merge_block );
                 auto lbb = bld.block( lift_block );
 
                 bld = bld
                     | sc::action::condbr( a->taint, mbb, lbb )
-                    | sc::action::set_block( lift_block )
+                    | sc::action::set_block{ lift_block }
                     /* lift block */
                     | sc::action::call( wrap( a->concrete ), args_t{ a->concrete } )
                     | sc::action::inspect( [&]( auto *builder ) {
                         auto wrapped = builder->stack.back();
-                        edges.emplace_back( wrapped, *(builder->current_block) );
+                        edges.push_back({ wrapped, *(builder->current_block) });
                     })
                     | sc::action::branch()
-                    | sc::action::set_block( merge_block );
+                    | sc::action::set_block{ merge_block };
                 bld = bld
                     /* merge block */
-                    | sc::action::phi( edges );
+                    | sc::action::phi{ edges };
 
                 // set abstract value to be merge of lifted and argument value
                 a->abstract = bld.stack.back();
@@ -207,7 +208,8 @@ namespace lart
 
         auto impl = module.getFunction( op::impl(op) );
         auto types = impl->getFunctionType()->params();
-        bld | sc::action::call( impl, detail::final_args( *bld.current_block, args, types ) )
+        auto final_args = detail::final_args( *bld.current_block, args, types );
+        bld | sc::action::call{ impl, ranges::to<std::vector>(final_args) }
             | sc::action::ret();
     }
 

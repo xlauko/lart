@@ -62,7 +62,7 @@ namespace lart::taint
     llvm::CallInst * make_call( llvm::Module &module, const operation &op )
     {
         lart::lifter lifter( module, op );
-        auto args = sv::freeze( detail::arguments( lifter, op ) );
+        auto args = detail::arguments( lifter, op ) | ranges::to_vector;
         return op::make_call( op, args, detail::name( op ) );
     }
 

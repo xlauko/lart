@@ -451,7 +451,7 @@ namespace lart::op
     {
         llvm::IRBuilder<> irb( op::location(op) );
         auto module = irb.GetInsertBlock()->getModule();
-        auto arg_types = sv::freeze( args | sv::types );
+        auto arg_types = args | sv::types | ranges::to_vector;
         auto rty = extract_return_type( op, arg_types );
         return irb.CreateCall( function(module, rty, arg_types, intr_name), args );
     }

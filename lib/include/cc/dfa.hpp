@@ -33,7 +33,6 @@
 #include <sc/format.hpp>
 
 #include <vector>
-#include <ranges>
 #include <cassert>
 #include <iostream>
 #include <experimental/iterator>

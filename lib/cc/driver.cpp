@@ -26,7 +26,6 @@
 
 #include <sc/ranges.hpp>
 
-#include <ranges>
 #include <queue>
 #include <vector>
 #include <iostream>

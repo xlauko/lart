@@ -32,8 +32,8 @@ namespace lart::backend
         llvm::Value *tainted = sc::i1( false );
 
         auto bld = sc::stack_builder()
-            | sc::action::function( fn )
-            | sc::action::create_block( "entry" );
+            | sc::action::function{ fn }
+            | sc::action::create_block{ "entry" };
 
         auto test = [&] ( auto arg ) -> llvm::Value* {
             if ( arg->getType()->isIntegerTy() ) {
@@ -65,7 +65,7 @@ namespace lart::backend
                 auto abstract = fn->getArg(pos + 1);
                 auto taint = test( concrete );
 
-                bld = bld | sc::action::or_( tainted, taint );
+                bld = bld | sc::action::or_{ tainted, taint };
                 tainted = bld.stack.back();
 
                 args.push_back( taint );
@@ -75,7 +75,7 @@ namespace lart::backend
                 pos += 2;
             } else if ( arg.type == op::argtype::test ) {
                 auto taint = test( fn->getArg(pos) );
-                bld = bld | sc::action::or_( tainted, taint );
+                bld = bld | sc::action::or_{ tainted, taint };
                 tainted = bld.stack.back();
                 pos++;
             } else {
@@ -85,19 +85,19 @@ namespace lart::backend
         }
 
         bld = bld
-            | sc::action::create_block( "abstract.path" )
-            | sc::action::create_block( "concrete.path" )
-            | sc::action::set_block( "entry" )
+            | sc::action::create_block{ "abstract.path" }
+            | sc::action::create_block{ "concrete.path" }
+            | sc::action::set_block{ "entry" }
             | sc::action::condbr( tainted )
             /* abstract path */
-            | sc::action::set_block( "abstract.path")
+            | sc::action::set_block{ "abstract.path"}
             | sc::action::call( fn->getArg(0), args )
             | sc::action::ret()
             /* concrete path */
-            | sc::action::set_block( "concrete.path" );
+            | sc::action::set_block{ "concrete.path" };
 
         if ( auto def = op::default_value(i.op); def.has_value() ) {
-            bld | sc::action::ret( extract_default( def.value(), args ) );
+            bld | sc::action::ret{ extract_default( def.value(), args ) };
         } else {
             bld | sc::action::ret();
         }

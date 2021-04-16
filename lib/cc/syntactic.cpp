@@ -58,41 +58,41 @@ namespace lart
         sc::llvmcase( val,
             [&] ( llvm::AllocaInst * ) {
                 if ( is_abstract_pointer( types[val] ) )
-                    result = op::alloc(val);
+                    result = op::alloc{ val };
             },
             [&] ( llvm::LoadInst *load ) {
                 auto p = load->getPointerOperand();
                 if ( types.count(p) && is_abstract_pointer( types[p] ) )
-                    result = op::load(val);
+                    result = op::load{ val };
                 else
-                    result = op::melt(val);
+                    result = op::melt{ val };
             },
             [&] ( llvm::StoreInst *store ) {
                 auto p = store->getPointerOperand();
                 auto v = store->getValueOperand();
 
                 if ( types.count(p) && is_abstract_pointer( types[p] ) ) {
-                    result = op::store(val);
+                    result = op::store{ val };
                 } else if ( types.count(v) &&  is_abstract( types[v] ) ) {
-                    result = op::freeze(val);
+                    result = op::freeze{ val };
                 }
             },
             [&] ( llvm::BinaryOperator * ) {
-                result = op::binary( val );
+                result = op::binary{ val };
             },
             [&] ( llvm::CmpInst * ) {
-                result = op::cmp( val );
+                result = op::cmp{ val };
             },
             [&] ( llvm::CastInst * ) {
                 if ( is_identity_cast( val ) )
-                    result = op::identity( val );
+                    result = op::identity{ val };
                 else
-                    result = op::cast( val );
+                    result = op::cast{ val };
             },
             [&] ( llvm::CallInst *call ) {
                 if ( is_lamp_call(call) ) {
                     // TODO does return nonvoid
-                    result = op::unstash(call, {});
+                    result = op::unstash{ call, {} };
                 } else {
                     // TODO
                 }
@@ -136,7 +136,7 @@ namespace lart
         if ( op::with_taints( op ) )
             return { taint::make_call( m, op ), op };
 
-        auto args = sv::freeze( op::duplicated_arguments(op) );
+        auto args = op::duplicated_arguments(op) | ranges::to_vector;
         auto name = "lart." + op::name(op);
         return { op::make_call( op, args, name ), op };
     }
