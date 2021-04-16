@@ -39,10 +39,6 @@ add_library( lart_project_warnings INTERFACE )
 include( cmake/compiler_warnings.cmake )
 set_project_warnings( lart_project_warnings )
 
-# use libc++
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
-set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi" )
-
 # sanitizer options if supported by compiler
 # include( cmake/sanitizers.cmake )
 # enable_sanitizers( lart_project_options )

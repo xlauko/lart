@@ -14,6 +14,11 @@ add_library( lart
     backend/native.cpp
 )
 
+set_target_properties( lart PROPERTIES 
+  COMPILE_FLAGS "-stdlib=libc++" 
+  LINK_FLAGS "-stdlib=libc++ -lc++abi"
+)
+
 set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories( lart
