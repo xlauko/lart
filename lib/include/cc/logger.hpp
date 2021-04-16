@@ -14,9 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuseless-cast"
 #include "spdlog/spdlog.h"
 #include "spdlog/cfg/env.h"
 #include "spdlog/fmt/ostr.h"
-#pragma GCC diagnostic pop
