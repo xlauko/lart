@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <runtime/lart.h>
+#include <lart.h>
 
 #ifdef __cplusplus
 #include <string>
