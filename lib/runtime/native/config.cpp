@@ -22,21 +22,31 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <string_view>
+
 namespace __lart::rt
 {
     config_t config;
-
-    constructor void load_config()
+    
+    bool option( std::string_view option, std::string_view msg )
     {
-        if ( auto opt = std::getenv( "LART_TRACE_CHOICES" ); opt && strcmp( opt, "ON" ) == 0 ) {
-            fprintf( stderr, "[lart config] trace choices\n" );
-            config.trace_choices = true;
+        auto is_set = [] ( auto opt ) { return opt && strcmp( opt, "ON" ) == 0; };
+        if ( auto opt = std::getenv( option.data() ); is_set( opt ) ) {
+            fprintf( stderr, "[lart config] %s\n", msg.data() );
+            return  true;
         }
+        return false;
+    }
 
-        if ( auto opt = std::getenv( "LART_ASK_CHOICES" ); opt && strcmp( opt, "ON" ) == 0 ) {
-            fprintf( stderr, "[lart config] ask choices\n" );
-            config.ask_choices = true;
-        }
+    void load_config()
+    {
+        config.trace_choices = option( "LART_TRACE_CHOICES", "trace choices" );
+        config.ask_choices = option( "LART_ASK_CHOICES", "ask choices" );
+    }
+
+    constructor void lart_setup()
+    {
+        load_config();
     }
 
 
