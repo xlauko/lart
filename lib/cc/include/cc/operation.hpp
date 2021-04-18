@@ -401,8 +401,8 @@ namespace lart::op
 
     inline auto unique_name_suffix(const operation &o)
     {
-        auto values = sv::map([] (const auto &o_) { return o_.value; });
-        auto format = sv::map([] (auto t) { return sc::fmt::type(t); });
+        auto values = ranges::views::transform( [] (const auto &o_) { return o_.value; } );
+        auto format = ranges::views::transform( [] (auto t) { return sc::fmt::type(t); } );
 
         std::stringstream suff;
         auto args = arguments(o);
