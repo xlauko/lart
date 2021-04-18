@@ -102,7 +102,7 @@ namespace lart
                 }
                 return value;
             });
-            return fargs;
+            return fargs | ranges::to<std::vector>;
         }
 
     } // namespace detail
@@ -209,7 +209,7 @@ namespace lart
 
         auto impl = module.getFunction( op::impl(op) );
         auto types = impl->getFunctionType()->params();
-        auto final_args = detail::final_args( *bld.current_block, args, types ) | ranges::to_vector;
+        auto final_args = detail::final_args( *bld.current_block, args, types );
         bld | sc::action::call{ impl, final_args }
             | sc::action::ret();
     }
