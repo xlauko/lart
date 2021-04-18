@@ -41,7 +41,8 @@ namespace __lart::rt
     void load_config()
     {
         config.trace_choices = option( "LART_TRACE_CHOICES", "trace choices" );
-        config.ask_choices = option( "LART_ASK_CHOICES", "ask choices" );
+        config.ask_choices   = option( "LART_ASK_CHOICES", "ask choices" );
+        config.trace_model   = option( "LART_TRACE_MODEL", "trace model" );
     }
 
     constructor void lart_setup()
@@ -49,5 +50,11 @@ namespace __lart::rt
         load_config();
     }
 
+    destructor void lart_cleanup()
+    {
+        if (config.trace_model) {
+             fprintf( stderr, "[lart-model]\n" );
+        }
+    }
 
 } // namespace __lart::rt

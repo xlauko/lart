@@ -17,3 +17,4 @@
 #pragma once
 
 #define constructor __attribute__( ( constructor ) ) // NOLINT
+#define destructor __attribute__( ( destructor ) ) // NOLINT
