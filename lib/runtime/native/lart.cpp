@@ -14,6 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "fault.hpp"
 #include "stash.hpp"
 #include "taint.hpp"
 #include "shadow.hpp"
@@ -61,5 +62,14 @@ extern "C"
     void __lart_freeze( void *value, void *where, uint32_t bytes )
     {
         __lart::rt::poke(where, bytes, value);
+    }
+    
+    void __lart_assert_fail( const char* file, const char *func, unsigned line, unsigned col )
+    {
+        using fault_event = __lart::rt::fault_event;
+        using fault_type  = __lart::rt::fault_type;
+
+        auto loc = __lart::rt::source_location(file, func, line, col);
+        __lart::rt::fault(fault_event{fault_type::assert_failed, loc});
     }
 }

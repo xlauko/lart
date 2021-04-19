@@ -16,6 +16,7 @@
 
 #include "config.hpp"
 
+#include "fault.hpp"
 #include "utils.hpp"
 
 #include <cstring>
@@ -48,6 +49,8 @@ namespace __lart::rt
     constructor void lart_setup()
     {
         load_config();
+
+        init_fault_handler();
     }
 
     destructor void lart_cleanup()
