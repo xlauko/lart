@@ -74,12 +74,6 @@ extern "C" {
     __export void* __lart_melt( void *addr, uint32_t bw ) __lart_stub;
     __export void __lart_freeze( void *value, void *addr, uint32_t bw ) __lart_stub;
 
-    __export void __lart_assert_fail( const char* file, const char *func, unsigned line, unsigned col );
-
-    #define assert( x ) { if(!(x)) \
-        __lart_assert_fail(__builtin_FILE(), __builtin_FUNCTION(), __builtin_LINE(), __builtin_COLUMN()); \
-    }
-
 #ifdef __cplusplus
 }
 #endif

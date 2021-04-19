@@ -64,12 +64,12 @@ extern "C"
         __lart::rt::poke(where, bytes, value);
     }
     
-    void __lart_assert_fail( const char* file, const char *func, unsigned line, unsigned col )
+    void __assert_fail(const char *assertion, const char *file, unsigned int line, const char *func)
     {
         using fault_event = __lart::rt::fault_event;
         using fault_type  = __lart::rt::fault_type;
 
-        auto loc = __lart::rt::source_location(file, func, line, col);
+        auto loc = __lart::rt::source_location(file, func, line, 0);
         __lart::rt::fault(fault_event{fault_type::assert_failed, loc});
     }
 }
