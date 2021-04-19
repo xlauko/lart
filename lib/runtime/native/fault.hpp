@@ -40,6 +40,7 @@ namespace __lart::rt
         size_t  _report_size;
     };
 
+
     struct report_payload
     {
         explicit constexpr report_payload( std::string_view report ) noexcept
@@ -55,6 +56,35 @@ namespace __lart::rt
 
     private:
         std::string_view _report;
+    };
+
+
+    struct source_location
+    {
+        static constexpr source_location current(
+            std::string_view file = __builtin_FILE(),
+            std::string_view function = __builtin_FUNCTION(),
+            unsigned line = __builtin_LINE(),
+            unsigned column = __builtin_COLUMN()
+        ) noexcept;
+    
+        constexpr source_location( std::string_view file
+                                 , std::string_view func 
+                                 , unsigned line, unsigned column) noexcept
+            :  _file(file), _func(func), _line(line), _column(column)
+        {}
+        
+        constexpr std::string_view file() const noexcept { return _file; }
+        constexpr std::string_view function() const noexcept { return _func; }
+
+        constexpr unsigned line() const noexcept { return _line; }
+        constexpr unsigned column() const noexcept { return _column; }
+        
+    private:
+        std::string_view _file;
+        std::string_view _func;
+        unsigned _line;
+        unsigned _column;
     };
 
     void init_fault_handler();

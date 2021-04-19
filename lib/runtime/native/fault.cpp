@@ -41,6 +41,15 @@ namespace __lart::rt
 
     static_assert( fixed_report( "short report" ).what() == "short report" );
 
+    constexpr source_location source_location::current(
+        std::string_view file,
+        std::string_view function,
+        unsigned line, unsigned column
+    ) noexcept
+    {
+        return source_location( file, function, line, column );
+    }
+
     void init_fault_handler()
     {
         printf( "init fault handler\n" );
