@@ -50,8 +50,29 @@ namespace __lart::rt
         return source_location( file, function, line, column );
     }
 
-    void init_fault_handler()
+    struct fault_handler
     {
-        printf( "init fault handler\n" );
+        void handle( const fault_event &event ) const noexcept
+        {
+            switch (event.type)
+            {
+                case fault_type::assert_failed: handle_assert_failed(event);
+            }
+        }
+
+        void handle_assert_failed(const fault_event &event) const noexcept
+        {
+            std::fputs("[fault] assertion failed\n", stderr);
+        }
+    };
+
+    fault_handler handler;
+    
+    [[noreturn]] void fault( const fault_event &event ) noexcept
+    {
+        handler.handle(event);
+        std::exit(EXIT_SUCCESS);
     }
+
+    void init_fault_handler() noexcept {}
 } // namespace __lart::rt

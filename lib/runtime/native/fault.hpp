@@ -87,5 +87,15 @@ namespace __lart::rt
         unsigned _column;
     };
 
-    void init_fault_handler();
+    enum class fault_type { assert_failed };
+
+    struct fault_event
+    {
+        fault_type type;
+        source_location location;
+    };
+
+    [[noreturn]] void fault( const fault_event& event ) noexcept;
+
+    void init_fault_handler() noexcept;
 } // namespace __lart::rt
