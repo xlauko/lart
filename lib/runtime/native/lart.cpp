@@ -70,6 +70,7 @@ extern "C"
         using fault_type  = __lart::rt::fault_type;
 
         auto loc = __lart::rt::source_location(file, func, line, 0);
-        __lart::rt::fault(fault_event{fault_type::assert_failed, loc});
+        auto msg = __lart::rt::report_payload(assertion);
+        __lart::rt::fault(fault_event{fault_type::assert_failed, loc, msg});
     }
 }

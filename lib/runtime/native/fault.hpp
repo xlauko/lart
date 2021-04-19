@@ -93,6 +93,7 @@ namespace __lart::rt
     {
         fault_type type;
         source_location location;
+        report_payload report;
     };
 
     [[noreturn]] void fault( const fault_event& event ) noexcept;
