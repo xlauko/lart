@@ -32,7 +32,7 @@ target_link_options( native
 target_include_directories( native
   PUBLIC
     $<INSTALL_INTERFACE:include>
-    ${PROJECT_SOURCE_DIR}/../../include/runtime
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include/runtime
     ${LIBCXX_INSTALL_DIR}/include/c++/v1
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
