@@ -18,6 +18,7 @@
 #pragma once
 
 #include <runtime/stream.hpp>
+#include <runtime/config.hpp>
 #include <lava/support/tristate.hpp>
 
 #include <array>
@@ -210,8 +211,6 @@ namespace __lamp
         static self op_zext    ( sref a, bw b ) { return TRACE( domain::op_zext, a, b ); }
         static self op_zfit    ( sref a, bw b ) { return TRACE( domain::op_zfit, a, b ); }
     };
-
-    using errstream = __lart::rt::stderr_stream;
 
     template< typename domain, typename outstream >
     struct simple_stream : tracing_stream_base< domain >, outstream
@@ -431,11 +430,30 @@ namespace __lamp
         }
     };
 
+    using file_stream = __lart::rt::file_stream;
+
+    struct configured_stream : file_stream
+    {
+        file_stream& underlying() { return *static_cast< file_stream* >( this ); }
+        
+        configured_stream()
+        {
+            auto file = __lart::rt::config.trace_file;
+            if ( file )
+                this->_file = file;
+        }
+        
+        configured_stream& operator<<(std::string_view str) noexcept
+        {
+            underlying() << str;
+            return *this;
+        }
+    };
 
     template< typename domain >
-    using tracing = tracing_domain< domain, simple_stream< domain, errstream > >;
+    using tracing = tracing_domain< domain, simple_stream< domain, configured_stream > >;
 
     template< typename domain >
-    using jsontracing = tracing_domain< domain, json_stream< domain, errstream > >;
+    using jsontracing = tracing_domain< domain, json_stream< domain, configured_stream > >;
 
 } // namespace __lamp

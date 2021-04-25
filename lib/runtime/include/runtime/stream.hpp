@@ -20,7 +20,7 @@ namespace __lart::rt
 {   
     struct file_stream
     {
-        explicit file_stream(std::FILE *file) : _file(file) {}
+        explicit file_stream(std::FILE *file = stderr) : _file(file) {}
         ~file_stream() { std::fflush(_file); }
 
         file_stream& operator<<(std::string_view str) noexcept
@@ -29,19 +29,8 @@ namespace __lart::rt
             return *this;
         }
     
-    private:
+    protected:
         std::FILE *_file;
-    };
-
-    struct stderr_stream
-    {
-        stderr_stream& operator<<(std::string_view str) noexcept
-        {
-            stream << str;
-            return *this;
-        }
-    private:
-        file_stream stream{ stderr };
     };
 
 } // namespace __lart::rt
