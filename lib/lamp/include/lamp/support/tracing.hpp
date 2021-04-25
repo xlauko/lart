@@ -25,6 +25,7 @@
 
 namespace __lamp
 {
+    using namespace std::literals;
 
     template< typename domain >
     struct tracing_stream_base
@@ -310,7 +311,6 @@ namespace __lamp
                     std::snprintf( buff.data(), buff.size(), "%d", kv.value );
                     return os << std::string_view( buff.data() );
                 } else {
-
                     return os << kv.value;
                 }
             }
@@ -391,7 +391,7 @@ namespace __lamp
         json_stream& operator<<(const traced_assume &a) noexcept
         {
             return self() << std::tuple(
-                keyvalue( "type", "assume" ),
+                keyvalue( "type", "assume"sv ),
                 value_with_address( "arg", a.arg ),
                 keyvalue( "expected", (a.expected ? "true" : "false") )
             );
@@ -401,7 +401,7 @@ namespace __lamp
         {
             return self() << std::tuple(
                 keyvalue( "operation", c.op ),
-                keyvalue( "type", "cast" ),
+                keyvalue( "type", "cast"sv ),
                 value_with_address( "result", c.result ),
                 value_with_address( "arg", c.arg ),
                 keyvalue( "bitwidth", c.bitwidth )
@@ -412,7 +412,7 @@ namespace __lamp
         {
             return self() << std::tuple(
                 keyvalue( "operation", u.op ),
-                keyvalue( "type", "unary" ),
+                keyvalue( "type", "unary"sv ),
                 value_with_address( "result", u.result ),
                 value_with_address( "arg", u.arg )
             );;
@@ -422,7 +422,7 @@ namespace __lamp
         {
             return self() << std::tuple(
                 keyvalue( "operation", b.op ),
-                keyvalue( "type", "binary" ),
+                keyvalue( "type", "binary"sv ),
                 value_with_address( "result", b.result ),
                 value_with_address( "left", b.left ),
                 value_with_address( "right", b.right )
