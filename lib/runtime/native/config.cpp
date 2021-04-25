@@ -44,6 +44,12 @@ namespace __lart::rt
         config.trace_choices = option( "LART_TRACE_CHOICES", "trace choices" );
         config.ask_choices   = option( "LART_ASK_CHOICES", "ask choices" );
         config.trace_model   = option( "LART_TRACE_MODEL", "trace model" );
+
+        if ( auto opt = std::getenv( "LART_TRACE_FILE" ); opt ) {
+            fprintf( stderr, "[lart config] trace file = %s\n", opt );
+
+            config.trace_file = std::fopen( opt, "w" );
+        }
     }
 
     constructor void lart_setup()
@@ -55,8 +61,12 @@ namespace __lart::rt
 
     destructor void lart_cleanup()
     {
-        if (config.trace_model) {
+        if ( config.trace_model ) {
              fprintf( stderr, "[lart-model]\n" );
+        }
+
+        if ( config.trace_file ) {
+            std::fclose( config.trace_file );
         }
     }
 
