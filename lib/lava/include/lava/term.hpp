@@ -169,6 +169,12 @@ namespace __lava
         {
             return Z3_ast_to_string( __term_state.ctx, t.get() );
         }
+
+        template< typename stream >
+        friend stream& operator<<( stream &os, tr t )
+        {
+            return os << Z3_ast_to_string( __term_state.ctx, t.get() );
+        }
     };
 
 
