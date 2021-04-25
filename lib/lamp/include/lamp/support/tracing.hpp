@@ -20,7 +20,7 @@
 #include <runtime/stream.hpp>
 #include <lava/support/tristate.hpp>
 
-#include <variant>
+#include <array>
 
 namespace __lamp
 {
@@ -232,27 +232,27 @@ namespace __lamp
             return *this;
         }
 
-        simple_stream& operator<<(const traced_result &u) noexcept
+        simple_stream& operator<<(const traced_result &r) noexcept
         {
-            underlying() << u.op << " ➞  " << u.result;
+            underlying() << r.op << " ➞  " << r.result;
             return *this;
         }
         
-        simple_stream& operator<<(const traced_assume &u) noexcept
+        simple_stream& operator<<(const traced_assume &a) noexcept
         {
-            underlying() << "assume: " << (u.expected ? "" : "not ") << u.arg;
+            underlying() << "assume: " << (a.expected ? "" : "not ") << a.arg;
             return *this;
         }
 
-        simple_stream& operator<<(const traced_cast &u) noexcept
+        simple_stream& operator<<(const traced_cast &c) noexcept
+        {
+            underlying() << c.op << " " << c.arg << " ➞  " << c.result;
+            return *this;
+        }
+
+        simple_stream& operator<<(const traced_unary &u) noexcept
         {
             underlying() << u.op << " " << u.arg << " ➞  " << u.result;
-            return *this;
-        }
-
-        simple_stream& operator<<(const traced_unary &b) noexcept
-        {
-            underlying() << b.op << " " << b.arg << " ➞  " << b.result;
             return *this;
         }
         
@@ -263,7 +263,179 @@ namespace __lamp
         }
     };
 
+    template< typename domain, typename outstream >
+    struct json_stream : tracing_stream_base< domain >, outstream
+    {
+        using base = tracing_stream_base< domain >;
+
+        using domain_ref = typename base::domain_ref;
+
+        using traced_result = typename base::traced_result;
+        using traced_assume = typename base::traced_assume;
+        using traced_cast   = typename base::traced_cast;
+        using traced_unary  = typename base::traced_unary;
+        using traced_binary = typename base::traced_binary;
+
+        template< typename value_t >
+        struct keyvalue
+        {
+            keyvalue(std::string_view k, const value_t &v ) : key( k ), value( v ) {}
+            std::string_view key;
+            const value_t &value;
+
+            template< typename type >
+            struct asstring
+            {
+                asstring( const type &v ) : value( v ) {}
+                const type &value;
+
+                template< typename stream >
+                friend stream& operator<<( stream &os, const asstring &s )
+                {
+                    return os << "\"" << s.value << "\"";
+                }
+            };
+
+            template< typename type > asstring( const type& ) -> asstring< type >;
+
+            template< typename stream >
+            friend stream& operator<<( stream &os, const keyvalue &kv )
+            {
+                os << asstring( kv.key ) << ": ";
+                if constexpr ( std::is_same_v< value_t, domain > ) {
+                    return os << asstring( kv.value );
+                } else if constexpr ( std::is_same_v< value_t, std::string_view > ) {
+                    return os << asstring( kv.value );
+                } else if constexpr ( std::is_integral_v< value_t > ) {
+                    std::array< char, 65 > buff{};
+                    std::snprintf( buff.data(), buff.size(), "%d", kv.value );
+                    return os << std::string_view( buff.data() );
+                } else {
+
+                    return os << kv.value;
+                }
+            }
+        };
+        
+        template< typename value_t >
+        keyvalue( std::string_view, const value_t& ) -> keyvalue< value_t >;
+
+
+        struct value_with_address
+        {
+            using address = std::array< char, 16 >;
+
+            value_with_address( std::string_view n, domain_ref v )
+                : name( n ), value( v )
+            {
+                std::snprintf(addr.data(), addr.size(), "%p", v.unsafe_ptr());
+            }
+
+            template< typename stream >
+            friend stream& operator<<( stream &os, const value_with_address &v )
+            {
+                return os << keyvalue( v.name, std::tuple( 
+                    keyvalue( "value", v.value ),
+                    keyvalue( "addr", std::string_view( v.addr.data() ) )
+                ));
+            }
+
+            std::string_view name;
+            domain_ref value;
+            address addr;
+        };
+
+
+        template< typename F, typename ...types >
+        F for_all( F fn, types &&... values )
+        {
+            ( fn( std::forward< types >( values ) ), ... );
+            return std::move( fn );
+        }
+
+        template< typename F, typename ...types, std::size_t ...indices >
+        F for_all_indices( F fn, std::tuple< types... > const & t, std::index_sequence< indices... > )
+        {
+            return for_all( std::move( fn ), std::get< indices >(t)... );
+        }
+
+        template< typename first, typename ...rest > // non-nullary tuples only
+        json_stream& operator<<( std::tuple< first, rest... > const &t )
+        {
+            self() << "{";
+            for_all_indices( [&]( auto const &value ) { 
+                self() << value << ", "; }, 
+                t, std::index_sequence_for< rest... >{}
+            );
+            self() << std::get< sizeof...(rest) >(t) << "}";
+            return self();
+        }
+
+
+        outstream& underlying() { return *static_cast< outstream* >( this ); }
+        json_stream& self() { return *this; }
+
+        json_stream& operator<<(std::string_view str) noexcept
+        {
+            underlying() << str;
+            return self();
+        }
+
+        json_stream& operator<<(const traced_result &r) noexcept
+        {
+            return self() << std::tuple(
+                keyvalue( "operation", r.op ),
+                value_with_address( "result", r.result )
+            );
+        }
+        
+        json_stream& operator<<(const traced_assume &a) noexcept
+        {
+            return self() << std::tuple(
+                keyvalue( "type", "assume" ),
+                value_with_address( "arg", a.arg ),
+                keyvalue( "expected", (a.expected ? "true" : "false") )
+            );
+        }
+
+        json_stream& operator<<(const traced_cast &c) noexcept
+        {
+            return self() << std::tuple(
+                keyvalue( "operation", c.op ),
+                keyvalue( "type", "cast" ),
+                value_with_address( "result", c.result ),
+                value_with_address( "arg", c.arg ),
+                keyvalue( "bitwidth", c.bitwidth )
+            );
+        }
+
+        json_stream& operator<<(const traced_unary &u) noexcept
+        {
+            return self() << std::tuple(
+                keyvalue( "operation", u.op ),
+                keyvalue( "type", "unary" ),
+                value_with_address( "result", u.result ),
+                value_with_address( "arg", u.arg )
+            );;
+        }
+        
+        json_stream& operator<<(const traced_binary &b) noexcept
+        {
+            return self() << std::tuple(
+                keyvalue( "operation", b.op ),
+                keyvalue( "type", "binary" ),
+                value_with_address( "result", b.result ),
+                value_with_address( "left", b.left ),
+                value_with_address( "right", b.right )
+            );;
+        }
+    };
+
+
     template< typename domain >
     using tracing = tracing_domain< domain, simple_stream< domain, errstream > >;
+
+    template< typename domain >
+    using jsontracing = tracing_domain< domain, json_stream< domain, errstream > >;
 
 } // namespace __lamp
