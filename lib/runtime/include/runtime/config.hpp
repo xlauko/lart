@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <string_view>
+
 namespace __lart::rt
 {
     struct config_t
@@ -23,6 +25,8 @@ namespace __lart::rt
         bool trace_choices = false;
         bool trace_model = false;
         bool ask_choices = false;
+
+        std::FILE *trace_file = nullptr;
     };
 
     extern config_t config;
