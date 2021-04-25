@@ -53,6 +53,12 @@ namespace __lart::rt
         {
             return _report;
         }
+        
+        template< typename stream >
+        friend auto operator<<(stream &os, const report_payload &report) noexcept -> decltype( os << "" )
+        {
+            return os << report.what();
+        }
 
     private:
         std::string_view _report;
@@ -79,6 +85,14 @@ namespace __lart::rt
 
         constexpr unsigned line() const noexcept { return _line; }
         constexpr unsigned column() const noexcept { return _column; }
+        
+        template< typename stream >
+        friend auto operator<<( stream &os, const source_location &loc ) noexcept -> decltype( os << "" )
+        {
+            std::array<char, 33> line;
+            std::sprintf(line.data(), "%d", loc.line());
+            return os << loc.file() << ":" << loc.function() << ":" << line.data();
+        }
         
     private:
         std::string_view _file;

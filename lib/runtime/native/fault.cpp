@@ -16,6 +16,8 @@
 
 #include "fault.hpp"
 
+#include "stream.hpp"
+
 #include <csignal>
 #include <cstdio>
 
@@ -51,32 +53,6 @@ namespace __lart::rt
         return source_location( file, function, line, column );
     }
 
-    struct file_stream
-    {
-        explicit file_stream(std::FILE *file) : _file(file) {}
-        ~file_stream() { std::fflush(_file); }
-
-        file_stream& operator<<(std::string_view str) noexcept
-        {
-            std::fwrite( str.data(), sizeof(char), str.size(), _file );
-            return *this;
-        }
-
-        file_stream& operator<<(report_payload report) noexcept
-        {
-            return *this << report.what();
-        }
-        
-        file_stream& operator<<(source_location loc) noexcept
-        {
-            std::array<char, 33> line;
-            std::sprintf(line.data(), "%d", loc.line());
-            return *this << loc.file() << ":" << loc.function() << ":" << line.data();
-        }
-
-    private:
-        std::FILE *_file;
-    };
 
     struct fault_handler
     {
