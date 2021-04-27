@@ -37,7 +37,7 @@ namespace lart
     bool driver::run()
     {
         spdlog::cfg::load_env_levels();
-        spdlog::info("start lartcc pass");
+        spdlog::info("lartcc started");
 
         // propagate abstraction type from annotated roots
         auto types = dfa::analysis::run_on( module );
@@ -84,7 +84,8 @@ namespace lart
             if ( fn.getName().startswith( "__lart" ) )
                 fn.deleteBody();
         }
-
+        
+        spdlog::info("lartcc finished");
         return true;
     }
 
