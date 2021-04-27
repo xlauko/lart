@@ -1,81 +1,50 @@
-from ipywidgets import interact, interactive, fixed, interact_manual
-import ipywidgets as widgets
+from IPython.core.magic import register_cell_magic
+from pygdbmi.gdbcontroller import GdbController
+from pprint import pprint
 
-from sys import stdout, stdin
-from subprocess import Popen, PIPE, STDOUT
-from threading import Thread
+from typing import List, Optional
+from argparse import ArgumentParser
 
-from IPython.display import clear_output
-
-import time
-
-verbose_listener = False
-
-class Listener:
-    def __init__(self, channel) -> None:
-        self.running: bool = False
-        self.channel = channel
-        self.listener = None
-        self.buffer: List[str] = []
-
-    def loop(self) -> None:
-        while self.running:
-            line = self.channel.readline().decode(stdout.encoding)
-            self.buffer.append(line)
-    
-    def flush(self) -> None:
-        global verbose_listener
-        if verbose_listener:
-            for line in self.buffer:
-                print(line, end='')
-        self.buffer = []
-
-    def start(self) -> None:
-        self.running = True
-        self.listener = Thread(target=self.loop)
-        self.listener.start()
-
-
-class Simulator:
+class GDBSimulator:
     def __init__(self) -> None:
-        self.proc = None
-        self.pout = None
-        self.pin = None
+        self.file = None
+        self.gdb = GdbController()
 
-    def setup_process(self) -> None:
-        self.proc = Popen('gdb', stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        self.pout = self.proc.stdout
-        self.pin = self.proc.stdin
-        self.listener = Listener(self.pout)
-        self.listener.start()
-
-    def start(self) -> None:
-        global verbose_listener
-
-        self.setup_process()
-        
-        time.sleep(0.5)
-        self.listener.flush()
-        verbose_listener = True
-
-        while self.proc.poll() is None:
-            cmd = input('command: ')
-            if cmd == 'mute':
-                print('(sim) muted')
-                verbose_listener = False
-            elif cmd == 'unmute':
-                print('(sim) unmuted')
-                verbose_listener = True
-            elif self.proc.poll() is None:
-                self.pin.write(bytearray(cmd + '\n', stdin.encoding))
-                self.pin.flush()
-            
-            clear_output()
-            time.sleep(0.3)
-            self.listener.flush()
-
-            if 'quit' in cmd:
-                break
+    def load(self, file: str) -> None:
+        if file == self.file:
+            return
+        self.file = file
+        self.restart()
+        return self.run(f'file {self.file}')
 
     def restart(self) -> None:
-        pass
+        self.gdb.spawn_new_gdb_subprocess()
+
+    def run(self, cmd: str):
+        return self.gdb.write(cmd)
+
+
+sim = GDBSimulator()
+
+
+def print_console_payload(response):
+    for part in response:
+        if part['type'] == 'console':
+            print(part['payload'].encode('utf-8').decode('unicode_escape'), end='')
+
+
+@register_cell_magic('lart.simulator')
+def simulator(line, cell):
+    args = line.split()
+    cmds = cell.splitlines()
+
+    parser = ArgumentParser(description="lart simulator")
+    parser.add_argument('file', metavar='path', type=str, help='file to simulate')
+    parsed = parser.parse_args(args)
+
+    response = sim.load(parsed.file)
+    if response:
+        print_console_payload(response)
+
+    for cmd in cmds:
+        print_console_payload(sim.run(cmd))
