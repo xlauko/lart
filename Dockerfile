@@ -1,54 +1,34 @@
-# GCC support can be specified at major, minor, or micro version
-# (e.g. 8, 8.2 or 8.2.0).
-# See https://hub.docker.com/r/library/gcc/ for all supported GCC
-# tags from Docker Hub.
-# See https://docs.docker.com/samples/library/gcc/ for more on how to use this image
-FROM gcc:latest
+ARG LLVM_VERSION=12.0.1
+ARG BUILD_BASE=ubuntu:rolling
 
-ENV LLVM_INSTALL_DIR="/usr/src/llvm"
-
-ARG LLVM_VERSION=10.0.0
+FROM ${BUILD_BASE} as base
 
 # Set for all apt-get install, must be at the very beginning of the Dockerfile.
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get -y update && apt-get install bash sudo -y
+RUN apt-get -y update
+RUN apt-get install bash sudo git ninja-build ccache curl build-essential cmake clang -y
 
-WORKDIR /usr/src/lart
+WORKDIR /usr/src/
 
-RUN mkdir -p /usr/src/lart/scripts
+FROM base as llvm
 
-COPY ./scripts/install-deps.sh /usr/src/lart/scripts/
-RUN ./scripts/install-deps.sh
+ARG LLVM_VERSION=12.0.1
+RUN curl -SL https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/llvm-project-${LLVM_VERSION}.src.tar.xz \
+        | tar -xJC .
 
-# Install CMake
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.2/cmake-3.18.2-Linux-x86_64.sh \
-    -q -O /tmp/cmake-install.sh \
-    && chmod u+x /tmp/cmake-install.sh \
-    && mkdir /usr/bin/cmake \
-    && /tmp/cmake-install.sh --skip-license --prefix=/usr/bin/cmake \
-    && rm /tmp/cmake-install.sh
+RUN mv /usr/src/llvm-project-${LLVM_VERSION}.src /usr/src/llvm
 
-ENV PATH="/usr/bin/cmake/bin:${PATH}"
+FROM llvm as llvm_build
 
-# Non-interactive modes get set back.
-ENV DEBIAN_FRONTEND newtq
+RUN mkdir -p /usr/opt/llvm
+WORKDIR /usr/opt/llvm
 
-ENV CMAKE_C_COMPILER=/usr/bin/gcc
-ENV CMAKE_CXX_COMPILER=/usr/bin/g++
+RUN cmake -GNinja /usr/src/llvm/llvm \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DLLVM_USE_SANITIZER="DataFlow" \
+  -DLLVM_ENABLE_LIBCXX=ON \
+  -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi"
 
-COPY ./scripts/install-llvm.sh /usr/src/lart/scripts/
-RUN ./scripts/install-llvm.sh ${LLVM_VERSION}
-
-COPY . /usr/src/lart
-
-RUN ls /usr/src/
-
-# This command compiles your app using GCC, adjust for your source code
-RUN cmake -S . -B build -G Ninja \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_INSTALL_DIR="/usr/src/llvm"
-
-RUN cmake --build build
-
-LABEL Name=lart Version=0.1.0
+RUN ninja cxx cxxabi
