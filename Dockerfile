@@ -62,3 +62,16 @@ RUN mv SVF-SVF-${SVF_VERSION} svf
 
 WORKDIR /usr/opt/svf
 RUN ./build.sh
+
+FROM svf_build as deps
+
+WORKDIR /usr/opt
+
+# ARM processor compability
+ENV VCPKG_FORCE_SYSTEM_BINARIES=1
+
+RUN git clone https://github.com/microsoft/vcpkg \
+        && ./vcpkg/bootstrap-vcpkg.sh
+
+RUN ./vcpkg/vcpkg update
+RUN ./vcpkg/vcpkg install range-v3 spdlog cppcoro
