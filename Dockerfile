@@ -63,10 +63,16 @@ WORKDIR /usr/src/svf
 
 ENV LLVM_DIR="/usr/lib/llvm-12"
 
-WORKDIR /usr/opt
+RUN mkdir build && cd build \
+        && cmake -DCMAKE_INSTALL_PREFIX:PATH="/usr/opt/svf/" .. \
+        && cmake --build . --target install --config Release
+
+FROM svf_build as deps
 
 # ARM processor compability
 ENV VCPKG_FORCE_SYSTEM_BINARIES=1
+
+WORKDIR /usr/opt/
 
 RUN git clone https://github.com/microsoft/vcpkg \
         && ./vcpkg/bootstrap-vcpkg.sh
