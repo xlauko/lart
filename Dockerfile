@@ -78,4 +78,16 @@ RUN git clone https://github.com/microsoft/vcpkg \
         && ./vcpkg/bootstrap-vcpkg.sh
 
 RUN ./vcpkg/vcpkg update
-RUN ./vcpkg/vcpkg install range-v3 spdlog cppcoro
+RUN ./vcpkg/vcpkg install range-v3 spdlog cppcoro catch2
+
+FROM deps as lart_build
+
+COPY . /usr/src/lart
+WORKDIR /usr/src/lart
+
+RUN cmake -DLLVM_INSTALL_DIR=${LLVM_DIR} \
+      -DLIBCXX_INSTALL_DIR=${LIBCXX_DATAFLOW_DIR} \
+      -DSVF_INSTALL_DIR="/usr/opt/svf/" \
+      -DCMAKE_TOOLCHAIN_FILE="/usr/opt/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+      -B build \
+      -S .
