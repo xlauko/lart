@@ -11,7 +11,7 @@ ARG CMAKE_VERSION
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -y update
-RUN apt-get install bash sudo git ninja-build ccache curl build-essential clang zip unzip tar libssl-dev libc++-dev pkg-config -y
+RUN apt-get install bash sudo git ninja-build ccache curl build-essential clang zip unzip tar zlib1g-dev llvm-dev libssl-dev libc++-dev libtbb-dev pkg-config -y
 
 # Set clang as default C and C++ compiler.
 ENV CC=/usr/bin/clang-12
