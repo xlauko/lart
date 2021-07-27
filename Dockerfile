@@ -3,6 +3,9 @@ ARG LLVM_VERSION=12.0.1
 ARG SVF_VERSION=2.2
 ARG BUILD_BASE=ubuntu:rolling
 
+#
+# Base layer
+#
 FROM ${BUILD_BASE} as base
 
 ARG CMAKE_VERSION
@@ -11,87 +14,83 @@ ARG CMAKE_VERSION
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -y update
-RUN apt-get install bash sudo git ninja-build ccache curl \
-	build-essential clang zip unzip tar zlib1g-dev \
-	llvm-dev libssl-dev libc++ libc++-dev libtbb-dev \
-	libc++abi-dev pkg-config gpg wget -y
+RUN apt-get install -y \
+        bash git ninja-build ccache curl wget \
+	build-essential clang zip unzip tar llvm-12 \
+	pkg-config zlib1g-dev cmake -y
 
-# Set clang as default C and C++ compiler.
-ENV CC=/usr/bin/clang-12
-ENV CXX=/usr/bin/clang++-12
+RUN apt-get autoremove -y
+RUN apt-get clean all
 
-WORKDIR /usr/src/
+ENV LLVM_DIR="/usr/lib/llvm-12/"
 
-# Build CMake.
-# TODO Remove
-RUN curl -SL http://www.cmake.org/files/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.0.tar.gz \
-        | tar -xzC .
+RUN rm -rf /var/lib/apt/lists/*
 
-RUN mv cmake-${CMAKE_VERSION}.0 cmake
-RUN cd cmake && ./configure && make install
+WORKDIR /usr/src
+RUN mkdir -p /usr/opt/cmake
+RUN wget http://www.cmake.org/files/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.0-linux-x86_64.sh
+RUN sh ./cmake-${CMAKE_VERSION}.0-linux-x86_64.sh --prefix=/usr/opt/cmake --skip-license
+RUN rm ./cmake-${CMAKE_VERSION}.0-linux-x86_64.sh
+ENV PATH="/usr/opt/cmake/bin:${PATH}"
 
-FROM base as llvm
+#
+# LIBCXX build for LART runtime
+#
+FROM base as dataflow-libs
 
+WORKDIR /usr/src
 ARG LLVM_VERSION
-RUN curl -SL https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/llvm-project-${LLVM_VERSION}.src.tar.xz \
-        | tar -xJC .
 
-RUN mv /usr/src/llvm-project-${LLVM_VERSION}.src /usr/src/llvm
+# RUN curl -sSL https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-${LLVM_VERSION}.tar.gz \
+#         | tar -xvz
 
-FROM llvm as llvm_build
+# RUN mv /usr/src/llvm-project-llvmorg-${LLVM_VERSION} /usr/src/llvm
 
-ENV LIBCXX_DATAFLOW_DIR="/usr/opt/libcxx-dataflow/"
-ENV LLVM_DIR="/usr/opt/llvm/"
+# FROM llvm as libcxx
 
-RUN mkdir -p /usr/build/libcxx
-WORKDIR /usr/build/libcxx
+# ENV LIBCXX_DATAFLOW_DIR="/usr/opt/libcxx-dataflow/"
 
-RUN cmake -GNinja /usr/src/llvm/llvm \
-  -DCMAKE_C_COMPILER=clang \
-  -DCMAKE_CXX_COMPILER=clang++ \
-  -DLLVM_USE_SANITIZER="DataFlow" \
-  -DLLVM_ENABLE_LIBCXX=ON \
-  -DCMAKE_INSTALL_PREFIX:PATH=${LIBCXX_DATAFLOW_DIR} .. \
-  -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi"
+# RUN cmake -GNinja \
+#   -DCMAKE_C_COMPILER=clang \
+#   -DCMAKE_CXX_COMPILER=clang++ \
+#   -DCMAKE_CXX_FLAGS=-stdlib=libc++ \
+#   -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++ -lc++abi" \
+#   -DLLVM_USE_SANITIZER="DataFlow" \
+#   -DLLVM_ENABLE_LIBCXX=ON \
+#   -DCMAKE_INSTALL_PREFIX:PATH=${LIBCXX_DATAFLOW_DIR} \
+#   -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" \
+#   -S llvm \
+#   -B build-dataflow
 
-RUN cmake --build .
-RUN cmake --build . --target install
+# RUN cmake --build build-dataflow -- -j 4
+# RUN cmake --build build-dataflow --target install
 
-RUN mkdir -p /usr/build/llvm
-WORKDIR /usr/build/llvm
+FROM dataflow-libs as svf
 
-RUN cmake -GNinja /usr/src/llvm/llvm \
-  -DCMAKE_C_COMPILER=clang \
-  -DCMAKE_CXX_COMPILER=clang++ \
-  -DLLVM_ENABLE_LIBCXX=ON \
-  -DCMAKE_INSTALL_PREFIX:PATH=${LLVM_DIR} .. \
-  -DLLVM_ENABLE_PROJECTS="llvm"
-
-RUN cmake --build .
-RUN cmake --build . --target install
-
-FROM llvm_build as svf_build
+ENV SVF_INSTALL_DIR "/usr/opt/svf/"
 ARG SVF_VERSION
 
 WORKDIR /usr/src/
 
-RUN curl -SL https://github.com/SVF-tools/SVF/archive/refs/tags/SVF-${SVF_VERSION}.tar.gz \
-        | tar -xzC .
-
+RUN curl -sSL https://github.com/SVF-tools/SVF/archive/refs/tags/SVF-${SVF_VERSION}.tar.gz \
+    | tar -xvz
 RUN mv SVF-SVF-${SVF_VERSION} svf
 
 WORKDIR /usr/src/svf
 
-# ENV LLVM_DIR="/usr/lib/llvm-12"
+RUN cmake \
+        -GNinja \
+	-DLLVM_DIR=${LLVM_DIR} \
+        -DCMAKE_INSTALL_PREFIX=${SVF_INSTALL_DIR} \
+        -B build \
+        -S .
 
-RUN mkdir build && cd build \
-        && cmake -DLLVM_DIR="/usr/lib/llvm-12" \
-		 -DCMAKE_INSTALL_PREFIX:PATH="/usr/opt/svf/" .. \
-        && cmake --build . --target install --config Release
+RUN cmake --build build -- -j 4
+RUN cmake --build build --target install
 
-FROM svf_build as deps
+FROM svf as deps
 
-# ARM processor compability
+# # ARM processor compability
 ENV VCPKG_FORCE_SYSTEM_BINARIES=1
 
 WORKDIR /usr/opt/
@@ -100,15 +99,22 @@ RUN git clone https://github.com/microsoft/vcpkg \
         && ./vcpkg/bootstrap-vcpkg.sh
 
 RUN ./vcpkg/vcpkg update
-RUN ./vcpkg/vcpkg install range-v3 spdlog cppcoro catch2
+RUN ./vcpkg/vcpkg install spdlog catch2
 
-FROM deps as lart_build
+ENV VCPKG_TOOLCHAIN "/usr/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+FROM deps as lart
 
 COPY . /usr/src/lart
 WORKDIR /usr/src/lart
 
-RUN cmake -DLIBCXX_INSTALL_DIR=${LIBCXX_DATAFLOW_DIR} \
-      -DSVF_INSTALL_DIR="/usr/opt/svf/" \
-      -DCMAKE_TOOLCHAIN_FILE="/usr/opt/vcpkg/scripts/buildsystems/vcpkg.cmake" \
-      -B build \
-      -S .
+RUN cmake \
+    -GNinja \
+    -DLIBCXX_INSTALL_DIR=${LIBCXX_DATAFLOW_DIR} \
+    -DLLVM_INSTALL_DIR=${LLVM_DIR}/build/ \
+    -DSVF_INSTALL_DIR=${SVF_INSTALL_DIR} \
+    -DCMAKE_TOOLCHAIN_FILE=${VCPKG_TOOLCHAIN} \
+    -B build \
+    -S .
+
+# RUN cmake --build build -- -j 4
