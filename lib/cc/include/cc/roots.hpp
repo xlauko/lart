@@ -19,7 +19,6 @@
 #include <sc/annotation.hpp>
 #include <sc/case.hpp>
 
-#include <llvm/IR/CallSite.h>
 #include <llvm/Support/ErrorHandling.h>
 
 #include <map>
@@ -29,7 +28,7 @@ namespace lart
 {
     enum class abstract_kind { scalar, pointer };
 
-    using roots_map = std::map< llvm::CallSite, abstract_kind >;
+    using roots_map = std::map< llvm::CallBase*, abstract_kind >;
 
     inline abstract_kind annotated_kind( const sc::annotation &ann )
     {

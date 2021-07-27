@@ -27,7 +27,6 @@
 #include <llvm/Transforms/Utils.h> // LowerSwitchPass
 
 #include <algorithm>
-#include <range/v3/algorithm.hpp>
 
 namespace lart
 {
@@ -87,11 +86,11 @@ namespace lart
         };
 
         auto nonbr = [] ( auto i ) {
-            return ranges::any_of( i->users(), sv::isnot< llvm::BranchInst > );
+            return std::ranges::any_of( i->users(), sv::isnot< llvm::BranchInst > );
         };
 
         auto cmps = sv::filter< llvm::CmpInst >( *fn );
-        for ( auto cmp : cmps | ranges::views::filter( nonbr ) )
+        for ( auto cmp : cmps | std::views::filter( nonbr ) )
             lower( cmp );
     }
 
@@ -136,7 +135,7 @@ namespace lart
             return offset;
         }
 
-        generator< dependence > lower_to_arithmetic( llvm::GetElementPtrInst * gep, uint64_t accum_offset )
+        sc::generator< dependence > lower_to_arithmetic( llvm::GetElementPtrInst * gep, uint64_t accum_offset )
         {
             auto dl = llvm::DataLayout( sc::get_module( gep ) );
 
@@ -195,7 +194,7 @@ namespace lart
         }
     } // anonymous namespace
 
-    generator< dependence > lower_pointer_arithmetic( llvm::GetElementPtrInst *gep )
+    sc::generator< dependence > lower_pointer_arithmetic( llvm::GetElementPtrInst *gep )
     {
         canonicalize( gep );
         auto offset = accumulate_byte_offset( gep );

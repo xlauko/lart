@@ -29,7 +29,7 @@
 #include <variant>
 #include <experimental/iterator>
 
-#include <cppcoro/generator.hpp>
+#include <sc/generator.hpp>
 
 namespace lart::op
 {
@@ -263,7 +263,7 @@ namespace lart::op
                 { sc::i8( uint8_t( sc::bytes( elem, dl ) ) ), argtype::concrete }
             };
         }
-        
+
         std::optional< default_wrapper > default_value() const
         {
             return std::nullopt;
@@ -397,12 +397,10 @@ namespace lart::op
 
     namespace sv = sc::views;
 
-    template< typename T > using generator = cppcoro::generator< T >;
-
     inline auto unique_name_suffix(const operation &o)
     {
-        auto values = ranges::views::transform( [] (const auto &o_) { return o_.value; } );
-        auto format = ranges::views::transform( [] (auto t) { return sc::fmt::type(t); } );
+        auto values = std::views::transform( [] (const auto &o_) { return o_.value; } );
+        auto format = std::views::transform( [] (auto t) { return sc::fmt::type(t); } );
 
         std::stringstream suff;
         auto args = arguments(o);
@@ -411,7 +409,7 @@ namespace lart::op
         return suff.str();
     }
 
-    inline generator< llvm::Value* > duplicated_arguments(const operation &op)
+    inline sc::generator< llvm::Value* > duplicated_arguments(const operation &op)
     {
         for ( auto arg : op::arguments(op) ) {
             if ( arg.type == argtype::lift ) {
@@ -451,7 +449,7 @@ namespace lart::op
     {
         llvm::IRBuilder<> irb( op::location(op) );
         auto module = irb.GetInsertBlock()->getModule();
-        auto arg_types = args | sv::types | ranges::to_vector;
+        auto arg_types = sc::views::to_vector( args | sv::types );
         auto rty = extract_return_type( op, arg_types );
         return irb.CreateCall( function(module, rty, arg_types, intr_name), args );
     }

@@ -9,14 +9,10 @@ add_library( lart
     preprocess.cpp
     syntactic.cpp
     taint.cpp
-
-    backend/base.cpp
-    backend/native.cpp
 )
 
-set_target_properties( lart PROPERTIES 
-  COMPILE_FLAGS "-stdlib=libc++" 
-  LINK_FLAGS "-stdlib=libc++ -lc++abi"
+set_target_properties( lart PROPERTIES
+  COMPILE_FLAGS "-fcoroutines"
 )
 
 set_property(TARGET lart PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -30,14 +26,12 @@ add_dependencies( lart svflib )
 
 find_package( spdlog CONFIG REQUIRED )
 find_package( fmt CONFIG REQUIRED )
-find_package( cppcoro CONFIG REQUIRED )
 
-target_link_libraries( lart PRIVATE 
-  llvmsc::llvmsc 
+target_link_libraries( lart PRIVATE
+  llvmsc::llvmsc
   svflib
   fmt::fmt-header-only
   spdlog::spdlog_header_only
-  cppcoro
 )
 
 target_link_libraries( lart PRIVATE lart_project_options lart_project_warnings )

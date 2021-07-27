@@ -38,11 +38,11 @@ namespace lart
         return static_cast< bool >( type.back().pointer ) && is_abstract( type );
     }
 
-    bool is_lamp_call( llvm::CallSite call )
+    bool is_lamp_call( llvm::CallBase *call )
     {
-        if ( call.isIndirectCall() )
+        if ( call->isIndirectCall() )
             return false;
-        return call.getCalledFunction()->getName().startswith( "__lamp" );
+        return call->getCalledFunction()->getName().startswith( "__lamp" );
     }
 
     bool is_identity_cast( llvm::Value *inst )
@@ -102,7 +102,7 @@ namespace lart
         return result;
     }
 
-    generator< operation > syntactic::toprocess()
+    sc::generator< operation > syntactic::toprocess()
     {
         for ( const auto &[val, type] : types ) {
             if ( auto op = make_operation(val); op.has_value() ) {
@@ -124,7 +124,7 @@ namespace lart
             if ( types.count(cond) && types[cond].maybe_abstract() )
             {
                 co_yield op::tobool( br );
-                
+
                 for ( auto intr : constrain::assume( br, cond ) )
                     co_yield intr;
             }
@@ -136,7 +136,7 @@ namespace lart
         if ( op::with_taints( op ) )
             return { taint::make_call( m, op ), op };
 
-        auto args = op::duplicated_arguments(op) | ranges::to_vector;
+        auto args = sc::views::to_vector( op::duplicated_arguments(op) );
         auto name = "lart." + op::name(op);
         return { op::make_call( op, args, name ), op };
     }
@@ -157,7 +157,7 @@ namespace lart
     void syntactic::update_places( llvm::Value *concrete )
     {
         auto abs = abstract[concrete];
-        
+
         // Update placeholders where result of abstract operation
         // should be used instead. That are arguments of already
         // abstracted users of concrete variant of the operation.

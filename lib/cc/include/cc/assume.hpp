@@ -20,7 +20,7 @@
 
 #include <cc/operation.hpp>
 
-#include <cppcoro/generator.hpp>
+#include <sc/generator.hpp>
 
 namespace lart::constrain
 {
@@ -55,8 +55,6 @@ namespace lart::constrain
         unsigned succ_idx() const;
     };
 
-    template< typename T > using generator = cppcoro::generator< T >;
-
-    generator< op::operation > assume( llvm::BranchInst *br, llvm::Value *cond );
+    sc::generator< op::operation > assume( llvm::BranchInst *br, llvm::Value *cond );
 
 } // namespace lart::constrain

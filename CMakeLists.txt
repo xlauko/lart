@@ -90,15 +90,15 @@ add_definitions( ${LLVM_DEFINITIONS} )
 link_directories( ${LLVM_LIBRARY_DIRS} )
 include_directories( SYSTEM ${LLVM_INCLUDE_DIRS} )
 
-find_program( CLANG_BINARY "clang"
-  HINTS ${LLVM_TOOLS_BINARY_DIR}
-  DOC "The clang binary to use in the lart wrapper script.")
-find_program( CLANGPP_BINARY "clang++"
-  HINTS ${LLVM_TOOLS_BINARY_DIR}
-  DOC "The clang binary to use in the lart++ wrapper script.")
-if ( NOT CLANG_BINARY )
-  message( FATAL_ERROR "Clang not found; please make sure that the version corresponding to your LLVM installation is available." )
-endif()
+# find_program( CLANG_BINARY "clang"
+#   HINTS ${LLVM_TOOLS_BINARY_DIR}
+#   DOC "The clang binary to use in the lart wrapper script.")
+# find_program( CLANGPP_BINARY "clang++"
+#   HINTS ${LLVM_TOOLS_BINARY_DIR}
+#   DOC "The clang binary to use in the lart++ wrapper script.")
+# if ( NOT CLANG_BINARY )
+#   message( FATAL_ERROR "Clang not found; please make sure that the version corresponding to your LLVM installation is available." )
+# endif()
 
 add_custom_target( lit
   COMMAND lit -v "${CMAKE_CURRENT_BINARY_DIR}/test"

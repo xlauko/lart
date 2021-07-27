@@ -22,7 +22,7 @@
 #include <cc/logger.hpp>
 #include <cc/preprocess.hpp>
 
-#include <cc/backend/native.hpp>
+// #include <cc/backend/native.hpp>
 
 #include <sc/ranges.hpp>
 
@@ -71,9 +71,9 @@ namespace lart
         // 7. interrupts ?
 
         // TODO pick backend based on cmd arguments
-        auto backend = lart::backend::native( module );
-        for ( auto intr : intrinsics )
-            backend.lower( intr );
+        // auto backend = lart::backend::native( module );
+        // for ( auto intr : intrinsics )
+        //    backend.lower( intr );
 
         // delete stubs
         for ( auto &fn : module ) {
@@ -84,7 +84,7 @@ namespace lart
             if ( fn.getName().startswith( "__lart" ) )
                 fn.deleteBody();
         }
-        
+
         spdlog::info("lartcc finished");
         return true;
     }

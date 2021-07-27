@@ -1,6 +1,6 @@
 include( CTest )
 
-add_subdirectory( unittests )
+# add_subdirectory( unittests )
 
 set( LART_TEST_SHLIBEXT "${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 
@@ -19,7 +19,7 @@ configure_file( "${LART_TEST_SITE_CFG_INPUT}"
 
 file( COPY "scripts" DESTINATION "."
     FILE_PERMISSIONS
-        OWNER_READ OWNER_WRITE OWNER_EXECUTE 
+        OWNER_READ OWNER_WRITE OWNER_EXECUTE
         GROUP_READ GROUP_EXECUTE
         WORLD_READ WORLD_EXECUTE
 )

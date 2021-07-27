@@ -67,7 +67,7 @@ namespace lart::constrain
         llvm_unreachable( "BasicBlock 'to' is not a successor of BasicBlock 'from'." );
     }
 
-    generator< op::operation > assume( llvm::BranchInst *br, llvm::Value *cond )
+    sc::generator< op::operation > assume( llvm::BranchInst *br, llvm::Value *cond )
     {
         auto &ctx = br->getContext();
 

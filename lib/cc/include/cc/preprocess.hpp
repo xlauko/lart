@@ -31,8 +31,6 @@
 
 namespace lart
 {
-    template< typename T > using generator = cppcoro::generator< T >;
-
     using operation = lart::op::operation;
 
     struct preprocessor : sc::with_context
@@ -50,6 +48,6 @@ namespace lart
 
     using dependence = std::pair< llvm::Value*, llvm::Instruction* >;
 
-    generator< dependence > lower_pointer_arithmetic( llvm::GetElementPtrInst *gep );
+    sc::generator< dependence > lower_pointer_arithmetic( llvm::GetElementPtrInst *gep );
 
 } // namespace lart

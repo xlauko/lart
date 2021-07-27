@@ -24,7 +24,7 @@
 #include <svf/Graphs/PAG.h>
 #include <svf/WPA/Andersen.h>
 
-#include <cppcoro/generator.hpp>
+#include <sc/generator.hpp>
 
 namespace lart::aa
 {
@@ -32,7 +32,7 @@ namespace lart::aa
     {
         void init( SVF::PAG * pag )
         {
-            pta = SVF::AndersenWaveDiff::createAndersenWaveDiff( pag, false /* disable stats */ );
+            pta = SVF::AndersenWaveDiff::createAndersenWaveDiff( pag );
         }
 
         inline auto node( const llvm::Value *value )
@@ -40,9 +40,7 @@ namespace lart::aa
             return pta->getPAG()->getValueNode(value);
         }
 
-        template< typename T > using generator = cppcoro::generator< T >;
-
-        inline generator< llvm::Value * > pointsto( llvm::Value *value )
+        inline sc::generator< llvm::Value * > pointsto( llvm::Value *value )
         {
             for (auto pts : pta->getPts( node( value ) ) ) {
                 auto target = pta->getPAG()->getPAGNode(pts);

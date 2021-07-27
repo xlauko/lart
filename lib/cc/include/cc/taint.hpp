@@ -22,16 +22,14 @@
 #include <llvm/IR/Module.h>
 
 #include <bitset>
-#include <cppcoro/generator.hpp>
+#include <sc/generator.hpp>
 
 namespace lart::taint
 {
-    template< typename T > using generator = cppcoro::generator< T >;
-
     using operation = lart::op::operation;
 
     llvm::CallInst * make_call( llvm::Module &module, const operation &op );
 
-    generator< ir::arg::liftable > liftable_view( const ir::intrinsic &test );
+    sc::generator< ir::arg::liftable > liftable_view( const ir::intrinsic &test );
 
 } // namespace lart::taint

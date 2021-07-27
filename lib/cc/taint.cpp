@@ -29,7 +29,7 @@ namespace lart::taint
             return "lart.test.taint." + op::name(op) + "." + op::unique_name_suffix(op);
         }
 
-        generator< llvm::Value* > arguments( const lart::lifter &lifter, const operation &op )
+        sc::generator< llvm::Value* > arguments( const lart::lifter &lifter, const operation &op )
         {
             co_yield lifter.function();
 
@@ -37,7 +37,7 @@ namespace lart::taint
                 co_yield arg;
         }
 
-        generator< unsigned > liftable_indices( const ir::intrinsic &test )
+        sc::generator< unsigned > liftable_indices( const ir::intrinsic &test )
         {
             auto op = test.op;
             // skip lifter argument
@@ -62,11 +62,11 @@ namespace lart::taint
     llvm::CallInst * make_call( llvm::Module &module, const operation &op )
     {
         lart::lifter lifter( module, op );
-        auto args = detail::arguments( lifter, op ) | ranges::to_vector;
+        auto args = sc::views::to_vector( detail::arguments( lifter, op ) );
         return op::make_call( op, args, detail::name( op ) );
     }
 
-    generator< ir::arg::liftable > liftable_view( const ir::intrinsic &test )
+    sc::generator< ir::arg::liftable > liftable_view( const ir::intrinsic &test )
     {
         // TODO assert is test taint
         auto call = test.call;

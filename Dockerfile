@@ -85,7 +85,7 @@ RUN cmake \
         -B build \
         -S .
 
-RUN cmake --build build -- -j 4
+RUN cmake --build build
 RUN cmake --build build --target install
 
 FROM svf as deps
@@ -108,13 +108,17 @@ FROM deps as lart
 COPY . /usr/src/lart
 WORKDIR /usr/src/lart
 
+ENV LART_INSTALL_DIR "/usr/opt/lart"
+
 RUN cmake \
     -GNinja \
     -DLIBCXX_INSTALL_DIR=${LIBCXX_DATAFLOW_DIR} \
     -DLLVM_INSTALL_DIR=${LLVM_DIR}/build/ \
     -DSVF_INSTALL_DIR=${SVF_INSTALL_DIR} \
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_TOOLCHAIN} \
+    -DCMAKE_INSTALL_PREFIX=${LART_INSTALL_DIR} \
     -B build \
     -S .
 
-# RUN cmake --build build -- -j 4
+RUN cmake --build build
+RUN cmake --build build --target install

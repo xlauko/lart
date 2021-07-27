@@ -67,7 +67,7 @@ namespace lart::dfa::detail
         };
 
         // creates edge between operand and function arguments
-        auto arguse = [&] ( auto /*operand*/, llvm::CallSite /*call*/ ) {
+        auto arguse = [&] ( auto /*operand*/, llvm::CallBase * /*call*/ ) {
             /*for ( auto fn : cr.resolve_call( call ) ) {
                 if ( auto afn = abstract_function( fn ) ) {
                     if ( lart::tag::has( afn, tag::abstract ) )
@@ -89,9 +89,9 @@ namespace lart::dfa::detail
             }*/
         };
 
-        auto calluse = [&] ( auto operand, llvm::CallSite call ) {
-            if ( operand == call.getCalledValue() )
-                use( v, call.getInstruction() ); // use of function return value
+        auto calluse = [&] ( auto operand, llvm::CallBase * call ) {
+            if ( operand == call->getCalledOperand() )
+                use( v, call ); // use of function return value
             else
                 arguse( operand, call );
         };
@@ -222,9 +222,8 @@ namespace lart::dfa::detail
         aliases.init( pag );
 
         for ( const auto&[call, kind] : roots ) {
-            auto *inst = call.getInstruction();
-            types.add( inst, kind );
-            push( inst );
+            types.add( call, kind );
+            push( call );
         }
 
         while ( !worklist.empty() )
