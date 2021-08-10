@@ -41,29 +41,26 @@ FROM base as dataflow-libs
 WORKDIR /usr/src
 ARG LLVM_VERSION
 
-# RUN curl -sSL https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-${LLVM_VERSION}.tar.gz \
-#         | tar -xvz
+RUN curl -sSL https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-${LLVM_VERSION}.tar.gz \
+        | tar -xvz
 
-# RUN mv /usr/src/llvm-project-llvmorg-${LLVM_VERSION} /usr/src/llvm
+RUN mv /usr/src/llvm-project-llvmorg-${LLVM_VERSION} /usr/src/llvm
 
-# FROM llvm as libcxx
+ENV LIBCXX_DATAFLOW_DIR="/usr/opt/libcxx-dataflow/"
 
-# ENV LIBCXX_DATAFLOW_DIR="/usr/opt/libcxx-dataflow/"
+WORKDIR /usr/src/llvm
 
-# RUN cmake -GNinja \
-#   -DCMAKE_C_COMPILER=clang \
-#   -DCMAKE_CXX_COMPILER=clang++ \
-#   -DCMAKE_CXX_FLAGS=-stdlib=libc++ \
-#   -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++ -lc++abi" \
-#   -DLLVM_USE_SANITIZER="DataFlow" \
-#   -DLLVM_ENABLE_LIBCXX=ON \
-#   -DCMAKE_INSTALL_PREFIX:PATH=${LIBCXX_DATAFLOW_DIR} \
-#   -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" \
-#   -S llvm \
-#   -B build-dataflow
+RUN cmake -GNinja \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DLLVM_USE_SANITIZER="DataFlow" \
+  -DCMAKE_INSTALL_PREFIX:PATH=${LIBCXX_DATAFLOW_DIR} \
+  -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" \
+  -S llvm \
+  -B build-dataflow
 
-# RUN cmake --build build-dataflow -- -j 4
-# RUN cmake --build build-dataflow --target install
+RUN cmake --build build-dataflow --target cxx cxxabi -- -j 4
+RUN cmake --build build-dataflow --target install-cxx install-cxxabi
 
 FROM dataflow-libs as svf
 
@@ -112,7 +109,6 @@ ENV LART_INSTALL_DIR "/usr/opt/lart"
 
 RUN cmake \
     -GNinja \
-    -DLIBCXX_INSTALL_DIR=${LIBCXX_DATAFLOW_DIR} \
     -DLLVM_INSTALL_DIR=${LLVM_DIR}/build/ \
     -DSVF_INSTALL_DIR=${SVF_INSTALL_DIR} \
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_TOOLCHAIN} \
@@ -121,4 +117,18 @@ RUN cmake \
     -S .
 
 RUN cmake --build build
-RUN cmake --build build --target install
+# RUN cmake --build build --target install
+
+FROM lart as runtime
+
+RUN cmake \
+    -GNinja \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DLIBCXX_INSTALL_DIR=${LIBCXX_DATAFLOW_DIR} \
+    -DCMAKE_TOOLCHAIN_FILE=${VCPKG_TOOLCHAIN} \
+    -DCMAKE_INSTALL_PREFIX=${LART_INSTALL_DIR} \
+    -B build-runtime \
+    -S runtime
+
+RUN cmake --build build-runtime
