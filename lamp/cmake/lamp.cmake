@@ -24,7 +24,7 @@ macro( register_domain domain )
       INTERFACE
         ${LIBCXX_INSTALL_DIR}/include/c++/v1
     )
-    
+
     target_link_options( ${domain}-dfs
       INTERFACE
         -Wl,-rpath,${LLVM_INSTALL_DIR}/lib
@@ -42,7 +42,7 @@ macro( register_domain domain )
     add_library( ${domain}-src STATIC ${domain}.cpp )
     target_link_libraries( ${domain}-src
       PUBLIC ${domain}-prop
-      PRIVATE lava
+      PRIVATE lava runtime
     )
 
     set_property( TARGET ${domain}-src PROPERTY POSITION_INDEPENDENT_CODE ON )
@@ -52,11 +52,18 @@ macro( register_domain domain )
     add_library( ${domain} STATIC ${domain}.cpp )
     target_link_libraries( ${domain}
       PUBLIC ${domain}-dfs ${domain}-prop
-      PRIVATE lava
+      PRIVATE lava runtime
     )
 
     set_property( TARGET ${domain} PROPERTY POSITION_INDEPENDENT_CODE ON )
     set_property( TARGET ${domain} PROPERTY CXX_STANDARD 20 )
+
+    install (TARGETS ${domain}
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        PUBLIC_HEADER DESTINATION include
+    )
 
   endif()
 endmacro()

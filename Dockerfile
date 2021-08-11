@@ -100,7 +100,7 @@ RUN ./vcpkg/vcpkg install spdlog catch2
 
 ENV VCPKG_TOOLCHAIN "/usr/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
-FROM deps as lart
+FROM deps as lart-config
 
 COPY . /usr/src/lart
 WORKDIR /usr/src/lart
@@ -109,26 +109,36 @@ ENV LART_INSTALL_DIR "/usr/opt/lart"
 
 RUN cmake \
     -GNinja \
+    -DBUILD_LART_CC=ON \
     -DLLVM_INSTALL_DIR=${LLVM_DIR}/build/ \
     -DSVF_INSTALL_DIR=${SVF_INSTALL_DIR} \
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_TOOLCHAIN} \
     -DCMAKE_INSTALL_PREFIX=${LART_INSTALL_DIR} \
-    -B build \
+    -B build-lartcc \
     -S .
 
-RUN cmake --build build
-# RUN cmake --build build --target install
+FROM lart-config as lartcc
 
-FROM lart as runtime
+RUN cmake --build build-lartcc
+RUN cmake --build build-lartcc --target install
+
+FROM lartcc as runtime-config
 
 RUN cmake \
     -GNinja \
     -DCMAKE_C_COMPILER=clang \
     -DCMAKE_CXX_COMPILER=clang++ \
+    -DBUILD_LART_RUNTIME=ON \
     -DLIBCXX_INSTALL_DIR=${LIBCXX_DATAFLOW_DIR} \
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_TOOLCHAIN} \
     -DCMAKE_INSTALL_PREFIX=${LART_INSTALL_DIR} \
     -B build-runtime \
-    -S runtime
+    -S .
+
+FROM runtime-config as runtime
 
 RUN cmake --build build-runtime
+RUN cmake --build build-runtime --target install
+# RUN cmake --build build-runtime
+
+# RUN cmake --build build-runtime

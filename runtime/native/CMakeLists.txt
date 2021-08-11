@@ -1,6 +1,9 @@
-cmake_minimum_required( VERSION 3.16 )
-
-project( lart-native )
+add_library( lart-runtime INTERFACE )
+target_include_directories( lart-runtime
+    INTERFACE
+        $<INSTALL_INTERFACE:include>
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
 add_library( native
   STATIC
@@ -43,3 +46,11 @@ target_link_libraries( native
     project_warnings
     project_options
 )
+
+install (TARGETS native
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    PUBLIC_HEADER DESTINATION include
+)
+

@@ -1,10 +1,6 @@
 cmake_minimum_required( VERSION 3.16 )
 
-set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake;"
-)
-
-include( lamp )
+include( cmake/lamp.cmake )
 
 register_domain( unit )
 register_domain( constant )
@@ -18,7 +14,6 @@ target_include_directories( lamp-api
         $<INSTALL_INTERFACE:include>
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/lamp.h
