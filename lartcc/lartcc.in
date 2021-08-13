@@ -1,0 +1,25 @@
+#!/bin/bash
+
+domain=$1
+
+LART_INTERFACE="@CMAKE_INSTALL_PREFIX@/include/"
+RUNTIME="@CMAKE_INSTALL_PREFIX@/lib/libnative.a"
+DOMAIN="@CMAKE_INSTALL_PREFIX@/lib/lib$domain.a"
+PASS="@CMAKE_INSTALL_PREFIX@/lib/liblartcc.so"
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+if [ -z $domain ]; then
+     echo -e "${RED}[LART ERROR]${NC} No domain provided. Please specify a domain name."
+     exit 1
+fi
+
+exec @CLANG_BINARY@                             \
+     -Xclang -load -Xclang "$PASS"              \
+     -fsanitize=dataflow                        \
+     "${@:2}"                                   \
+     "$RUNTIME"                                 \
+     "$DOMAIN"                                  \
+     -I"$LART_INTERFACE"                        \
+     -Qunused-arguments
