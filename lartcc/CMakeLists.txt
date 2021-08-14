@@ -104,10 +104,6 @@ if( NOT LLVM_ENABLE_RTTI )
   set_target_properties( lartcc PROPERTIES COMPILE_FLAGS "-fno-rtti" )
 endif()
 
-configure_file( "lartcc.in"
-  ${CMAKE_CURRENT_BINARY_DIR}/lartcc @ONLY
-)
-
 install(TARGETS lartcc
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
@@ -124,6 +120,10 @@ find_program( CLANGPP_BINARY "clang++"
 if ( NOT CLANG_BINARY )
   message( FATAL_ERROR "Clang not found; please make sure that the version corresponding to your LLVM installation is available." )
 endif()
+
+configure_file( "lartcc.in"
+  ${CMAKE_CURRENT_BINARY_DIR}/lartcc @ONLY
+)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lartcc
   DESTINATION bin

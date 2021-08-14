@@ -15,14 +15,13 @@ target_include_directories( lamp-api
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lamp.h
-    ${PROJECT_BINARY_DIR}/include/lamp.h
-    COPYONLY
+set_target_properties( lamp-api PROPERTIES PUBLIC_HEADER
+    "include/lamp.h;include/lamp-pointers.h"
 )
 
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lamp-pointers.h
-    ${PROJECT_BINARY_DIR}/include/lamp-pointers.h
-    COPYONLY
+install(TARGETS lamp-api
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    PUBLIC_HEADER DESTINATION include
 )
