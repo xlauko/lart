@@ -33,6 +33,7 @@
 
 # Build
 build/*
+build-runtime/*
 .cache/*
 
 # vscode
