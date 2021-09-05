@@ -35,6 +35,3 @@
 build/*
 build-runtime/*
 .cache/*
-
-# vscode
-.vscode/*
