@@ -160,7 +160,7 @@ namespace lart
         auto lift = [&] ( auto &arg, unsigned pos ) {
             std::vector< sc::phi_edge > edges;
 
-            std::string entry_block = ( *bld.current_block )->getName().str();
+            std::string entry_block = bld.current_block_name();
             std::string lift_block  = "lift." + std::to_string(pos);
             std::string merge_block = "merge." + std::to_string(pos);
             if ( auto a = std::get_if< arg::with_taint >( &arg ) ) {
@@ -170,22 +170,24 @@ namespace lart
                     | sc::action::set_block{ entry_block }
                     /* entry block to lift section */
                     | sc::action::inspect( [&]( auto *builder ) {
-                        edges.push_back({ a->abstract, *(builder->current_block) });
+                        edges.push_back({ a->abstract, builder->current_block });
                     });
                 auto mbb = bld.block( merge_block );
                 auto lbb = bld.block( lift_block );
 
                 args_t wrap_args{ a->concrete };
+                
                 bld = bld
+                    | sc::action::set_block{ entry_block }
                     | sc::action::condbr( a->taint, mbb, lbb )
                     | sc::action::set_block{ lift_block }
                     /* lift block */
                     | sc::action::call( wrap( a->concrete ), wrap_args )
                     | sc::action::inspect( [&]( auto *builder ) {
                         auto wrapped = builder->stack.back();
-                        edges.push_back({ wrapped, *(builder->current_block) });
+                        edges.push_back({ wrapped, builder->current_block });
                     })
-                    | sc::action::branch()
+                    | sc::action::branch( mbb )
                     | sc::action::set_block{ merge_block };
                 bld = bld
                     /* merge block */
@@ -207,7 +209,7 @@ namespace lart
 
         auto impl = module.getFunction( op::impl(op) );
         auto types = impl->getFunctionType()->params();
-        auto final_args = detail::final_args( *bld.current_block, args, types );
+        auto final_args = detail::final_args( bld.current_block, args, types );
         bld | sc::action::call{ impl, std::span(final_args) }
             | sc::action::ret();
     }
