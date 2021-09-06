@@ -84,17 +84,28 @@ namespace lart::backend
             }
         }
 
+        auto abstract_block = "abstract.path";
+        auto concrete_block = "concrete.path";
+
         bld = bld
-            | sc::action::create_block{ "abstract.path" }
-            | sc::action::create_block{ "concrete.path" }
+            | sc::action::create_block{ abstract_block }
+            | sc::action::create_block{ concrete_block };
+
+        auto abb = bld.block( abstract_block );
+        auto cbb = bld.block( concrete_block );
+        
+        auto fty = bld.function_type_from_value( fn->getArg(0) );
+        auto callee = llvm::FunctionCallee( fty, fn->getArg(0) );
+
+        bld = bld 
             | sc::action::set_block{ "entry" }
-            | sc::action::condbr( tainted )
+            | sc::action::condbr( tainted, abb, cbb )
             /* abstract path */
-            | sc::action::set_block{ "abstract.path"}
-            | sc::action::call( fn->getArg(0), args )
+            | sc::action::set_block{ abstract_block }
+            | sc::action::call( callee, args )
             | sc::action::ret()
             /* concrete path */
-            | sc::action::set_block{ "concrete.path" };
+            | sc::action::set_block{ concrete_block };
 
         if ( auto def = op::default_value(i.op); def.has_value() ) {
             bld | sc::action::ret{ extract_default( def.value(), args ) };

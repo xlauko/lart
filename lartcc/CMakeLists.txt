@@ -73,6 +73,9 @@ add_library( lartcc
     preprocess.cpp
     syntactic.cpp
     taint.cpp
+
+    backend/base.cpp
+    backend/native.cpp
 )
 
 set_target_properties( lartcc PROPERTIES
