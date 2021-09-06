@@ -170,15 +170,17 @@ extern "C"
         return wrap( []( const auto &... x ) { return dom::op_alloca( x... ); }, size, w );
     }
 
-    /*void __lamp_freeze( void *val, void *addr, bw size )
+    void __lamp_freeze( void *val, void *addr, bw size )
     {
-        __lamp_freeze_impl( val, addr, size );
+        __lart_freeze( val, addr, size );
+        // __lamp_freeze_impl( val, addr, size );
     }
 
     __lamp_ptr __lamp_melt( void *addr, bw size )
     {
-        return { __lamp_melt_impl( addr, size ).disown() };
-    }*/
+        return { __lart_melt( addr, size ) };
+        // return { __lamp_melt_impl( addr, size ).disown() };
+    }
 
     __lamp_ptr __lamp_join( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::op_join, a, b ); }
     __lamp_ptr __lamp_meet( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::op_meet, a, b ); }
