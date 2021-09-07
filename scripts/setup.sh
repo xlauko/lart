@@ -10,12 +10,14 @@
     -B build-runtime \
     -S .
 
-cmake --build build-runtime
+cmake --build build-runtime -- -j 1
 cmake --build build-runtime --target install
 
 cmake \
     -GNinja \
     -DBUILD_LART_CC=ON \
+    -DENABLE_TESTING=ON \
+    -DCMAKE_BUILD_TYPE=Debug \
     -DLLVM_INSTALL_DIR=${LLVM_INSTALL_DIR}/build/ \
     -DSVF_INSTALL_DIR=${SVF_INSTALL_DIR} \
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_TOOLCHAIN} \
@@ -23,5 +25,5 @@ cmake \
     -B build \
     -S .
 
-cmake --build build
+cmake --build build -- -j 1
 cmake --build build --target install
