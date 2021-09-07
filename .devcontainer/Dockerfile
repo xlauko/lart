@@ -25,7 +25,9 @@ RUN apt-get -y update
 RUN apt-get install -y \
         bash git ninja-build ccache curl wget \
 	build-essential clang zip unzip tar llvm-12 \
-	pkg-config zlib1g-dev cmake -y
+	pkg-config zlib1g-dev cmake python3-pip -y
+
+RUN pip install lit
 
 RUN if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
     groupmod --gid $USER_GID $USERNAME \
@@ -96,7 +98,7 @@ RUN cmake \
         -B build \
         -S .
 
-RUN cmake --build build
+RUN cmake --build build -- -j 1
 RUN cmake --build build --target install
 
 FROM svf as deps
