@@ -25,7 +25,7 @@ if ( BUILD_LART_RUNTIME )
 endif()
 
 
-# if ( ENABLE_TESTING )
-#   enable_testing()
-#   add_subdirectory( test )
-# endif()
+if ( ENABLE_TESTING )
+  enable_testing()
+  add_subdirectory( test )
+endif()
