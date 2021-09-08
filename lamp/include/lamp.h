@@ -77,6 +77,7 @@ __lamp_ptr __lamp_wrap_f64( __lamp_f64 v ) __lart_stub;
 __lamp_ptr __lamp_wrap_ptr( void *v ) __lart_stub;
 void *__lamp_lift_ptr( void *v ) __lart_stub;
 
+bool     __lamp_any_i1   ( void ) __lart_stub;
 uint8_t  __lamp_any_i8   ( void ) __lart_stub;
 uint16_t __lamp_any_i16  ( void ) __lart_stub;
 uint32_t __lamp_any_i32  ( void ) __lart_stub;
@@ -86,7 +87,7 @@ double   __lamp_any_f64  ( void ) __lart_stub;
 void    *__lamp_any_ptr  ( void ) __lart_stub;
 char    *__lamp_any_array( void ) __lart_stub;
 
-bool    __lamp_lower_i1 ( __lamp_ptr v ) __lart_stub;
+bool     __lamp_lower_i1 ( __lamp_ptr v ) __lart_stub;
 uint8_t  __lamp_lower_i8 ( __lamp_ptr v ) __lart_stub;
 uint16_t __lamp_lower_i16( __lamp_ptr v ) __lart_stub;
 uint32_t __lamp_lower_i32( __lamp_ptr v ) __lart_stub;

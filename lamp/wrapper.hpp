@@ -154,6 +154,7 @@ extern "C"
     // // i32 __lamp_lower_i32( __lamp_ptr v ) { return lower< i32 >( v ); }
     // // i64 __lamp_lower_i64( __lamp_ptr v ) { return lower< i64 >( v ); }
 
+    i1    __lamp_any_i1()    { return any< dom, i1  >(); }
     i8    __lamp_any_i8()    { return any< dom, i8  >(); }
     i16   __lamp_any_i16()   { return any< dom, i16 >(); }
     i32   __lamp_any_i32()   { return any< dom, i32 >(); }
