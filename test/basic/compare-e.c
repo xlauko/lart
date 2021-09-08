@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include <lamp.h>
 #include "utils.h"
 
 uint32_t __lamp_any_i32(void); // test bitcast from different function type
