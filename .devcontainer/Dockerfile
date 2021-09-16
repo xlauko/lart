@@ -1,20 +1,12 @@
 ARG CMAKE_VERSION=3.21
 ARG LLVM_VERSION=12.0.1
-ARG SVF_VERSION=2.2
+ARG SVF_VERSION=2.3
 ARG BUILD_BASE=ubuntu:rolling
-
-ARG USERNAME=vscode
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
 
 #
 # Base layer
 #
 FROM ${BUILD_BASE} as base
-
-ARG USERNAME
-ARG USER_UID
-ARG USER_GID
 
 ARG CMAKE_VERSION
 
@@ -25,15 +17,9 @@ RUN apt-get -y update
 RUN apt-get install -y \
         bash git ninja-build ccache curl wget \
 	build-essential clang zip unzip tar llvm-12 \
-	pkg-config zlib1g-dev cmake python3-pip -y
+	pkg-config zlib1g-dev cmake python3-pip gdb -y
 
 RUN pip install lit
-
-RUN if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \
-    groupmod --gid $USER_GID $USERNAME \
-    && usermod --uid $USER_UID --gid $USER_GID $USERNAME \
-    && chown -R $USER_UID:$USER_GID /home/$USERNAME; \
-    fi
 
 RUN apt-get autoremove -y
 RUN apt-get clean all
@@ -75,7 +61,7 @@ RUN cmake -GNinja \
   -S llvm \
   -B build-dataflow
 
-RUN cmake --build build-dataflow --target cxx cxxabi -- -j 4
+RUN cmake --build build-dataflow --target cxx cxxabi
 RUN cmake --build build-dataflow --target install-cxx install-cxxabi
 
 FROM dataflow-libs as svf
@@ -98,7 +84,7 @@ RUN cmake \
         -B build \
         -S .
 
-RUN cmake --build build -- -j 1
+RUN cmake --build build
 RUN cmake --build build --target install
 
 FROM svf as deps
