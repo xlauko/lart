@@ -10,7 +10,7 @@
     -B build-runtime \
     -S .
 
-cmake --build build-runtime -- -j 1
+cmake --build build-runtime
 cmake --build build-runtime --target install
 
 cmake \
@@ -25,5 +25,5 @@ cmake \
     -B build \
     -S .
 
-cmake --build build -- -j 1
+cmake --build build
 cmake --build build --target install
