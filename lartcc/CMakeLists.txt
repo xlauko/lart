@@ -97,8 +97,8 @@ find_package( fmt CONFIG REQUIRED )
 target_link_libraries( lartcc PRIVATE
   llvmsc::llvmsc
   svflib
-  fmt::fmt-header-only
-  spdlog::spdlog_header_only
+  fmt::fmt
+  spdlog::spdlog
 )
 
 target_link_libraries( lartcc PRIVATE lart_project_options lart_project_warnings )
