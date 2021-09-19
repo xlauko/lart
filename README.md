@@ -47,3 +47,11 @@ In docker use:
 ```
 opt -load build/lib/cc/liblart_module.so -lart < in.bc > out.bc
 ```
+
+## Test
+
+```
+lit -v build/test
+```
+
+Note: `build/lartcc/lartcc` has to have exacutabple permisions.
