@@ -30,6 +30,12 @@ cmake -DLLVM_INSTALL_DIR=<path to llvm to use> \
 cmake --build build
 ```
 
+In docker use:
+
+```
+./scripts/build.sh
+```
+
 ## Run Compiler
 
 ```
