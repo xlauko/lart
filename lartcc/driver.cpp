@@ -24,6 +24,7 @@
 
 #include <cc/backend/native.hpp>
 
+#include <sc/erase.hpp>
 #include <sc/ranges.hpp>
 
 #include <queue>
@@ -43,20 +44,18 @@ namespace lart
         auto types = dfa::analysis::run_on( module );
 
         // lower pointer arithmetic to scalar operations
-        std::vector< llvm::Instruction * > toerase;
-        for ( auto &[val, type] : types ) {
-            if ( auto gep = llvm::dyn_cast< llvm::GetElementPtrInst >( val ) ) {
-                for ( auto [src, inst] : lower_pointer_arithmetic( gep ) ) {
-                    if ( types.count(src) )
-                        types[inst] = types[src];
+        {
+            sc::deferred_erase_vector erase([&] (auto inst) { types.erase(inst); });
+            
+            for ( auto &[val, type] : types ) {
+                if ( auto gep = llvm::dyn_cast< llvm::GetElementPtrInst >( val ) ) {
+                    for ( auto [src, inst] : lower_pointer_arithmetic( gep ) ) {
+                        if ( types.count(src) )
+                            types[inst] = types[src];
+                    }
+                    erase.push(gep);
                 }
-                toerase.push_back(gep);
             }
-        }
-
-        for ( auto v : toerase ) {
-            types.erase(v);
-            v->eraseFromParent();
         }
 
         // syntactic pass
