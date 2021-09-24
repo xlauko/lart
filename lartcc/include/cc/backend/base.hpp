@@ -35,7 +35,9 @@ namespace lart::backend
 
         using callinst = llvm::CallInst*;
         virtual void lower( ir::intrinsic, testtaint ) = 0;
+        
         virtual void lower( callinst c, op::unstash u ) = 0;
+        virtual void lower( callinst c, op::stash s ) = 0;
     };
 
 } // namespace lart::backend

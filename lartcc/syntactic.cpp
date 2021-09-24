@@ -23,6 +23,7 @@
 
 #include <sc/ranges.hpp>
 
+#include <algorithm>
 
 namespace lart
 {
@@ -43,6 +44,13 @@ namespace lart
         if ( call->isIndirectCall() )
             return false;
         return call->getCalledFunction()->getName().startswith( "__lamp" );
+    }
+
+    bool is_testtaint( llvm::CallBase *call )
+    {
+        if ( call->isIndirectCall() )
+            return false;
+        return call->getCalledFunction()->getName().startswith( "lart.test.taint" );
     }
 
     bool is_identity_cast( llvm::Value *inst )
@@ -104,6 +112,10 @@ namespace lart
 
     sc::generator< operation > syntactic::toprocess()
     {
+        auto is_abstract = [&] (auto value) {
+            return types.count(value) && types[value].maybe_abstract();
+        };
+
         for ( const auto &[val, type] : types ) {
             if ( auto op = make_operation(val); op.has_value() ) {
                 co_yield op.value();
@@ -111,8 +123,7 @@ namespace lart
         }
 
         for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
-            auto ptr = store->getPointerOperand();
-            if ( types.count(ptr) && types[ptr].maybe_abstract() )
+            if ( is_abstract( store->getPointerOperand() ) )
                 if ( auto op = make_operation(store); op.has_value() )
                     co_yield op.value();
         }
@@ -121,12 +132,21 @@ namespace lart
             if ( !br->isConditional() )
                 continue;
             auto cond = br->getCondition();
-            if ( types.count(cond) && types[cond].maybe_abstract() )
+            if ( is_abstract(cond) )
             {
                 co_yield op::tobool( br );
 
                 for ( auto intr : constrain::assume( br, cond ) )
                     co_yield intr;
+            }
+        }
+
+        for ( auto call : sv::filter< llvm::CallInst >( module ) ) {
+            if ( !is_testtaint(call) ) {
+                for ( auto &arg : call->arg_operands() ) {
+                    if ( is_abstract(arg.get()) )
+                        co_yield op::stash(arg.get(), call );
+                }
             }
         }
     }
@@ -190,11 +210,11 @@ namespace lart
             propagate_identity( concrete );
         }
 
-        if ( op::with_taints( intr.op ) ) {
+        if ( op::with_taints( intr.op ) || op::with_abstract_arg( intr.op ) ) {
             // Update placeholders of this instruction. If the abstract
             // instruction does not exist yet, store the placeholder
             // to quickly find it when abstract value is generated later.
-            for ( auto arg : taint::liftable_view( intr ) ) {
+            for ( auto arg : taint::paired_view( intr ) ) {
                 auto &con = arg.concrete;
                 if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
                     arg.abstract.set( abs->second );

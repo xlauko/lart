@@ -37,21 +37,22 @@ namespace lart::taint
                 co_yield arg;
         }
 
-        sc::generator< unsigned > liftable_indices( const ir::intrinsic &test )
+        sc::generator< unsigned > paired_indices( const ir::intrinsic &intr )
         {
-            auto op = test.op;
+            auto op = intr.op;
             // skip lifter argument
-            unsigned pos = 1;
+            unsigned pos = op::with_taints(op) ? 1 : 0;
 
             for ( auto arg : op::arguments(op) ) {
                 switch ( arg.type ) {
                 case op::argtype::lift:
+                case op::argtype::abstract:
                     co_yield pos;
                     pos += 2;
                     break;
                 case op::argtype::test:
                 case op::argtype::concrete:
-                    pos++;
+                    pos += 1;
                     break;
                 }
             }
@@ -66,11 +67,10 @@ namespace lart::taint
         return op::make_call( op, args, detail::name( op ) );
     }
 
-    sc::generator< ir::arg::liftable > liftable_view( const ir::intrinsic &test )
+    sc::generator< ir::arg::paired > paired_view( const ir::intrinsic &test )
     {
-        // TODO assert is test taint
         auto call = test.call;
-        for ( auto i : detail::liftable_indices( test ) )
+        for ( auto i : detail::paired_indices( test ) )
             co_yield { call->getOperandUse(i), call->getOperandUse(i + 1) };
     }
 

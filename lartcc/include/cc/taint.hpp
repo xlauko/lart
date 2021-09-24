@@ -30,6 +30,6 @@ namespace lart::taint
 
     llvm::CallInst * make_call( llvm::Module &module, const operation &op );
 
-    sc::generator< ir::arg::liftable > liftable_view( const ir::intrinsic &test );
+    sc::generator< ir::arg::paired > paired_view( const ir::intrinsic &test );
 
 } // namespace lart::taint

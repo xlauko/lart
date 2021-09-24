@@ -55,6 +55,7 @@ namespace lart::backend
 
         void lower( ir::intrinsic, testtaint ) override;
         void lower( callinst c, op::unstash u ) override;
+        void lower( callinst c, op::stash s ) override;
 
     private:
         llvm::Function *testtaint_fn;

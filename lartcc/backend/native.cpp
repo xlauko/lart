@@ -60,27 +60,39 @@ namespace lart::backend
         unsigned pos = 1;
 
         for ( auto arg : op::arguments( i.op ) ) {
-            if ( arg.type == op::argtype::lift ) {
-                auto concrete = fn->getArg(pos);
-                auto abstract = fn->getArg(pos + 1);
-                auto taint = test( concrete );
+            switch (arg.type) {
+                case op::argtype::lift: {
+                    auto concrete = fn->getArg(pos);
+                    auto abstract = fn->getArg(pos + 1);
+                    auto taint = test( concrete );
 
-                bld = bld | sc::action::or_{ tainted, taint };
-                tainted = bld.stack.back();
+                    bld = bld | sc::action::or_{ tainted, taint };
+                    tainted = bld.stack.back();
 
-                args.push_back( taint );
-                args.push_back( concrete );
-                args.push_back( abstract );
-
-                pos += 2;
-            } else if ( arg.type == op::argtype::test ) {
-                auto taint = test( fn->getArg(pos) );
-                bld = bld | sc::action::or_{ tainted, taint };
-                tainted = bld.stack.back();
-                pos++;
-            } else {
-                args.push_back( fn->getArg(pos) );
-                pos++;
+                    args.push_back( taint );
+                    args.push_back( concrete );
+                    args.push_back( abstract );
+                    pos += 2;
+                    break;
+                }
+                case op::argtype::test: {
+                    auto taint = test( fn->getArg(pos) );
+                    bld = bld | sc::action::or_{ tainted, taint };
+                    tainted = bld.stack.back();
+                    pos += 1;
+                    break;
+                } 
+                case op::argtype::concrete: {
+                    args.push_back( fn->getArg(pos) );
+                    pos += 1;
+                    break;
+                }
+                case op::argtype::abstract: {
+                    args.push_back( fn->getArg(pos) );
+                    args.push_back( fn->getArg(pos + 1) );
+                    pos += 2;
+                    break;
+                }
             }
         }
 
@@ -117,6 +129,14 @@ namespace lart::backend
     void native::lower( callinst call, op::unstash )
     {
         call->setCalledFunction( unstash_fn );
+    }
+
+    void native::lower( callinst call, op::stash )
+    {
+        auto abstract = call->getArgOperand( 1 );
+        auto bld = sc::builder_t( call );
+        bld.call( stash_fn, { abstract } );
+        call->eraseFromParent();
     }
 
 } // namespace lart::backend

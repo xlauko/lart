@@ -45,7 +45,7 @@ namespace lart
 
         std::map< llvm::Value*, llvm::Value* > abstract;
         std::map< llvm::Value*, llvm::Value* > identity;
-        std::map< llvm::Value*, std::vector< ir::arg::liftable > > places;
+        std::map< llvm::Value*, std::vector< ir::arg::paired > > places;
 
         const dfa::types &types;
         llvm::Module &module;

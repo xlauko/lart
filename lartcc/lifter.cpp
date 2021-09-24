@@ -36,14 +36,21 @@ namespace lart
             llvm::Value *abstract;
         };
 
-        struct without_taint
+        struct without_taint_concrete
         {
             llvm::Value *value;
         };
 
+        struct without_taint_abstract
+        {
+            llvm::Value *concrete;
+            llvm::Value *abstract;
+        };
+
+
     } // namespace arg
 
-    using argument = std::variant< arg::with_taint, arg::without_taint >;
+    using argument = std::variant< arg::with_taint, arg::without_taint_concrete, arg::without_taint_abstract >;
 
     namespace detail
     {
@@ -61,8 +68,12 @@ namespace lart
                     i += 3;
                     break;
                 case op::argtype::concrete:
-                    co_yield arg::without_taint{ f->getArg(i) };
-                    i++;
+                    co_yield arg::without_taint_concrete{ f->getArg(i) };
+                    i += 1;
+                    break;
+                case op::argtype::abstract:
+                    co_yield arg::without_taint_abstract{ f->getArg(i), f->getArg(i + 1) };
+                    i += 2;
                     break;
                 }
             }
@@ -72,7 +83,8 @@ namespace lart
         {
             return std::visit( util::overloaded {
                 [] ( arg::with_taint a ) { return a.abstract; },
-                [] ( arg::without_taint a ) { return a.value; },
+                [] ( arg::without_taint_concrete a ) { return a.value; },
+                [] ( arg::without_taint_abstract a ) { return a.abstract; }
             }, arg );
         };
 
@@ -129,6 +141,10 @@ namespace lart
                 break;
             case op::argtype::concrete:
                 args.push_back(arg.value->getType());
+                break;
+            case op::argtype::abstract:
+                args.push_back(arg.value->getType());
+                args.push_back(aptr);
                 break;
             }
         }

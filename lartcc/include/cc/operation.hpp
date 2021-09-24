@@ -69,6 +69,8 @@ namespace lart::op
         llvm::Instruction *_where;
 
         std::optional< llvm::Value* > replaces;
+
+        constexpr bool with_taints() const { return false; }
     };
 
     struct with_taints_base : base
@@ -81,11 +83,9 @@ namespace lart::op
     struct without_taints_base : base
     {
         using base::base;
-
-        constexpr bool with_taints() const { return false; }
     };
 
-    enum class argtype { test, lift, concrete };
+    enum class argtype { test, lift, concrete, abstract };
 
     struct argument
     {
@@ -100,11 +100,17 @@ namespace lart::op
                     case argtype::test: return "test";
                     case argtype::lift: return "lift";
                     case argtype::concrete: return "concrete";
+                    case argtype::abstract: return "abstract";
                     default: llvm_unreachable( "unknown arg type" );
                 }
             } ();
 
             return s << sc::fmt::llvm_name( a.value ) << ":" << lift;
+        }
+
+        static inline constexpr bool is_abstract(const argument & arg)
+        {
+            return arg.type == argtype::abstract;
         }
     };
 
@@ -296,9 +302,24 @@ namespace lart::op
 
     struct stash : without_taints_base
     {
+        using base = without_taints_base;
+
+        stash( llvm::Value *what, llvm::Instruction *call )
+            : base( what, call )
+        {}
+        
         std::string name() const { return stash_base::name; }
         std::string impl() const { return stash_base::impl; }
-        args_t arguments() const { return {}; }
+
+        args_t arguments() const
+        {
+            return {{ _what, argtype::abstract }};
+        }
+
+        std::optional< default_wrapper > default_value() const
+        {
+            return std::nullopt;
+        }
     };
 
 
@@ -365,6 +386,11 @@ namespace lart::op
     static auto with_taints = detail::invoke( [] (const auto &o) { return o.with_taints(); } );
     static auto replaces = detail::invoke( [] (const auto &o) { return o.replaces; } );
 
+    inline bool with_abstract_arg( const operation &o )
+    {
+        return std::ranges::any_of( arguments(o), argument::is_abstract );
+    }
+    
     inline bool returns_value( const operation &o )
     {
         return default_value(o).has_value();
@@ -412,11 +438,15 @@ namespace lart::op
     inline sc::generator< llvm::Value* > duplicated_arguments(const operation &op)
     {
         for ( auto arg : op::arguments(op) ) {
-            if ( arg.type == argtype::lift ) {
-                co_yield arg.value;
-                co_yield op::abstract_pointer();
-            } else {
-                co_yield arg.value;
+            switch (arg.type) {
+                case argtype::lift:
+                case argtype::abstract:
+                    co_yield arg.value;
+                    co_yield op::abstract_pointer();
+                    break; 
+                case op::argtype::test:
+                case op::argtype::concrete:
+                    co_yield arg.value;
             }
         }
     }

@@ -35,7 +35,7 @@ namespace lart::ir
 
     namespace arg
     {
-        struct liftable
+        struct paired
         {
             llvm::Use &concrete;
             llvm::Use &abstract;
