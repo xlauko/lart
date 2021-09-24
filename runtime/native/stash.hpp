@@ -21,29 +21,28 @@
 
 namespace __lart::rt
 {
-    using stash_register_t = std::uint64_t;
-
-    extern thread_local stash_register_t stash_register;
+    constexpr std::size_t stash_stack_size = 256;
+    
+    using stash_stack_value_t = std::uint64_t;
+    
+    extern thread_local std::uint8_t stash_stack_top;
+    extern thread_local stash_stack_value_t stash_stack[];
 
     template< typename T > void stash( T value )
     {
+        auto &place = stash_stack[ stash_stack_top++ ];
         if constexpr ( std::is_pointer_v< T > )
-            stash_register = reinterpret_cast< std::uintptr_t >( value );
+            place = reinterpret_cast< std::uintptr_t >( value );
         else
-            stash_register = static_cast< std::uint64_t >( value );
+            place = static_cast< std::uint64_t >( value );
     }
 
     template< typename T > T unstash()
     {
-        auto ret = [] {
-            if constexpr ( std::is_pointer_v< T > )
-                return reinterpret_cast< T >( stash_register );
-            else
-                return static_cast< T >( stash_register );
-        }();
-
-        stash_register = 0; // reset stash_register
-        return ret;
+        if constexpr ( std::is_pointer_v< T > )
+            return reinterpret_cast< T >( stash_stack[ stash_stack_top-- ] );
+        else
+            return static_cast< T >( stash_stack[ stash_stack_top-- ] );
     }
 
 } // namespace __lart::rt

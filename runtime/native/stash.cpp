@@ -18,5 +18,6 @@
 
 namespace __lart::rt
 {
-    thread_local stash_register_t stash_register = 0;
+    thread_local std::uint8_t stash_stack_top = 0;
+    thread_local stash_stack_value_t stash_stack[stash_stack_size] = {};
 } // namespace __lart::rt
