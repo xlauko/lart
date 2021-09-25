@@ -99,7 +99,8 @@ namespace lart::dfa::detail
                     llvm_unreachable( "abstraction of functions not supported yet" );
                 } else {
                     assert( !fn->isVarArg() && "abstract varargs are not yet supported" );
-                    forward_use( use.getUser(), fn->getArg( use.getOperandNo() ) );
+                    // unify call argument and function argument abstraction
+                    forward_use( use.get(), fn->getArg( use.getOperandNo() ) );
                 }
             }
         };
@@ -128,8 +129,7 @@ namespace lart::dfa::detail
                 [&] ( llvm::IntrinsicInst * i ) {
                     if ( keep_intrinsic( i->getIntrinsicID() ) )
                         return;
-                    // FIXME
-                    // TRACE( "ignoring intrinsic: ", to_string( i ) );
+                    spdlog::info( "ignoring intrinsic: {}", sc::fmt::llvm_to_string( i ));
                 },
                 [&] ( llvm::CallBase*           ) { calluse( use ); },
                 [&] ( llvm::Instruction  * inst ) { forward_use( v, inst ); },
