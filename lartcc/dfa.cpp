@@ -31,6 +31,20 @@
 
 namespace lart::dfa::detail
 {
+    bool ignore_function( llvm::Function * )
+    {
+        return false;
+    }
+
+    // returns lamp version of a function if it exists
+    llvm::Function * abstract_function( llvm::Function *fn )
+    {
+        assert( fn->hasName() );
+        auto mod  = fn->getParent();
+        auto name = "__lamp_fn_" + fn->getName();
+        return mod->getFunction( name.str() );
+    }
+
     void dataflow_analysis::push( edge &&e ) noexcept
     {
         spdlog::debug( "push {}", e );
@@ -57,43 +71,45 @@ namespace lart::dfa::detail
         return e;
     }
 
+    sc::generator< llvm::Function * > dataflow_analysis::destinations( llvm::CallBase *call )
+    {
+        assert( !call->isIndirectCall() );
+        co_yield call->getCalledFunction();
+    }
+
     edges_t dataflow_analysis::edges( llvm::Value *v )
     {
         edges_t edges;
 
-        auto use = [&] ( llvm::Value * f, llvm::Value * t ) {
-            auto e = induced_edges( f, t );
+        auto forward_use = [&] ( llvm::Value *from, llvm::Value *to ) {
+            auto e = induced_edges( from, to );
             std::move( e.begin(), e.end(), std::back_inserter( edges ) );
         };
 
         // creates edge between operand and function arguments
-        auto arguse = [&] ( auto /*operand*/, llvm::CallBase * /*call*/ ) {
-            /*for ( auto fn : cr.resolve_call( call ) ) {
-                if ( auto afn = abstract_function( fn ) ) {
-                    if ( lart::tag::has( afn, tag::abstract ) )
-                        use( call.getInstruction(), afn );
+        auto arguse = [&] (const llvm::Use &use) {
+            auto call = llvm::cast< llvm::CallBase >( use.getUser() );
+            for ( auto fn : destinations(call) ) {
+                if ( ignore_function(fn)) 
+                    continue;
                 // FIXME transform function even if abstract version exists (perform copy)
-                } else if ( !lart::tag::function::ignore_call( fn ) ) {
-                    bool matched = false;
-                    for ( auto & op : call.args() ) {
-                        if ( op.get() == operand ) {
-                            ASSERT( !( fn->isVarArg() && op.getOperandNo() >= fn->arg_size() ),
-                                    "DFA cannot handle abstract varargs" );
-                            use( operand, argument( fn, op.getOperandNo() ) );
-                            matched = true;
-                        }
-                    }
-                    if ( !matched )
-                        UNREACHABLE( "mismatch of call and operand" );
+                if ( abstract_function(fn) ) {
+                    // if ( lart::tag::has( afn, tag::abstract ) )
+                    //     use( call.getInstruction(), afn );
+                    llvm_unreachable( "abstraction of functions not supported yet" );
+                } else {
+                    assert( !fn->isVarArg() && "abstract varargs are not yet supported" );
+                    forward_use( use.getUser(), fn->getArg( use.getOperandNo() ) );
                 }
-            }*/
+            }
         };
 
-        auto calluse = [&] ( auto operand, llvm::CallBase * call ) {
-            if ( operand == call->getCalledOperand() )
-                use( v, call ); // use of function return value
+        auto calluse = [&] (const llvm::Use &use) {
+            auto call = llvm::cast< llvm::CallBase >( use.getUser() );
+            if ( use.get() == call->getCalledOperand() )
+                forward_use( use.get(), use.getUser() ); // use of function return value
             else
-                arguse( operand, call );
+                arguse( use );
         };
 
         auto keep_intrinsic = [] ( auto id )
@@ -107,19 +123,18 @@ namespace lart::dfa::detail
             }
         };
 
-        auto forward = [ & ]( llvm::Value * user ) {
-            sc::llvmcase( user,
+        auto forward = [ & ](const llvm::Use &use) {
+            sc::llvmcase( use.getUser(),
                 [&] ( llvm::IntrinsicInst * i ) {
                     if ( keep_intrinsic( i->getIntrinsicID() ) )
                         return;
                     // FIXME
                     // TRACE( "ignoring intrinsic: ", to_string( i ) );
                 },
-                [&] ( llvm::CallInst     * call ) { calluse( v, call ); },
-                [&] ( llvm::InvokeInst   * call ) { calluse( v, call ); },
-                [&] ( llvm::Instruction  * inst ) { use( v, inst ); },
-                [&] ( llvm::ConstantExpr * expr ) { use( v, expr ); },
-                [&] ( llvm::GlobalVariable * gv ) { use( v, gv ); },
+                [&] ( llvm::CallBase*           ) { calluse( use ); },
+                [&] ( llvm::Instruction  * inst ) { forward_use( v, inst ); },
+                [&] ( llvm::ConstantExpr * expr ) { forward_use( v, expr ); },
+                [&] ( llvm::GlobalVariable * gv ) { forward_use( v, gv ); },
                 []  ( llvm::Value *val ) {
                     std::string msg = "unsupported edge"s + sc::fmt::llvm_to_string( val );
                     llvm_unreachable( msg.c_str() );
@@ -135,7 +150,7 @@ namespace lart::dfa::detail
             return abstract_function( sc::get_function( value ) );
         };*/
 
-        auto users = [&] ( auto val ) {
+        auto uses = [&] ( auto val ) {
             // for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
             //            push( store_edge( lhs, p ) )
             /*if ( auto aml = dfg.gv_to_aml( node ) )
@@ -144,10 +159,10 @@ namespace lart::dfa::detail
                     .filter( std::not_fn( in_lava ) )
                     .filter( std::not_fn( in_lamp ) )
                     .freeze();*/
-            return val->users();
+            return val->uses();
         };
 
-        for ( auto u : users( v ) )
+        for (const auto &u : uses(v))
             forward( u );
 
         return edges;
@@ -221,7 +236,7 @@ namespace lart::dfa::detail
 
         aliases.init( pag );
 
-        for ( const auto&[call, kind] : roots ) {
+        for ( const auto  &[call, kind] : roots ) {
             types.add( call, kind );
             push( call );
         }

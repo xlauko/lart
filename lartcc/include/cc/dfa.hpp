@@ -263,6 +263,8 @@ namespace detail
         edges_t edges( llvm::Value * v );
         edges_t induced_edges( llvm::Value * lhs, llvm::Value * rhs );
 
+        sc::generator< llvm::Function * > destinations( llvm::CallBase *call );
+
         void preprocess( llvm::Function * ) const;
 
         type_map run_from( const roots_map &roots );
