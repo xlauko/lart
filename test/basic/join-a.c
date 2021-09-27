@@ -1,4 +1,4 @@
-// TODO: %testrun %lartcc trivial %s -o %t | %filecheck %s
+// RUN: %testrun %lartcc trivial %s -o %t | %filecheck %s
 // RUN: %testrun %lartcc unit %s -o %t | %filecheck %s
 
 #include <lamp.h>
