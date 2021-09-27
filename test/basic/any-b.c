@@ -1,4 +1,4 @@
-// RUN: %testrun %lartcc term -lz3 %s -o %t | %filecheck %s
+// TODO: %testrun %lartcc term -lz3 %s -o %t | %filecheck %s
 
 #include <lamp.h>
 #include "utils.h"
