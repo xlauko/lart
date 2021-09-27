@@ -13,9 +13,9 @@ int main() {
     int x = 0;
     int y = __lamp_any_i32();
     if (fn(x, y))
-        UNREACHABLE
-    if (fn(y, x))
         REACHABLE
+    if (fn(y, x))
+        UNREACHABLE
     // CHECK-NOT: lart-unreachable
     // CHECK-COUNT-1: lart-reachable
 }
