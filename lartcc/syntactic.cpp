@@ -100,7 +100,7 @@ namespace lart
             [&] ( llvm::CallInst *call ) {
                 if ( is_lamp_call(call) ) {
                     // TODO does return nonvoid
-                    result = op::unstash{ call, {} };
+                    result = op::unstash{ call };
                 } else {
                     // TODO
                 }
@@ -147,6 +147,13 @@ namespace lart
                     if ( is_abstract(arg.get()) )
                         co_yield op::stash(arg.get(), call );
                 }
+            }
+        }
+
+        for ( auto &fn : module ) {
+            for ( auto &arg : fn.args() ) {
+                if ( is_abstract(&arg) )
+                    co_yield op::unstash(&arg, fn.getEntryBlock().getFirstNonPHIOrDbg() );
             }
         }
     }
