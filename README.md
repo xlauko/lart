@@ -19,18 +19,9 @@ While most traditional abstraction engines work as interpreters, abstractions ca
 
 ## Build
 
-```
-mkdir build
+Use or repeat the setup from `./devcontainer/Dockerfile` for the time being.
 
-cmake -DLLVM_INSTALL_DIR=<path to llvm to use> \
-      -DLIBCXX_INSTALL_DIR=<path to sanitized libcxx> \
-      -B build \
-      -S .
-
-cmake --build build
-```
-
-In docker use:
+Then use:
 
 ```
 ./scripts/build.sh
