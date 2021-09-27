@@ -18,6 +18,8 @@
 
 //#include <cc/dfa.hpp>
 
+#include <cc/logger.hpp>
+
 #include <sc/ranges.hpp>
 #include <sc/format.hpp>
 #include <sc/constant.hpp>
@@ -294,12 +296,6 @@ namespace lart::op
         }
     };
 
-    struct stash_base
-    {
-        inline static const std::string name = "stash";
-        inline static const std::string impl = "__lart_stash";
-    };
-
     struct stash : without_taints_base
     {
         using base = without_taints_base;
@@ -308,8 +304,8 @@ namespace lart::op
             : base( what, call )
         {}
         
-        std::string name() const { return stash_base::name; }
-        std::string impl() const { return stash_base::impl; }
+        std::string name() const { return "stash"; }
+        std::string impl() const { return "__lart_stash"; }
 
         args_t arguments() const
         {
@@ -322,17 +318,13 @@ namespace lart::op
         }
     };
 
-
-    struct unstash_base
+    struct unstash : without_taints_base
     {
-        inline static const std::string name = "unstash";
-        inline static const std::string impl= "__lart_unstash";
-    };
+        using base = without_taints_base;
+        using base::base;
 
-    struct unstash : without_taints_base, unstash_base
-    {
-        std::string name() const { return unstash_base::name; }
-        std::string impl() const { return unstash_base::impl; }
+        std::string name() const { return "unstash"; }
+        std::string impl() const { return  "__lart_unstash"; }
         args_t arguments() const { return {}; }
     };
 
@@ -478,10 +470,12 @@ namespace lart::op
                                     , const std::string &intr_name )
     {
         llvm::IRBuilder<> irb( op::location(op) );
-        auto module = irb.GetInsertBlock()->getModule();
+        auto mod = irb.GetInsertBlock()->getModule();
         auto arg_types = sc::views::to_vector( args | sv::types );
         auto rty = extract_return_type( op, arg_types );
-        return irb.CreateCall( function(module, rty, arg_types, intr_name), args );
+
+        spdlog::debug("make call: {} :: {} -> {}", intr_name, sc::fmt::llvm_to_string(arg_types), sc::fmt::llvm_to_string(rty));
+        return irb.CreateCall( function(mod, rty, arg_types, intr_name), args );
     }
 
 } // namespace lart::op
