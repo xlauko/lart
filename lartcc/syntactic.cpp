@@ -147,6 +147,17 @@ namespace lart
                     if ( is_abstract(arg.get()) )
                         co_yield op::stash(arg.get(), call );
                 }
+
+                if ( is_abstract(call) ) {
+                    co_yield op::unstash(call);
+                }
+            }
+        }
+
+        for ( auto ret : sv::filter< llvm::ReturnInst >( module ) ) {
+            auto val = ret->getReturnValue();
+            if ( is_abstract(val) ) {
+                co_yield op::stash(val, ret);
             }
         }
 
