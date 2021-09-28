@@ -40,9 +40,9 @@ namespace __lart::rt
     template< typename T > T unstash()
     {
         if constexpr ( std::is_pointer_v< T > )
-            return reinterpret_cast< T >( stash_stack[ stash_stack_top-- ] );
+            return reinterpret_cast< T >( stash_stack[ --stash_stack_top ] );
         else
-            return static_cast< T >( stash_stack[ stash_stack_top-- ] );
+            return static_cast< T >( stash_stack[ --stash_stack_top ] );
     }
 
 } // namespace __lart::rt
