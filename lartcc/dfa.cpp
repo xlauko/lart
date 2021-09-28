@@ -31,8 +31,10 @@
 
 namespace lart::dfa::detail
 {
-    bool ignore_function( llvm::Function * )
+    bool ignore_function( llvm::Function *fn )
     {
+        if ( fn->getName().startswith( "__lamp" ) )
+            return true;
         return false;
     }
 
