@@ -142,7 +142,7 @@ namespace lart
         }
 
         for ( auto call : sv::filter< llvm::CallInst >( module ) ) {
-            if ( !is_testtaint(call) ) {
+            if ( !is_testtaint(call) && !is_lamp_call(call) ) {
                 for ( auto &arg : call->arg_operands() ) {
                     if ( is_abstract(arg.get()) )
                         co_yield op::stash(arg.get(), call );
