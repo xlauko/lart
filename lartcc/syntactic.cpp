@@ -112,6 +112,7 @@ namespace lart
 
     sc::generator< operation > syntactic::toprocess()
     {
+        // TODO: rangeify
         auto is_abstract = [&] (auto value) {
             return types.count(value) && types[value].maybe_abstract();
         };
@@ -141,29 +142,42 @@ namespace lart
             }
         }
 
+        auto has_abstract_arg = [&] (llvm::CallBase *call) {
+            for (const auto &arg : call->arg_operands())
+                if (is_abstract(arg.get()))
+                    return true;
+            return false;
+        };
+
         for ( auto call : sv::filter< llvm::CallInst >( module ) ) {
             if ( !is_testtaint(call) && !is_lamp_call(call) ) {
-                for ( auto &arg : call->arg_operands() ) {
-                    if ( is_abstract(arg.get()) )
-                        co_yield op::stash(arg.get(), call );
+                // TODO stash only possibly abstract arguments
+                if ( has_abstract_arg(call) ) {
+                    for (auto &arg : call->arg_operands())
+                        co_yield op::stash(arg.get(), call);
                 }
 
-                if ( is_abstract(call) ) {
+                if ( is_abstract(call) )
                     co_yield op::unstash(call);
-                }
             }
         }
 
         for ( auto ret : sv::filter< llvm::ReturnInst >( module ) ) {
             auto val = ret->getReturnValue();
-            if ( is_abstract(val) ) {
+            if ( is_abstract(val) )
                 co_yield op::stash(val, ret);
-            }
         }
 
+        auto function_has_abstract_arg = [&] (llvm::Function &fn) {
+            for (auto &arg : fn.args())
+                if (is_abstract(&arg))
+                    return true;
+            return false;
+        };
+
         for ( auto &fn : module ) {
-            for ( auto &arg : fn.args() ) {
-                if ( is_abstract(&arg) )
+            if (function_has_abstract_arg(fn)) {
+                for (auto &arg : fn.args())
                     co_yield op::unstash(&arg, fn.getEntryBlock().getFirstNonPHIOrDbg() );
             }
         }
