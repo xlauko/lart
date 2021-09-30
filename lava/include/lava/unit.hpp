@@ -38,9 +38,6 @@ namespace __lava
         template< typename type > static unit lift( const type& ) { return {}; }
         template< typename type > static unit any() { return {}; }
 
-        static unit lift_any() { return {}; }
-        static unit lift_any_ptr() { return {}; }
-
         template< typename size >
         static unit op_alloca( const size&, uint8_t ) { return {}; }
 
