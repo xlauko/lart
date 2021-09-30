@@ -304,7 +304,10 @@ namespace lart::op
             : base( what, call )
         {}
         
-        std::string name() const { return "stash"; }
+        std::string name() const
+        {
+            return "stash." + sc::fmt::llvm_to_string(_what->getType()); 
+        }
         std::string impl() const { return "__lart_stash"; }
 
         args_t arguments() const
