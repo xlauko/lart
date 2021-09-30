@@ -6,6 +6,7 @@ register_domain( unit )
 register_domain( constant )
 register_domain( trivial )
 register_domain( term )
+register_domain( tracing-term )
 register_domain( pa )
 
 add_library( lamp-api INTERFACE )
