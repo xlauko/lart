@@ -150,7 +150,10 @@ namespace __lava
 
         // static term op_inttoptr( tr, bw ) { return {}; }
         // static term op_ptrtoint( tr, bw ) { return {}; }
-        static term op_sext( tr t, bw b ) { return z3::sext( t.get(), b ); }
+        static term op_sext( tr t, bw b ) { 
+            auto &v = t.get();
+            return z3::sext( v, b - v.get_sort().bv_size() ); 
+        }
         // static term op_sitofp( tr, bw ) { return {}; }
         static term op_trunc( tr t, bw b ) { return t.get().extract( b - 1, 0 ); }
         // static term op_uitofp( tr, bw ) { return {}; }
