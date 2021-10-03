@@ -62,11 +62,6 @@ namespace __lava
         {
             auto &ctx = __term_state.ctx;
 
-            if constexpr ( std::is_same_v< type, bool > )
-            {
-                return ctx.bool_val( value );
-            }
-
             if constexpr ( std::is_integral_v < type > )
             {
                 return ctx.bv_val( value, bitwidth_v< type > );
@@ -155,7 +150,10 @@ namespace __lava
             return z3::sext( v, b - v.get_sort().bv_size() ); 
         }
         // static term op_sitofp( tr, bw ) { return {}; }
-        static term op_trunc( tr t, bw b ) { return t.get().extract( b - 1, 0 ); }
+        static term op_trunc( tr t, bw b ) { 
+            // TODO: check
+            return t.get().extract( b - 1, 0 ); 
+        }
         // static term op_uitofp( tr, bw ) { return {}; }
         static term op_zext( tr t, bw b ) { 
             auto &v = t.get();
