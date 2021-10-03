@@ -121,6 +121,9 @@ namespace __lava
 
         static void dump( ur ) { printf( "unit\n" ); }
         static std::string trace( ur ) { return "unit"; }
+        
+        template< typename stream >
+        friend stream& operator<<( stream &os, ur ) { return os << "unit"; }
     };
 
 } // namespace __lava
