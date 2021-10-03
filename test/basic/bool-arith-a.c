@@ -10,7 +10,6 @@
 int main()
 {
     bool a = __lamp_any_i1();
-    bool b = !a;
-
-    assert( a == b ); // CHECK: assertion a == b failed
+    bool b = __lamp_any_i1();
+    assert( a && b ); // CHECK: assertion a && b failed
 }
