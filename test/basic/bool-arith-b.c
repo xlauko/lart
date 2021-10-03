@@ -9,8 +9,10 @@
 
 int main()
 {
-    bool a = __lamp_any_i1();
-    bool b = !a;
+    int a = __lamp_any_i32();
+    int b = __lamp_any_i32();
+    bool check = a == b;
 
-    assert( a == b ); // CHECK: assertion a == b failed
+    bool boolean = __lamp_any_i1();
+    assert( check & boolean ); // CHECK: assertion check & boolean failed
 }
