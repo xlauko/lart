@@ -3,6 +3,7 @@ cmake_minimum_required( VERSION 3.16 )
 include( cmake/lamp.cmake )
 
 register_domain( unit )
+register_domain( tracing-unit )
 register_domain( constant )
 register_domain( trivial )
 register_domain( term )
