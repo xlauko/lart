@@ -26,7 +26,6 @@ namespace __lart::rt
 
     void poke( void *addr, std::size_t size, shadow_t value );
 
-
     using peeked = __lart_peeked;
 
     peeked peek( const void *addr, std::size_t size );
