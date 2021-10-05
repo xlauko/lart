@@ -20,6 +20,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include <runtime/peek.h>
+
 #define __annotate( x )   __attribute__(( __annotate__( #x ) ))
 #define __inline          __attribute__(( __always_inline__ ))
 #define __noinline        __attribute__(( __noinline__ ))
@@ -71,8 +73,9 @@ extern "C" {
 
     __export void __lart_cancel() __lart_stub;
 
-    __export void* __lart_melt( void *addr, uint32_t bw ) __lart_stub;
-    __export void __lart_freeze( void *value, void *addr, uint32_t bw ) __lart_stub;
+    __export void __lart_poke( void *addr, size_t bytes, void* value );
+    
+    __export struct __lart_peeked __lart_peek( const void *addr, size_t bytes );
 
 #ifdef __cplusplus
 }

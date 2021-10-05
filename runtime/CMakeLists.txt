@@ -6,6 +6,10 @@ set_target_properties( runtime PROPERTIES PUBLIC_HEADER
     include/runtime/lart.h
 )
 
+set_target_properties( runtime PROPERTIES PUBLIC_HEADER
+    include/runtime/peek.h
+)
+
 target_include_directories( runtime
     INTERFACE
         $<INSTALL_INTERFACE:include>

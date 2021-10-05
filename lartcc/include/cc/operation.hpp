@@ -124,7 +124,7 @@ namespace lart::op
         using base::with_taints;
 
         std::string name() const { return "melt"; }
-        std::string impl() const { return "__lart_melt"; }
+        std::string impl() const { return "__lamp_melt"; }
         args_t arguments() const
         {
             auto load = llvm::cast< llvm::LoadInst >( _what );
@@ -142,7 +142,7 @@ namespace lart::op
     struct freeze : with_taints_base
     {
         std::string name() const { return "freeze"; }
-        std::string impl() const { return "__lart_freeze"; }
+        std::string impl() const { return "__lamp_freeze"; }
 
         args_t arguments() const
         {
