@@ -31,11 +31,11 @@ namespace __lart::rt
         return meta;
     }
 
-    void poke( void *addr, size_t size, void *value )
+    void poke( void *addr, size_t bytes, void *value )
     {
-        auto meta = make_meta( addr, size, value );
+        auto meta = make_meta( addr, bytes, value );
         auto shadow = dfsan_create_label( "shadow", meta );
-        dfsan_set_label( shadow, addr, size );
+        dfsan_set_label( shadow, addr, bytes );
     }
 
     shadow_meta *peek( const void *addr )
@@ -43,11 +43,6 @@ namespace __lart::rt
         auto meta        = dfsan_read_label( addr, 1 );
         const auto *info = dfsan_get_label_info( meta );
         return static_cast< shadow_meta* >( info->userdata );
-    }
-
-    shadow_meta *peek( const void *addr, std::size_t size )
-    {
-        return peek( addr );
     }
 
 } // namespace __lart::rt

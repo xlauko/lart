@@ -21,8 +21,6 @@
 
 namespace __lamp
 {
-    using bw = __lava::bitwidth_t;
-
     namespace detail
     {
 
@@ -52,7 +50,7 @@ namespace __lamp
     } // namespace detail
 
 
-    void freeze( void *val, void *addr, bw size )
+    void freeze( void *val, void *addr, size_t bytes )
     {
         // auto orig = ref( val_ );
         // auto cl = orig.clone();
@@ -98,10 +96,10 @@ namespace __lamp
         // }
 
         // __vm_poke( _VM_ML_User, addr.obj, addr.off, size, ptr.obj );
-        __lart_poke( addr, size, val );
+        __lart_poke( addr, bytes, val );
     }
 
-    void* melt( void *addr, bw size )
+    void* melt( void *addr, size_t bytes )
     {
         // __vm_pointer_t addr = __vm_pointer_split( addr_ );
         // __vm_meta_t m;
@@ -155,8 +153,7 @@ namespace __lamp
         // for  ( ; current_offset < end_offset; advance() )
         //     curr = dom::op_concat( next(), std::move( curr ) );
         // return curr;
-        // auto peeked = __lart::rt::peek( addr, size );
-        auto peeked = __lart_peek( addr, bytes );
+        auto peeked = __lart_peek( addr );
         return peeked->value;
     }
 } // namespace __lamp

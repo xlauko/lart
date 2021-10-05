@@ -75,7 +75,7 @@ extern "C" {
 
     __export void __lart_poke( void *addr, size_t bytes, void* value );
     
-    __export struct __lart_shadow_meta *__lart_peek( const void *addr, size_t bytes );
+    __export struct __lart_shadow_meta *__lart_peek( const void *addr );
 
 #ifdef __cplusplus
 }

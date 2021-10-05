@@ -172,12 +172,12 @@ extern "C"
         return wrap( []( const auto &... x ) { return dom::op_alloca( x... ); }, size, w );
     }
 
-    void __lamp_freeze( void *val, void *addr, bw bytes )
+    void __lamp_freeze( void *val, void *addr, size_t bytes )
     {
         __lamp::freeze( val, addr, bytes );
     }
 
-    __lamp_ptr __lamp_melt( void *addr, bw bytes )
+    __lamp_ptr __lamp_melt( void *addr, size_t bytes )
     {
         return { __lamp::melt( addr, bytes ) };
     }
