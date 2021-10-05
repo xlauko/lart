@@ -62,9 +62,9 @@ extern "C"
         __lart::rt::poke( addr, bytes, value );
     }
 
-    __lart_shadow_meta *__lart_peek( const void *addr, size_t bytes )
+    __lart_shadow_meta *__lart_peek( const void *addr )
     {
-        return __lart::rt::peek( addr, bytes );
+        return __lart::rt::peek( addr );
     }
     
     void __assert_fail(const char *assertion, const char *file, unsigned int line, const char *func)

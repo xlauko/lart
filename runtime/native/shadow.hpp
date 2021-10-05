@@ -22,9 +22,9 @@
 
 namespace __lart::rt
 {
-    void poke( void *addr, std::size_t size, void *value );
+    void poke( void *addr, std::size_t bytes, void *value );
 
     using shadow_meta = __lart_shadow_meta;
 
-    shadow_meta* peek( const void *addr, std::size_t size );
+    shadow_meta* peek( const void *addr );
 }
