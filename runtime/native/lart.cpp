@@ -20,7 +20,7 @@
 #include "shadow.hpp"
 #include "choose.hpp"
 
-#include "peek.h"
+#include "shadowmeta.h"
 
 #include <cstdlib>
 
@@ -62,7 +62,7 @@ extern "C"
         __lart::rt::poke( addr, bytes, value );
     }
 
-    __lart_peeked __lart_peek( const void *addr, size_t bytes )
+    __lart_shadow_meta *__lart_peek( const void *addr, size_t bytes )
     {
         return __lart::rt::peek( addr, bytes );
     }

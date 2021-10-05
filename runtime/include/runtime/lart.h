@@ -20,7 +20,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include <peek.h>
+#include "shadowmeta.h"
 
 #define __annotate( x )   __attribute__(( __annotate__( #x ) ))
 #define __inline          __attribute__(( __always_inline__ ))
@@ -75,7 +75,7 @@ extern "C" {
 
     __export void __lart_poke( void *addr, size_t bytes, void* value );
     
-    __export struct __lart_peeked __lart_peek( const void *addr, size_t bytes );
+    __export struct __lart_shadow_meta *__lart_peek( const void *addr, size_t bytes );
 
 #ifdef __cplusplus
 }
