@@ -95,7 +95,8 @@ uint64_t __lamp_lower_i64( __lamp_ptr v ) __lart_stub;
 
 __lamp_ptr __lamp_alloca( __lamp_ptr size, __lamp_bw bw ) __lart_stub;
 
-void __lamp_freeze( void *val, void *addr, __lamp_bw bw ) __lart_stub;
+void __lamp_freeze( void *val, void *addr, __lamp_bw bytes ) __lart_stub;
+__lamp_ptr __lamp_melt( void *addr, __lamp_bw bytes ) __lart_stub;
 
 __lamp_ptr __lamp_join( __lamp_ptr a, __lamp_ptr b ) __lart_stub;
 __lamp_ptr __lamp_meet( __lamp_ptr a, __lamp_ptr b ) __lart_stub;
