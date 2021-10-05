@@ -20,10 +20,13 @@
 #include "shadow.hpp"
 #include "choose.hpp"
 
+#include "peek.h"
+
 #include <cstdlib>
 
 extern "C"
 {
+
     void * __lart_unstash()
     {
         return __lart::rt::unstash< void * >();
@@ -54,14 +57,14 @@ extern "C"
         std::exit( EXIT_SUCCESS );
     }
 
-    void* __lart_melt( void *addr, uint32_t bytes )
+    void __lart_poke( void *addr, size_t bytes, void* value )
     {
-        return __lart::rt::peek(addr, bytes).value;
+        __lart::rt::poke( addr, bytes, value );
     }
 
-    void __lart_freeze( void *value, void *where, uint32_t bytes )
+    __lart_peeked __lart_peek( const void *addr, size_t bytes )
     {
-        __lart::rt::poke(where, bytes, value);
+        return __lart::rt::peek( addr, bytes );
     }
     
     void __assert_fail(const char *assertion, const char *file, unsigned int line, const char *func)

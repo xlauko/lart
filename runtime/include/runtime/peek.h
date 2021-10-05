@@ -1,5 +1,5 @@
 /*
- * (c) 2020 Henrich Lauko <xlauko@mail.muni.cz>
+ * (c) 2021 Henrich Lauko <xlauko@mail.muni.cz>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,18 +16,18 @@
 
 #pragma once
 
-#include "peek.h"
+#include <stddef.h>
 
-#include <cstddef>
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+    struct __lart_peeked
+    {
+        void *value;
+        size_t offset;
+    };
 
-namespace __lart::rt
-{
-    using shadow_t = void *;
-
-    void poke( void *addr, std::size_t size, shadow_t value );
-
-
-    using peeked = __lart_peeked;
-
-    peeked peek( const void *addr, std::size_t size );
+#ifdef __cplusplus
 }
+#endif

@@ -22,6 +22,7 @@
 
 #include <lava/support/base.hpp> /* iN */
 #include <lamp/support/storage.hpp> /* domain_ref */
+#include <lamp/support/memory.hpp>
 #include <lava/constant.hpp>
 
 #include <runtime/lart.h>
@@ -173,14 +174,12 @@ extern "C"
 
     void __lamp_freeze( void *val, void *addr, bw size )
     {
-        __lart_freeze( val, addr, size );
-        // __lamp_freeze_impl( val, addr, size );
+        __lamp::freeze( val, addr, size );
     }
 
     __lamp_ptr __lamp_melt( void *addr, bw size )
     {
-        return { __lart_melt( addr, size ) };
-        // return { __lamp_melt_impl( addr, size ).disown() };
+        return { __lamp::melt( addr, size ) };
     }
 
     __lamp_ptr __lamp_join( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::op_join, a, b ); }
@@ -281,7 +280,7 @@ extern "C"
     void __lamp_dump( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-            ref a( __lart_melt( twin, 0 ) );
+            ref a( __lamp::melt( twin, 0 ) );
             return dom::dump( a ); // TODO size?
         }
         printf( "concrete\n" );
@@ -292,7 +291,7 @@ extern "C"
     std::string __lamp_trace( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-            ref a( __lart_melt( twin, 0 ) );
+            ref a( __lamp::melt( twin, 0 ) );
             return dom::trace( a ); // TODO size?
         }
         return "concrete";
