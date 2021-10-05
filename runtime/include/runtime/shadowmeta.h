@@ -22,10 +22,11 @@
 extern "C" {
 #endif
     
-    struct __lart_peeked
+    struct __lart_shadow_meta
     {
         void *value;
-        size_t offset;
+        void *origin;
+        size_t bytes;
     };
 
 #ifdef __cplusplus

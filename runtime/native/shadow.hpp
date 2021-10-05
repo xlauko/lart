@@ -16,17 +16,15 @@
 
 #pragma once
 
-#include "peek.h"
+#include "shadowmeta.h"
 
 #include <cstddef>
 
 namespace __lart::rt
 {
-    using shadow_t = void *;
+    void poke( void *addr, std::size_t size, void *value );
 
-    void poke( void *addr, std::size_t size, shadow_t value );
+    using shadow_meta = __lart_shadow_meta;
 
-    using peeked = __lart_peeked;
-
-    peeked peek( const void *addr, std::size_t size );
+    shadow_meta* peek( const void *addr, std::size_t size );
 }

@@ -156,6 +156,7 @@ namespace __lamp
         //     curr = dom::op_concat( next(), std::move( curr ) );
         // return curr;
         // auto peeked = __lart::rt::peek( addr, size );
-        return __lart_peek( addr, size ).value;
+        auto peeked = __lart_peek( addr, bytes );
+        return peeked->value;
     }
 } // namespace __lamp
