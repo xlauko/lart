@@ -117,6 +117,8 @@ static auto any()
 
 namespace lamp::detail
 {
+    size_t offset( shadow_meta *meta, void *addr );
+
     void freeze( __lamp_ptr val, void *addr, size_t bytes );
 
     __lamp_ptr melt( void *addr, size_t bytes );
@@ -288,7 +290,9 @@ extern "C"
     void __lamp_dump( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-            ref a( lamp::detail::melt( twin, 0 ).ptr );
+            auto *meta = __lart_peek( twin );
+            auto size = meta->bytes - lamp::detail::offset( meta, twin );
+            ref a( lamp::detail::melt( twin, size ).ptr );
             return dom::dump( a ); // TODO size?
         }
         printf( "concrete\n" );
@@ -299,6 +303,8 @@ extern "C"
     std::string __lamp_trace( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
+            auto *meta = __lart_peek( twin );
+            auto size = meta->bytes - lamp::detail::offset( meta, twin );
             ref a( lamp::detail::melt( twin, 0 ).ptr );
             return dom::trace( a ); // TODO size?
         }
