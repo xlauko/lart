@@ -22,7 +22,6 @@
 
 #include <lava/support/base.hpp> /* iN */
 #include <lamp/support/storage.hpp> /* domain_ref */
-#include <lamp/support/memory.hpp>
 #include <lava/constant.hpp>
 
 #include <runtime/lart.h>
@@ -35,6 +34,8 @@ typedef struct { void *ptr; } __lamp_ptr;
 
 using dom = __lamp::meta_domain;
 using bw = __lava::bitwidth_t;
+
+using shadow_meta = __lart_shadow_meta;
 
 using namespace __lava; /* iN */
 
@@ -114,6 +115,13 @@ static auto any()
 //     return cast< false /* unsigned */, bitwidth_v< T > >( dom::lower( ref( v.ptr ) )->value );
 // }
 
+namespace lamp::detail
+{
+    void freeze( __lamp_ptr val, void *addr, size_t bytes );
+
+    __lamp_ptr melt( void *addr, size_t bytes );
+}
+
 extern "C"
 {
     i1  __lamp_lift_i1 ( i1  v )     { return lift( dom::lift_i1,  v ); }
@@ -172,14 +180,14 @@ extern "C"
         return wrap( []( const auto &... x ) { return dom::op_alloca( x... ); }, size, w );
     }
 
-    void __lamp_freeze( void *val, void *addr, size_t bytes )
+    void __lamp_freeze( __lamp_ptr val, void *addr, size_t bytes )
     {
-        __lamp::freeze( val, addr, bytes );
+        lamp::detail::freeze( val, addr, bytes );
     }
 
     __lamp_ptr __lamp_melt( void *addr, size_t bytes )
     {
-        return { __lamp::melt( addr, bytes ) };
+        return lamp::detail::melt( addr, bytes );
     }
 
     __lamp_ptr __lamp_join( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::op_join, a, b ); }
@@ -280,7 +288,7 @@ extern "C"
     void __lamp_dump( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-            ref a( __lamp::melt( twin, 0 ) );
+            ref a( lamp::detail::melt( twin, 0 ).ptr );
             return dom::dump( a ); // TODO size?
         }
         printf( "concrete\n" );
@@ -291,9 +299,47 @@ extern "C"
     std::string __lamp_trace( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-            ref a( __lamp::melt( twin, 0 ) );
+            ref a( lamp::detail::melt( twin, 0 ).ptr );
             return dom::trace( a ); // TODO size?
         }
         return "concrete";
     }
 #endif
+
+
+namespace lamp::detail
+{
+    size_t offset( shadow_meta *meta, void *addr )
+    {
+        return uintptr_t(addr) - uintptr_t(meta->origin);
+    }
+    
+    void freeze( __lamp_ptr val, void *addr, size_t bytes )
+    {
+        __lart_poke( addr, bytes, val.ptr );
+    }
+
+    __lamp_ptr melt( void *addr, size_t bytes )
+    {
+        auto *meta = __lart_peek( addr );
+
+        auto off = offset( meta, addr );
+
+        if (off == 0) {
+            if (meta->bytes == bytes) {
+                // trivial case
+                return { meta->value };
+            }
+
+            // truncate
+            if (meta->bytes > bytes) {
+                return __lamp_trunc( { meta->value }, bytes );
+            }
+
+            // todo concat multiple values
+            __builtin_unreachable();
+        }
+        // todo deal with concrete prefix
+        __builtin_unreachable();
+    }
+}
