@@ -9,6 +9,8 @@ register_domain( trivial )
 register_domain( term )
 register_domain( tracing-term )
 register_domain( pa )
+register_domain( zero )
+register_domain( tracing-zero )
 
 add_library( lamp-api INTERFACE )
 target_include_directories( lamp-api
