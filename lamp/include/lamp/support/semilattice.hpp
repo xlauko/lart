@@ -274,7 +274,7 @@ namespace __lamp
         template< typename val_t >
         static self any() { return sl::scalar_any_dom::template any< val_t >(); }
 
-        static void assume( sref a, bool c ) { cast_void( wrap( op::assume, c ), a  ); }
+        static void assume( self &a, bool c ) { cast_void( wrap( op::assume, c ), a  ); }
         static tristate to_tristate( sref a )
         {
             return cast( [&]( const auto &v ) { return std::decay_t< decltype( v ) >::to_tristate( v ); }, a );

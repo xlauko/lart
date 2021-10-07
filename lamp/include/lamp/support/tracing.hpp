@@ -143,7 +143,7 @@ namespace __lamp
         template< typename val_t >
         static self any() { return TRACE( domain::template any< val_t > ); }
 
-        static void assume( sref a, bool expected ) { TRACE( domain::assume, a, expected ); }
+        static void assume( self &a, bool expected ) { TRACE( domain::assume, a, expected ); }
 
         /* arithmetic operations */
         static self op_add ( sref a, sref b ) { return TRACE( domain::op_add, a, b ); }

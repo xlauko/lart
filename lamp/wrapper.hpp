@@ -266,7 +266,10 @@ extern "C"
         return lowered;
     }
 
-    void __lamp_assume( __lamp_ptr a, bool c ) { dom::assume( ref( a.ptr ), c ); }
+    void __lamp_assume( __lamp_ptr a, bool c ) {
+        auto r = ref( a.ptr );
+        dom::assume( r, c ); 
+    }
     __lamp_ptr __lamp_extract( __lamp_ptr a, bw s, bw e ) { return wrap( dom::op_extract, a, s, e ); }
 
     //void __lamp_dealloca( void * addr, uint64_t size ) { __lamp_dealloca_impl( addr, size ); }
