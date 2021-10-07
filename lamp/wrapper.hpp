@@ -308,7 +308,7 @@ extern "C"
         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
             auto *meta = __lart_peek( twin );
             auto size = meta->bytes - lamp::detail::offset( meta, twin );
-            ref a( lamp::detail::melt( twin, 0 ).ptr );
+            ref a( lamp::detail::melt( twin, size ).ptr );
             return dom::trace( a ); // TODO size?
         }
         return "concrete";
@@ -342,7 +342,7 @@ namespace lamp::detail
 
             // truncate
             if (meta->bytes > bytes) {
-                return __lamp_trunc( { meta->value }, bytes );
+                return __lamp_trunc( { meta->value }, bytes * 8 );
             }
 
             // todo concat multiple values
