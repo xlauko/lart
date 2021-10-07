@@ -20,7 +20,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "shadowmeta.h"
+#include <runtime/shadowmeta.h>
 
 #define __annotate( x )   __attribute__(( __annotate__( #x ) ))
 #define __inline          __attribute__(( __always_inline__ ))
