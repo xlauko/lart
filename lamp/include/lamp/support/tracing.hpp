@@ -128,7 +128,7 @@ namespace __lamp
             return std::move( res );
         }
 
-        static void trace( std::string_view, decltype( domain::assume ) op, sref a, bool expected )
+        static void trace( std::string_view, decltype( domain::assume ) op, self &a, bool expected )
         {
             auto s = stream();
             op( a, expected );
