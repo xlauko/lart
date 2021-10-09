@@ -7,6 +7,7 @@ target_include_directories( lart-runtime
 
 add_library( native
   STATIC
+    svcomp.cpp
     config.cpp
     choose.cpp
     shadow.cpp
