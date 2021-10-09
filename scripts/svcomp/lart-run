@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+
+"""
+usage: lart-run <property.prp> [--options] <file.c>
+"""
+from __future__ import print_function
+
+import sys
+import os
+import argparse
+import logging
+import asyncio
+import tempfile
+import shutil
+
+from typing import List
+
+exec_path = os.readlink(__file__) if os.path.islink(__file__) else __file__
+pth = os.path.join(os.path.dirname(exec_path), './utils')
+sys.path.append(os.path.abspath(pth))
+
+from utils import logger, config, runner, property, property_names
+
+def parse_properties(property_file):
+    props = set()
+
+    def add_property(prp: property):
+        props.add(prp)
+
+    for line in property_file:
+        line = line.strip()
+        if not line:
+            continue
+
+        logger().info(f"parse property {line}")
+        if not line.startswith("CHECK"):
+            continue
+
+        parsed = line[ line.find("(") + 1 : line.rfind(" )") ].split(", ")[1]
+
+        prp = property_names[parsed]
+        if prp.is_memsafety():
+            prp = property.memsafety
+        props.add(prp)
+
+    if not props:
+        error("missing property")
+
+    if len(props) > 1:
+        error("conflicting properties: " + " ".join(str(p) for p in props))
+
+    return list(props)
+
+
+def argument_parser():
+    parser = argparse.ArgumentParser(description='LART BenchExec Wrapper')
+    parser.add_argument('lartcc', help='path to lartcc', type=str)
+    parser.add_argument('property',
+                        help='property file *.prp',
+                        type=argparse.FileType('r'))
+    parser.add_argument('benchmark', help='c/c++ source file', type=str)
+    parser.add_argument('-d',
+                        '--debug',
+                        help="enable debug logging",
+                        action="store_const",
+                        dest="loglevel",
+                        const=logging.DEBUG,
+                        default=logging.ERROR)
+    parser.add_argument('-v',
+                        '--verbose',
+                        help="enable verbose logging",
+                        action="store_const",
+                        dest="loglevel",
+                        const=logging.INFO)
+    parser.add_argument('--32',
+                        help="set 32-bit architecture",
+                        action="store_const",
+                        dest="architecture",
+                        const=32,
+                        default=64)
+    parser.add_argument('--64',
+                        help="set 64-bit architecture",
+                        action="store_const",
+                        dest="architecture",
+                        const=64,
+                        default=64)
+    parser.add_argument('--lamp',
+                        help="lamp domain",
+                        dest="lamp",
+                        default="term")
+    parser.add_argument('--no-correctness-witness',
+                        help="do not generate correctness witness",
+                        action="store_const",
+                        dest="witness",
+                        const=False,
+                        default=True)
+    parser.add_argument('--report',
+                        help="report path",
+                        dest="report",
+                        default=None)
+    parser.add_argument('--workdir',
+                        help="workdir path",
+                        dest="workdir",
+                        default=None)
+    # TODO timeout option
+    return parser
+
+
+def parse_config() -> config:
+    parser = argument_parser()
+    # TODO forward unrecognized options
+
+    opts = parser.parse_args(sys.argv[1:])
+
+    log = logger()
+    log.setLevel(opts.loglevel)
+
+    lartcc = opts.lartcc
+    log.info(f"lart location: {lartcc}")
+    
+    workdir = opts.workdir
+    log.info(f"working directory: {workdir}")
+
+    benchmark = opts.benchmark
+    log.info(f"benchmark: {benchmark}")
+
+    properties = parse_properties(opts.property)
+    for prp in properties:
+        log.info(f"property: {prp}")
+
+    architecture = opts.architecture
+    log.info(f"architecture: {architecture}")
+
+    lamp = opts.lamp
+    log.info(f"lamp: {lamp}")
+
+    cfg = config(lartcc, benchmark, properties, architecture, lamp, workdir)
+
+    report = opts.report
+    if report:
+        log.info(f"report path: {report}")
+        cfg.report = report
+
+    witness = opts.witness
+    log.info(f"witness: {witness}")
+    cfg.witness = witness
+
+    return cfg
+
+
+def verify(cfg):
+    log = logger()
+    log.info(f"run verification")
+    analysis = runner(cfg)
+    result = analysis.run()
+    # if config.opts.witness:
+    #     result.generate_witness(divine.work_dir)
+    # result.dump()
+
+
+async def main() -> None:
+    cfg = parse_config()
+    verify(cfg)
+
+    if cfg.tmpworkdir:
+        shutil.rmtree(cfg.workdir)
+
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    loop.close()
