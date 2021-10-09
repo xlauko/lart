@@ -21,11 +21,6 @@ RUN apt-get install -y \
 
 RUN pip install lit
 
-RUN apt-get autoremove -y
-RUN apt-get clean all
-
-RUN rm -rf /var/lib/apt/lists/*
-
 ENV LLVM_INSTALL_DIR="/usr/lib/llvm-12/"
 
 WORKDIR /usr/src
@@ -104,3 +99,15 @@ RUN vcpkg update
 RUN vcpkg install spdlog catch2 doctest
 
 ENV VCPKG_TOOLCHAIN "/usr/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+FROM deps as svcomp
+
+WORKDIR /usr/set/
+
+RUN git clone --depth 1 https://gitlab.com/sosy-lab/benchmarking/sv-benchmarks.git
+
+FROM svcomp as benchexec
+
+RUN apt-get install software-properties-common  -y
+RUN add-apt-repository ppa:sosy-lab/benchmarking
+RUN apt-get install benchexec -y && adduser root benchexec
