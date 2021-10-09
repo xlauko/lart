@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $1 == "--version" ]; then
+     echo "LART @CMAKE_PROJECT_VERSION@"
+     exit 0
+fi
+
 domain=$1
 
 LART_INTERFACE="@CMAKE_INSTALL_PREFIX@/include/"
