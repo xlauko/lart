@@ -23,8 +23,7 @@ namespace __lava
 {
     /* The tristate abstract domain has three values: true, false and maybe
      * (unknown).  It is used for branching, to decide whether to take the then
-     * or else path, or whether to choose non-deterministically (in DIVINE this
-     * means split and take both paths).
+     * or else path, or whether to choose non-deterministically.
      *
      * Every other abstract domain needs to define a `to_tristate()` method,
      * which specifies what happens if a value of that abstract type is
