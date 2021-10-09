@@ -100,14 +100,11 @@ valid_results_per_property = {
 
 
 class analysis_result:
-    def __init__(self, execution_result, report, config):
-        self.cfg = config
+    def __init__(self, report, cfg):
+        self.cfg = cfg
         self.model = Model()
 
-        if execution_result != 0:
-            self.verification_result = result.error
-        else:
-            self.verification_result = self.process_report(report)
+        self.verification_result = self.process_report(report)
 
         if not self.valid_result():
             logger().info(f"invalid result: {self.verification_result}")
@@ -130,75 +127,24 @@ class analysis_result:
         return False
 
     def ignore_result(self, line):
-        if "lart.stubs" in line:
-            logger().info("ignoring error in lart.stubs")
-            return True
-        # TODO add ignore cases
         return False
 
     def process_lines(self, report):
         for line in report:
             if self.ignore_result(line):
                 return result.unknown
-            if "error found: no" in line:
-                return result.true
-            if "error found: yes" in line:
-                return result.false
-            # TODO type of error
-
-
-    def backtrace(self, report):
-        trace = []
-        for line in report:
-            if "- symbol:" in line:
-                trace.append(line.split(':')[1].strip())
-        return trace
-
-    def errortrace(self, report):
-        fatal = ""
-        fault = ""
-        for line in report:
-            if "FAULT:" in line:
-                fault = line.split(':')[1].strip()
-            if "FATAL:" in line:
-                fatal = line.split(':')[1].strip()
-                return (fault, fatal)
-        return fault, fatal
+            if "[lart fault]" in line and "reach_error" in line:
+                return result.false_reach
+        return result.true
 
     def process_report(self, report_path):
         logger().info(f"processing report: {report_path}")
 
-        res = result.unknown
-        backtrace = []
-        fault = ""
-        fatal = ""
         try:
             with open(report_path, "r") as report:
-                res = self.process_lines(report)
-                if res == result.false:
-                    fault, fatal = self.errortrace(report)
-                    backtrace = self.backtrace(report)
+                return self.process_lines(report)
         except EnvironmentError:
-            res = result.unknown
-
-        if res == result.false:
-            if fatal == "not implemented in userspace":
-                return result.unknown
-            if fatal == "memory error in userspace":
-                if "__vm_obj_free" in fault:
-                    return result.false_free
-                if "out of bounds" in fault:
-                    return result.false_deref
-                return result.unknown
-            if fatal == "memory leak in userspace":
-                if "heap" in fault:
-                    return result.false_memtrack
-            if "__VERIFIER_error" in backtrace:
-                return result.false_reach
-            if "reach_error" in backtrace:
-                return result.false_reach
             return result.unknown
-        return res
 
     def parse_model(self, report_path):
         logger().info(f"parsing model: {report_path}")

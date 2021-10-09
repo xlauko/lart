@@ -123,24 +123,25 @@ class runner(object):
         return line
 
     def run(self):
+        os.environ['DFSAN_OPTIONS'] = 'warn_unimplemented=0'
+        
         self.preprocess()
 
         cc = compilation(self.cfg, self.preprocesed)
-        (ccout, ccerr, abstracted) = cc.run()
+        ccout, ccerr, abstracted = cc.run()
 
         # FIXME: if error empty
 
         ver = verifier(self.cfg, abstracted)
-        (vout, verr) = ver.run()
+        vout, verr = ver.run()
 
-        print("output:") 
+        print("output:")
         with open(vout, 'r') as out:
             print(out.read())
 
-        print("error:") 
+        print("error:")
         with open(verr, 'r') as err:
             print(err.read())
 
-        return None
-        # empty_result = analysis_result(0, self.report, self.cfg)
-        # return empty_result
+        # TODO: check return code of
+        return analysis_result(verr, self.cfg)
