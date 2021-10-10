@@ -109,5 +109,5 @@ RUN git clone --depth 1 https://gitlab.com/sosy-lab/benchmarking/sv-benchmarks.g
 FROM svcomp as benchexec
 
 RUN apt-get install software-properties-common  -y
-RUN add-apt-repository ppa:sosy-lab/benchmarking
-RUN apt-get install benchexec -y && adduser root benchexec
+RUN pip3 install git+https://github.com/xlauko/benchexec.git coloredlogs
+RUN groupadd benchexec && adduser root benchexec
