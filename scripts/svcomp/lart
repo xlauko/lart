@@ -53,8 +53,7 @@ def parse_properties(property_file):
 
 
 def argument_parser():
-    parser = argparse.ArgumentParser(description='LART BenchExec Wrapper')
-    parser.add_argument('lartcc', help='path to lartcc', type=str)
+    parser = argparse.ArgumentParser(description='LART BenchExec Wrapper', prog='LART')
     parser.add_argument('property',
                         help='property file *.prp',
                         type=argparse.FileType('r'))
@@ -72,6 +71,10 @@ def argument_parser():
                         action="store_const",
                         dest="loglevel",
                         const=logging.INFO)
+    parser.add_argument('--version',
+                        help="lart version",
+                        action='version', 
+                        version='%(prog)s 0.0.0')
     parser.add_argument('--32',
                         help="set 32-bit architecture",
                         action="store_const",
@@ -115,7 +118,8 @@ def parse_config() -> config:
     log = logger()
     log.setLevel(opts.loglevel)
 
-    lartcc = opts.lartcc
+    # TODO update
+    lartcc = "/usr/src/lart/build/lartcc/lartcc"
     log.info(f"lart location: {lartcc}")
     
     workdir = opts.workdir

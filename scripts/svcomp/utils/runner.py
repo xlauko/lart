@@ -135,13 +135,13 @@ class runner(object):
         ver = verifier(self.cfg, abstracted)
         vout, verr = ver.run()
 
-        print("output:")
-        with open(vout, 'r') as out:
-            print(out.read())
+        # print("output:")
+        # with open(vout, 'r') as out:
+        #     print(out.read())
 
-        print("error:")
-        with open(verr, 'r') as err:
-            print(err.read())
+        # print("error:")
+        # with open(verr, 'r') as err:
+        #     print(err.read())
 
         # TODO: check return code of
         return analysis_result(verr, self.cfg)
