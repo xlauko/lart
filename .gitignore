@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+*.pyc
 
 # Precompiled Headers
 *.gch
@@ -45,3 +46,9 @@ build-runtime/*
 cmake_install.cmake
 CMakeCache.txt
 CMakeFiles/
+
+# install
+install/*
+
+# benchexec
+results/*
