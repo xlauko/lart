@@ -54,10 +54,12 @@ def parse_properties(property_file):
 
 def argument_parser():
     parser = argparse.ArgumentParser(description='LART BenchExec Wrapper', prog='LART')
-    parser.add_argument('property',
-                        help='property file *.prp',
-                        type=argparse.FileType('r'))
     parser.add_argument('benchmark', help='c/c++ source file', type=str)
+    parser.add_argument('-p',
+                        '--prp',
+                        help='property file *.prp',
+                        dest="prp",
+                        default=None)
     parser.add_argument('-d',
                         '--debug',
                         help="enable debug logging",
@@ -119,7 +121,7 @@ def parse_config() -> config:
     log.setLevel(opts.loglevel)
 
     # TODO update
-    lartcc = "/usr/src/lart/build/lartcc/lartcc"
+    lartcc = "/usr/src/lart/install/bin/lartcc"
     log.info(f"lart location: {lartcc}")
     
     workdir = opts.workdir
@@ -128,9 +130,10 @@ def parse_config() -> config:
     benchmark = opts.benchmark
     log.info(f"benchmark: {benchmark}")
 
-    properties = parse_properties(opts.property)
-    for prp in properties:
-        log.info(f"property: {prp}")
+    with open(opts.prp, 'r') as prp:
+        properties = parse_properties(prp)
+        for prp in properties:
+            log.info(f"property: {prp}")
 
     architecture = opts.architecture
     log.info(f"architecture: {architecture}")
@@ -159,7 +162,7 @@ def verify(cfg):
     result = analysis.run()
     # if config.opts.witness:
     #     result.generate_witness(divine.work_dir)
-    # result.dump()
+    result.dump()
 
 
 async def main() -> None:
