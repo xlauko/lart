@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-usage: lart-run <property.prp> [--options] <file.c>
+usage: lart --property <property.prp> [--options] <file.c>
 """
 from __future__ import print_function
 
@@ -56,7 +56,7 @@ def argument_parser():
     parser = argparse.ArgumentParser(description='LART BenchExec Wrapper', prog='LART')
     parser.add_argument('benchmark', help='c/c++ source file', type=str)
     parser.add_argument('-p',
-                        '--prp',
+                        '--property',
                         help='property file *.prp',
                         dest="prp",
                         default=None)
