@@ -4,6 +4,8 @@ config.llvm_tools_dir = "@LLVM_INSTALL_DIR@/Release/bin"
 config.llvm_shlib_ext = "@LART_TEST_SHLIBEXT@"
 config.llvm_shlib_dir = "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
 
+config.lart_install_dir = "@CMAKE_INSTALL_PREFIX@/bin"
+
 config.my_src_root = r'@CMAKE_CURRENT_SOURCE_DIR@'
 config.my_obj_root = r'@CMAKE_CURRENT_BINARY_DIR@'
 
