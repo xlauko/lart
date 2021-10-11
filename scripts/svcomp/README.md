@@ -1,15 +1,6 @@
-## Test Benchexec
+See https://github.com/xlauko/lart for information about LART and its usage.
 
-`python3 -m benchexec.test_tool_info scripts.svcomp.tools.lart --no-container`
+For SV-COMP LART comes with a wrapper which handles SV-COMP specific settings.
 
-## Run Tool
-
-`./build/lartcc/lartcc /usr/set/sv-benchmarks/c/properties/unreach-call.prp /usr/set/sv-benchmarks/c/bitvector/byte_add-1.c`
-
-## Run Benchexec
-
-`benchexec ./scripts/svcomp/benchexec.xml --no-container --tool-directory=./scripts/svcomp/`
-
-## Docker run:
-
-`docker run -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v /Users/Casual/src/lart:/usr/src/lart:rw --privileged --cap-drop=all -it lart`
+This binary distribution should work on Ubuntu 20.04 and needs only the
+following packages: libz3-dev, clang-12, coreutils.
