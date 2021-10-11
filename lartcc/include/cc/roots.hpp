@@ -72,7 +72,8 @@ namespace lart
         {
             if ( fn.hasName() && !(
                 fn.getName().startswith( "__lamp_lift" ) ||
-                fn.getName().startswith( "__lamp_any" )
+                fn.getName().startswith( "__lamp_any" ) ||
+                fn.getName().startswith( "__VERIFIER_nondet" )
                ) )
                continue;
 
