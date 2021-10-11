@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import re
+import sys
 import time
 import copy
 import os.path
@@ -35,6 +36,12 @@ class compilation(object):
         cmd = [cc, self.cfg.lamp, self.preprocesed]
         if self.cfg.lamp == "term":
             cmd.append("-lz3")
+
+        # TODO: usupported by dataflow sanitizer
+        # if self.cfg.architecture == 32:
+        #     cmd.append("-m32")
+
+        cmd += ["-Os"]
         cmd += ["-o", self.res]
 
         return cmd
@@ -47,7 +54,7 @@ class compilation(object):
             proc = Popen(cc, stdout = out, stderr = err)
             status = proc.wait()
 
-        return (self.out, self.err, self.res)
+        return self.out, self.err, self.res
 
 
 class verifier(object):
@@ -69,7 +76,7 @@ class verifier(object):
             proc = Popen(prog, stdout = out, stderr = err)
             status = proc.wait()
 
-        return (self.out, self.err)
+        return self.out, self.err
 
 
 class runner(object):
@@ -79,6 +86,7 @@ class runner(object):
 
     def preprocess(self):
         with open(self.preprocesed, "w") as out, open(self.cfg.benchmark, "r") as bench:
+            out.write("#include <lamp.h>\n")
             for line in bench:
                 out.write(self.preprocess_line(line))
 
@@ -130,18 +138,21 @@ class runner(object):
         cc = compilation(self.cfg, self.preprocesed)
         ccout, ccerr, abstracted = cc.run()
 
+        if not os.path.isfile(abstracted):     
+            print("output:")
+            with open(ccout, 'r') as out:
+                print(out.read())
+
+            print("error:")
+            with open(ccerr, 'r') as err:
+                print(err.read())
+            ## TODO unknown result
+            sys.exit()
+
         # FIXME: if error empty
 
         ver = verifier(self.cfg, abstracted)
         vout, verr = ver.run()
-
-        # print("output:")
-        # with open(vout, 'r') as out:
-        #     print(out.read())
-
-        # print("error:")
-        # with open(verr, 'r') as err:
-        #     print(err.read())
 
         # TODO: check return code of
         return analysis_result(verr, self.cfg)
