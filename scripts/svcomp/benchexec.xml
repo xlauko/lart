@@ -4,12 +4,12 @@
 
 <rundefinition name="SV-COMP22_unreach-call">
   <tasks name="ReachSafety-Arrays">
-    <includesfile>/usr/set/sv-benchmarks/c/ReachSafety-Arrays.set</includesfile>
-    <propertyfile>/usr/set/sv-benchmarks/c/properties/unreach-call.prp</propertyfile>
+    <includesfile>/home/xlauko1/set/sv-benchmarks/c/ReachSafety-Arrays.set</includesfile>
+    <propertyfile>/home/xlauko1/set/sv-benchmarks/c/properties/unreach-call.prp</propertyfile>
   </tasks>
   <tasks name="ReachSafety-BitVectors">
-    <includesfile>/usr/set/sv-benchmarks/c/ReachSafety-BitVectors.set</includesfile>
-    <propertyfile>/usr/set/sv-benchmarks/c/properties/unreach-call.prp</propertyfile>
+    <includesfile>/home/xlauko1/set/sv-benchmarks/c/ReachSafety-BitVectors.set</includesfile>
+    <propertyfile>/home/xlauko1/set/sv-benchmarks/c/properties/unreach-call.prp</propertyfile>
   </tasks>
   <tasks name="ReachSafety-ControlFlow">
     <includesfile>/usr/set/sv-benchmarks/c/ReachSafety-ControlFlow.set</includesfile>

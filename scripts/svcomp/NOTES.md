@@ -1,14 +1,17 @@
 ## Test Benchexec
 
-`python3 -m benchexec.test_tool_info scripts.svcomp.tools.lart --no-container`
+`python3 -m benchexec.test_tool_info lart --no-container`
 
-## Run Tool
+## Run Tool from Submission File
 
-`./build/lartcc/lartcc /usr/set/sv-benchmarks/c/properties/unreach-call.prp /usr/set/sv-benchmarks/c/bitvector/byte_add-1.c`
+To create submission file execute `setup-submission.sh`.
+
+`./lart --property=<pathto>/sv-benchmarks/c/properties/unreach-call.prp <benchmark>`
+
 
 ## Run Benchexec
 
-`benchexec ./scripts/svcomp/benchexec.xml --no-container --tool-directory=./scripts/svcomp/`
+`benchexec ./scripts/svcomp/benchexec.xml --no-container --tool-directory=./submission -T 60 -t ReachSafety-BitVectors -N 20`
 
 ## Docker run:
 

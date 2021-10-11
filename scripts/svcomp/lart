@@ -120,8 +120,7 @@ def parse_config() -> config:
     log = logger()
     log.setLevel(opts.loglevel)
 
-    # TODO update
-    lartcc = "/usr/src/lart/install/bin/lartcc"
+    lartcc = "./bin/lartcc"
     log.info(f"lart location: {lartcc}")
     
     workdir = opts.workdir
