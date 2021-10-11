@@ -32,8 +32,7 @@ mkdir -p $DEST/utils
 mkdir -p $DEST/bin
 
 cp -t $DEST LICENSE $SVCOMP/README $SVCOMP/lart $SVCOMP/__init__.py
-cp -r $SVCOMP/utils $DEST/utils
-
+cp -r $SVCOMP/utils $DEST
 cp -r $LART/bin $DEST
 cp -r $LART/include $DEST
 cp -r $LART/lib $DEST
