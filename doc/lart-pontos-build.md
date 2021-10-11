@@ -102,8 +102,6 @@ cmake -GNinja \
 
 cmake --build build-runtime
 cmake --build build-runtime --target install
-
-chmod +x ~/src/lart/build-lart/lartcc/lartcc
 ```
 
 
