@@ -7,10 +7,14 @@ fi
 
 domain=$1
 
-LART_INTERFACE="@CMAKE_INSTALL_PREFIX@/include/"
-RUNTIME="@CMAKE_INSTALL_PREFIX@/lib/libnative.a"
-DOMAIN="@CMAKE_INSTALL_PREFIX@/lib/lib$domain.a"
-PASS="@CMAKE_INSTALL_PREFIX@/lib/liblartcc.so"
+SCRIPT=`realpath $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
+RUNTIME="${SCRIPTPATH}/../lib/libnative.a"
+DOMAIN="${SCRIPTPATH}/../lib/lib$domain.a"
+PASS="${SCRIPTPATH}/../lib/liblartcc.so"
+
+LART_INTERFACE="${SCRIPTPATH}/../include/"
 
 RED='\033[0;31m'
 NC='\033[0m' # No Color
