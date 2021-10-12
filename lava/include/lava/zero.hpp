@@ -98,10 +98,10 @@ namespace __lava
         {
             switch ( z->value )
             {
-            case ze::zero:    return tristate::false_value;
-            case ze::nonzero: return tristate::true_value;
-            case ze::unknown: return tristate::maybe_value;
-            case ze::bottom: __lart_cancel();
+                case ze::zero:    return tristate::false_value;
+                case ze::nonzero: return tristate::true_value;
+                case ze::unknown: return tristate::maybe_value;
+                case ze::bottom: __lart_cancel();
             }
 
             __builtin_unreachable();
@@ -195,13 +195,14 @@ namespace __lava
         static zero op_urem( zr a, zr b ) { return div( a, b ); }
         static zero op_srem( zr a, zr b ) { return div( a, b ); }
     
-        /* TODO: implement float arithmetic operations */
+        /* TODO: implement float arithmetic operations
         static zero op_fadd( zr, zr ) { return {}; }
         static zero op_fsub( zr, zr ) { return {}; }
         static zero op_fmul( zr, zr ) { return {}; }
         static zero op_fdiv( zr, zr ) { return {}; }
         static zero op_frem( zr, zr ) { return {}; }
         static zero op_fneg( zr ) { return {}; }
+        */
 
         /* bitwise operations */
         static zv op_shl ( zr a, zr b ) { return shift_lut[ a->value ][ b->value ]; }
@@ -223,7 +224,7 @@ namespace __lava
         static zv op_slt( zr a, zr b ) { return sgt_lut[ b->value ][ a->value ]; }
         static zv op_sle( zr a, zr b ) { return sge_lut[ b->value ][ a->value ]; }
 
-        /* TODO: implement float comparison operations */
+        /* TODO: implement float comparison operations
         static zero op_foeq( zr, zr ) { return {}; }
         static zero op_fogt( zr, zr ) { return {}; }
         static zero op_foge( zr, zr ) { return {}; }
@@ -248,10 +249,13 @@ namespace __lava
         static zero op_fptrunc( zr, bw ) { return {}; }
         static zero op_inttoptr( zr, bw ) { return {}; }
         static zero op_ptrtoint( zr, bw ) { return {}; }
-        static zero op_sext( zr z, bw ) { return z.clone(); }
+
         static zero op_sitofp( zr, bw ) { return {}; }
-        static zero op_trunc( zr z, bw ) { return z.is_zero() ? ze::zero : ze::unknown; }
         static zero op_uitofp( zr, bw ) { return {}; }
+        */
+
+        static zero op_sext( zr z, bw ) { return z.clone(); }
+        static zero op_trunc( zr z, bw ) { return z.is_zero() ? ze::zero : ze::unknown; }
         static zero op_zext( zr z, bw ) { return z.clone(); }
         static zero op_zfit( zr z, bw ) { return z.is_zero() ? ze::zero : ze::unknown; }
 
@@ -259,7 +263,7 @@ namespace __lava
 
         static const char *str( zr z )
         {
-            switch ( z.get().value ) {
+            switch ( z->value ) {
                 case ze::zero:    return "Z";
                 case ze::nonzero: return "N";
                 case ze::unknown: return "U";
@@ -282,4 +286,5 @@ namespace __lava
             return os << str( z );
         }
     };
-}
+
+} // namespace __lava

@@ -23,6 +23,6 @@
 namespace __lamp
 {
     using meta_domain = tracing< __lava::zero< wrapped_storage > >;
-}
+} // namespace __lamp
 
 #include "wrapper.hpp"
