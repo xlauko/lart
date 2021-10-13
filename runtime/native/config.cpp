@@ -41,6 +41,7 @@ namespace __lart::rt
 
     void load_config()
     {
+        config.backtrace     = option( "LART_ERROR_BACKTRACE", "trace error backtrace" );
         config.trace_choices = option( "LART_TRACE_CHOICES", "trace choices" );
         config.ask_choices   = option( "LART_ASK_CHOICES", "ask choices" );
         config.trace_model   = option( "LART_TRACE_MODEL", "trace model" );

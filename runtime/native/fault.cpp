@@ -14,9 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+#include "config.hpp"
 #include "fault.hpp"
 
 #include "stream.hpp"
+
+#include <execinfo.h>
 
 #include <csignal>
 #include <cstdio>
@@ -53,7 +57,6 @@ namespace __lart::rt
         return source_location( file, function, line, column );
     }
 
-
     struct fault_handler
     {
         void handle( const fault_event &event ) const noexcept
@@ -69,6 +72,56 @@ namespace __lart::rt
             file_stream out( stderr );
             out << "[lart fault] assertion " << event.report << " failed at: " 
                 << event.location << "\n";
+            
+            if ( config.backtrace ) {
+                print_backtrace(out);
+            }
+        }
+
+        void print_backtrace(file_stream &out) const noexcept
+        {
+            constexpr size_t size = 1024;
+            void *callstack[size];
+            auto frames = backtrace(callstack, size);
+            auto symbols = backtrace_symbols(callstack, frames);
+
+            std::string_view header = "[lart backtrace]";
+            if (!symbols) {
+                out << header << " empty\n";
+                return;
+            }
+
+            for (int i = 0; i < frames; ++i) {
+                auto symbol = symbols[i];
+                if (!symbol || ignore_symbol(symbol)) 
+                    continue;
+
+                out << header << ' ' <<  format_symbol(symbol) << '\n';
+            }
+
+            std::free(symbols);
+        }
+
+        bool ignore_symbol(std::string_view symbol) const
+        {
+            return symbol.find("__lart") != std::string_view::npos;
+        }
+
+        std::string_view format_symbol(std::string_view symbol) const
+        {
+            auto from = symbol.find('(');
+            auto to = symbol.rfind('+');
+
+            constexpr auto npos = std::string_view::npos;
+            
+            if (from != npos && to != npos) {
+                symbol = symbol.substr(from + 1, to - from - 1);
+            }
+
+            if (symbol.starts_with("dfs$"))
+                symbol.remove_prefix(sizeof("dfs$") - 1);
+
+            return symbol.empty() ? "unknown" : symbol;
         }
     };
 

@@ -28,6 +28,12 @@ namespace __lart::rt
             std::fwrite( str.data(), sizeof(char), str.size(), _file );
             return *this;
         }
+
+        file_stream& operator<<(char c) noexcept
+        {
+            std::putc(c, _file);
+            return *this;
+        }
     
     protected:
         std::FILE *_file;
