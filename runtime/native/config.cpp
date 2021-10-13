@@ -15,6 +15,7 @@
  */
 
 #include "config.hpp"
+#include "state.hpp"
 
 #include "fault.hpp"
 #include "utils.hpp"
@@ -62,8 +63,8 @@ namespace __lart::rt
 
     destructor void lart_cleanup()
     {
-        if ( config.trace_model ) {
-             fprintf( stderr, "[lart-model]\n" );
+        if ( config.trace_model && !state.error_traced ) {
+            fprintf( stderr, "[lart-model]\n" );
         }
 
         if ( config.trace_file ) {

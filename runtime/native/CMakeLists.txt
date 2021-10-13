@@ -12,6 +12,7 @@ add_library( native
     choose.cpp
     shadow.cpp
     stash.cpp
+    state.cpp
     taint.cpp
     lart.cpp
     trace.cpp

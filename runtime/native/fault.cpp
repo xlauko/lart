@@ -16,6 +16,7 @@
 
 
 #include "config.hpp"
+#include "state.hpp"
 #include "fault.hpp"
 
 #include "stream.hpp"
@@ -130,7 +131,7 @@ namespace __lart::rt
     [[noreturn]] void fault( const fault_event &event ) noexcept
     {
         handler.handle(event);
-        std::exit(EXIT_SUCCESS);
+        std::exit(EXIT_FAILURE);
     }
 
     void init_fault_handler() noexcept {}
