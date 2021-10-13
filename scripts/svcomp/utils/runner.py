@@ -41,7 +41,9 @@ class compilation(object):
         # if self.cfg.architecture == 32:
         #     cmd.append("-m32")
 
-        cmd += ["-Os"]
+        # for backtrace
+        cmd += ["-rdynamic"]
+        # cmd += ["-Os"]
         cmd += ["-o", self.res]
 
         return cmd
@@ -132,6 +134,7 @@ class runner(object):
 
     def run(self):
         os.environ['DFSAN_OPTIONS'] = 'warn_unimplemented=0'
+        os.environ['LART_ERROR_BACKTRACE'] = 'ON'
         
         self.preprocess()
 
