@@ -50,5 +50,7 @@ CMakeFiles/
 # install
 install/*
 
+submission/*
+
 # benchexec
 results/*
