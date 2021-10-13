@@ -12,7 +12,7 @@ def unsupported(prp: property) -> None:
 
 
 class config:
-    def __init__(self, lartcc, benchmark, properties, architecture, lamp, workdir):
+    def __init__(self, lartcc, benchmark, properties, property_strings, architecture, lamp, workdir):
         # path to lartcc binary
         self.lartcc : str = lartcc
 
@@ -24,6 +24,7 @@ class config:
 
         # property setup
         self.properties : List[property] = properties
+        self.property_strings : List[str] = property_strings
 
         # architecture
         self.architecture = architecture

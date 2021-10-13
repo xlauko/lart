@@ -16,3 +16,4 @@ To create submission file execute `setup-submission.sh`.
 ## Docker run:
 
 `docker run -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v /Users/Casual/src/lart:/usr/src/lart:rw --privileged --cap-drop=all -it lart`
+`docker run -v <path-to>/sv-benchmarks/:/usr/set/sv-benchmarks:rw -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v <path-to>/lart:/usr/src/lart:rw --privileged --cap-drop=all -it lart`

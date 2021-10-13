@@ -52,14 +52,14 @@ class NondetEdge:
 
 class WitnessWriter(object):
 
-    def __init__(self, result, config, model, path, correctness):
+    def __init__(self, result, cfg, model, path, correctness):
         self.result = result
         self.correctness = correctness
         self.model = model
         self.path = path
-        self.arch = str(config.architecture) + 'bit'
-        self.prps = config.properties
-        self.source = config.benchmark
+        self.arch = str(cfg.architecture) + 'bit'
+        self.property_strings = cfg.property_strings
+        self.source = cfg.benchmark
 
         ET.register_namespace("xsi",
                               "http://www.w3.org/2001/XMLSchema-instance")
@@ -92,7 +92,7 @@ class WitnessWriter(object):
             self.add_graph_key(key)
 
         self.add_graph_key('specification')
-        for prp in self.prps:
+        for prp in self.property_strings:
             ET.SubElement(self.graph, 'data', key='specification').text = str(prp)
 
         self.add_node_key('entry')
