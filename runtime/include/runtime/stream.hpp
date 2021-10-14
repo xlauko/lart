@@ -35,6 +35,18 @@ namespace __lart::rt
             return *this;
         }
 
+        file_stream& operator<<(unsigned int i) noexcept
+        {
+            std::fprintf( _file, "%u", i );
+            return *this;
+        }
+        
+        file_stream& operator<<(int i) noexcept
+        {
+            std::fprintf( _file, "%d", i );
+            return *this;
+        }
+
         std::FILE* stream() { return _file; }
     
     protected:
