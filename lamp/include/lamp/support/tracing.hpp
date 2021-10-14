@@ -92,7 +92,7 @@ namespace __lamp
         using traced_unary  = typename stream::traced_unary;
         using traced_binary = typename stream::traced_binary;
 
-        template< typename op_t, typename ...args_t >
+        template< typename op_t >
         static domain trace( std::string_view fn, op_t op )
         {
             auto s = stream();
@@ -110,7 +110,7 @@ namespace __lamp
             return std::move( res );
         }
 
-        template< typename op_t, typename ...args_t >
+        template< typename op_t >
         static domain trace( std::string_view fn, op_t op, sref a, sref b )
         {
             auto s = stream();

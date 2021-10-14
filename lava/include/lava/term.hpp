@@ -19,6 +19,10 @@
 #include <lava/support/tristate.hpp>
 #include <lava/support/base.hpp>
 
+#include <lamp/support/tracing.hpp>
+
+#include <sys/mman.h>
+
 #include <cstdio>
 #include <cstring>
 #include <type_traits>
@@ -28,12 +32,17 @@ using namespace std::string_literals;
 
 namespace __lava
 {
+    struct term_config_t
+    {
+        bool trace_model = false;
+    };
+
     struct term_state_t
     {
         term_state_t()
             : solver( ctx )
         {}
-
+        
         z3::context ctx;
         z3::solver solver;
     };
@@ -44,7 +53,8 @@ namespace __lava
         return ++v;
     }
 
-    term_state_t __term_state;
+    term_state_t *__term_state;
+    term_config_t *__term_cfg;
     
     template< template< typename > typename storage >
     struct term : storage< z3::expr >
@@ -60,7 +70,7 @@ namespace __lava
 
         template< typename type > static term lift( const type &value )
         {
-            auto &ctx = __term_state.ctx;
+            auto &ctx = __term_state->ctx;
 
             if constexpr ( std::is_integral_v < type > )
             {
@@ -77,7 +87,7 @@ namespace __lava
             std::strncpy( name, "var_", 4 );
             std::sprintf( name + 4, "%u", variable_counter() );
 
-            auto &ctx = __term_state.ctx;            
+            auto &ctx = __term_state->ctx;            
             if constexpr ( std::is_integral_v < type > )
             {
                 return ctx.bv_const( name, bitwidth_v< type > );
@@ -97,12 +107,12 @@ namespace __lava
         {
             assert( e.is_bv() );
             assert( e.get_sort().bv_size() == 1 );
-            return e == __term_state.ctx.bv_val( 1, 1 );
+            return e == __term_state->ctx.bv_val( 1, 1 );
         }
 
         static void assume( tr t, bool expected ) 
         {
-            auto &solver = __term_state.solver;
+            auto &solver = __term_state->solver;
             const auto& e = t.get();
             auto b = e.is_bool() ? e : tobool( e );
             solver.add( expected ? b : !b );
@@ -163,20 +173,79 @@ namespace __lava
 
         static void dump( tr t )
         {
-            printf( "%s\n", Z3_ast_to_string( __term_state.ctx, t.get() ) );
+            printf( "%s\n", Z3_ast_to_string( __term_state->ctx, t.get() ) );
         }
 
         static std::string trace( tr t )
         {
-            return Z3_ast_to_string( __term_state.ctx, t.get() );
+            return Z3_ast_to_string( __term_state->ctx, t.get() );
         }
 
         template< typename stream >
         friend stream& operator<<( stream &os, tr t )
         {
-            return os << Z3_ast_to_string( __term_state.ctx, t.get() );
+            return os << Z3_ast_to_string( __term_state->ctx, t.get() );
         }
     };
 
+    template< typename stream >
+    stream& operator<<( stream &os, const z3::symbol &s )
+    {
+        auto &ctx = __term_state->ctx;
+        switch (s.kind()) {
+            case Z3_INT_SYMBOL:    fprintf(os.stream(), "#%d", Z3_get_symbol_int(ctx, s)); break;
+            case Z3_STRING_SYMBOL: fprintf(os.stream(),  "%s", Z3_get_symbol_string(ctx, s)); break;
+            default: __builtin_unreachable();
+        }
+
+        return os;
+    }
+
+    inline void trace_model()
+    {
+        auto &solver = __term_state->solver;
+        auto model = solver.get_model();
+
+        using file_stream = __lart::rt::file_stream;
+        auto stream = file_stream( stderr );
+
+        for (unsigned i = 0; i < model.size(); i++) {
+            const auto &v = model[i];
+            auto interp = model.get_const_interp(v);
+            stream << "[term model] " << v.name() << " = " << Z3_ast_to_string( __term_state->ctx, interp ) << '\n';
+        }
+    }
+
+    inline bool option( std::string_view option, std::string_view msg )
+    {
+        auto is_set = [] ( auto opt ) { return opt && strcmp( opt, "ON" ) == 0; };
+        if ( auto opt = std::getenv( option.data() ); is_set( opt ) ) {
+            fprintf( stderr, "[term config] %s\n", msg.data() );
+            return  true;
+        }
+        return false;
+    }
+
+    [[gnu::constructor]] void term_setup()
+    {
+        __term_state = (term_state_t*)std::malloc(sizeof(term_state_t));
+        new ( __term_state ) term_state_t;
+
+        __term_cfg = (term_config_t*)mmap(NULL, sizeof(term_config_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
+        __term_cfg->trace_model = option("TERM_TRACE_MODEL", "term trace model");
+    }
+
+    [[gnu::destructor]] void term_cleanup()
+    {
+        if ( __term_cfg->trace_model ) {
+            trace_model();
+            // do not trace model multiple times
+            __term_cfg->trace_model = false;
+        }
+
+        std::free( __term_state );
+        munmap( __term_cfg, sizeof(term_config_t) );
+    }
 
 } // namespace __lava
