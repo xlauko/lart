@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import ctypes
+from . log import logger
 
 class ModelVar:
     def __init__(self, call, line, value):
@@ -9,34 +10,48 @@ class ModelVar:
         self.value = value
 
     def __str__(self):
-        return f"var:{self.call}:{self.line} = {self.value}"
+        return f"var: {self.call}:{self.line} = {self.value}"
 
 class Model:
     def __init__(self):
         self.vars = []
 
-    def parse(self, report):
-        model_start = False
+    def parse(self, report, line_offset):
+        nondet_calls = []
+        model = dict()
+
         for line in report:
-            if "nondet:" in line:
-                self.vars.append(self.parse_nondet_call(line))
-            if "model:" in line:
-                model_start = True
-            if line.startswith("var_") and model_start:
-                idx = int(line.split(":")[0].split("_")[1]) - 1
-                self.vars[idx].value = self.parse_value(line, idx)
+            if line.startswith("[lamp any]"):
+                nondet_calls.append(self.parse_nondet_call(line))    
+            if line.startswith("[term model]"):
+                name, value = self.parse_term_var(line)
+                index = self.parse_index(name) - 1
+                model[index] = value
+
+        for idx, call in enumerate(nondet_calls):
+            value = self.parse_value(call[0], model.get(idx, "0"))
+            line = str(int(call[2]) - line_offset)
+            var = ModelVar(call[0], line, value)
+            logger().info(f"{var}")
+            self.vars.append(var)
+        
+
+    def parse_index(self, var_name):
+        return int(var_name.split('_')[1])
 
     def parse_nondet_call(self, line):
-        parsed = line.strip().split(":")
-        return ModelVar(parsed[1], parsed[2], None)
+        name = line.removeprefix("[lamp any]").strip()
+        parsed = name.split(":")
+        return parsed
 
+    def parse_term_var(self, line):
+        line = line.removeprefix("[term model]")
+        parts = line.split(" = ")
+        return parts[0].strip(), parts[1].strip()
 
-    def parse_value(self, line, idx):
-        nondet = self.vars[idx].call
+    def parse_value(self, nondet, parsed):
         if "pointer" in nondet:
             return None # FIXME pointer models
-
-        parsed = line.strip().split(":")[1]
 
         try:
             if "float" in nondet:
@@ -50,7 +65,8 @@ class Model:
 
         try:
             # integer models:
-            val = int(parsed)
+            parsed = parsed.removeprefix("#x")
+            val = int(parsed, 16)
             bw = val.bit_length()
             if "uint" in nondet and bw <= 32:
                 return ctypes.c_uint(val)

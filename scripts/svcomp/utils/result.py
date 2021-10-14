@@ -112,8 +112,9 @@ class analysis_result:
 
         logger().info(f"result: {self.verification_result}")
         logger().info(f"properties: {self.cfg.properties}")
-        if self.cfg.symbolic:
-            if get_result_class(self.verification_result) is result_class.false:
+        if get_result_class(self.verification_result) is result_class.false:
+            self.backtrace = self.parse_backtrace(report)
+            if self.cfg.symbolic:
                 self.model = self.parse_model(report)
 
     def valid_result(self):
@@ -134,7 +135,7 @@ class analysis_result:
             logger().info(f"report line: {line}")
             if self.ignore_result(line):
                 return result.unknown
-            if "[lart fault]" in line:
+            if line.startswith("[lart fault]"):
                 if "reach_error" in line:
                     return result.false_reach
                 return result.unknown
@@ -149,11 +150,27 @@ class analysis_result:
         except EnvironmentError:
             return result.unknown
 
+    def parse_backtrace(self, report_path):
+        logger().info(f"parsing backtrace: {report_path}")
+        backtrace = []
+
+        with open(report_path, "r") as report:
+            prefix = "[lart backtrace]"
+            for line in report:
+                if line.startswith(prefix):
+                    name = line.removeprefix(prefix).strip()
+                    backtrace.append(name)
+
+        backtrace.reverse()
+
+        logger().info(f"backtrace {backtrace}")
+        return backtrace
+
     def parse_model(self, report_path):
         logger().info(f"parsing model: {report_path}")
         model = Model()
         with open(report_path, "r") as report:
-            model.parse(report)
+            model.parse(report, self.cfg.file_offset)
         return model
 
 

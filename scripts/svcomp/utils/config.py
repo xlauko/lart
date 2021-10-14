@@ -42,6 +42,9 @@ class config:
         
         # compiler options
         self.libm       : bool = False
+        
+        # file offset for line debug info
+        self.file_offset = 0
 
         self.setup_property_options()
 
