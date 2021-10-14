@@ -20,7 +20,7 @@ target_include_directories( lamp-api
 )
 
 set_target_properties( lamp-api PROPERTIES PUBLIC_HEADER
-    "include/lamp.h;include/lamp-pointers.h"
+    "include/lamp.h;include/lamp-pointers.h;include/svcomp.h"
 )
 
 install(TARGETS lamp-api
