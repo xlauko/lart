@@ -131,10 +131,13 @@ class analysis_result:
 
     def process_lines(self, report):
         for line in report:
+            logger().info(f"report line: {line}")
             if self.ignore_result(line):
                 return result.unknown
-            if "[lart fault]" in line and "reach_error" in line:
-                return result.false_reach
+            if "[lart fault]" in line:
+                if "reach_error" in line:
+                    return result.false_reach
+                return result.unknown
         return result.true
 
     def process_report(self, report_path):
@@ -155,7 +158,7 @@ class analysis_result:
 
 
     def generate_witness(self, path: str):
-        assert path is not None
+        assert path
 
         correctness = get_result_class(self.verification_result) is result_class.true
         writer = WitnessWriter(self.verification_result
