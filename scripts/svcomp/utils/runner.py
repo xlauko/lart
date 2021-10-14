@@ -135,7 +135,7 @@ class runner(object):
     def run(self):
         os.environ['DFSAN_OPTIONS'] = 'warn_unimplemented=0'
         os.environ['LART_ERROR_BACKTRACE'] = 'ON'
-        os.environ['LART_TRACE_MODEL'] = 'ON'
+        os.environ['TERM_TRACE_MODEL'] = 'ON'
         
         self.preprocess()
 
