@@ -34,6 +34,8 @@ namespace __lart::rt
             std::putc(c, _file);
             return *this;
         }
+
+        std::FILE* stream() { return _file; }
     
     protected:
         std::FILE *_file;

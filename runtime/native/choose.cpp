@@ -16,7 +16,6 @@
 
 #include "choose.hpp"
 #include "config.hpp"
-#include "state.hpp"
 #include "trace.hpp"
 
 #include <unistd.h>
@@ -35,7 +34,6 @@ namespace __lart::rt
         pid_t done = wait(&status);
         
         if (status != 0) {
-            state.error_traced = true;
             std::exit(status);
         }
 

@@ -15,7 +15,6 @@
  */
 
 #include "config.hpp"
-#include "state.hpp"
 
 #include "fault.hpp"
 #include "utils.hpp"
@@ -45,11 +44,9 @@ namespace __lart::rt
         config.backtrace     = option( "LART_ERROR_BACKTRACE", "trace error backtrace" );
         config.trace_choices = option( "LART_TRACE_CHOICES", "trace choices" );
         config.ask_choices   = option( "LART_ASK_CHOICES", "ask choices" );
-        config.trace_model   = option( "LART_TRACE_MODEL", "trace model" );
 
         if ( auto opt = std::getenv( "LART_TRACE_FILE" ); opt ) {
             fprintf( stderr, "[lart config] trace file = %s\n", opt );
-
             config.trace_file = std::fopen( opt, "w" );
         }
     }
@@ -63,10 +60,6 @@ namespace __lart::rt
 
     destructor void lart_cleanup()
     {
-        if ( config.trace_model && !state.error_traced ) {
-            fprintf( stderr, "[lart-model]\n" );
-        }
-
         if ( config.trace_file ) {
             std::fclose( config.trace_file );
         }

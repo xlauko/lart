@@ -24,7 +24,6 @@ namespace __lart::rt
     {
         bool backtrace = false;
         bool trace_choices = false;
-        bool trace_model = false;
         bool ask_choices = false;
 
         std::FILE *trace_file = nullptr;

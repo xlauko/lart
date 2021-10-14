@@ -16,7 +16,6 @@
 
 
 #include "config.hpp"
-#include "state.hpp"
 #include "fault.hpp"
 
 #include "stream.hpp"
