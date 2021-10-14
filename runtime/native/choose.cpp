@@ -42,14 +42,24 @@ namespace __lart::rt
 
     int choose( int count )
     {
-        int result;
+        static unsigned depth = 0;
+        
+        auto bound = config.choose_bound;
+        if ( bound && depth >= bound ) {
+            std::exit(EXIT_SUCCESS);
+        }
+
+        int result = 0;
         if ( config.ask_choices ) {
             std::scanf( "%d", &result );
         } else {
             result = fork_choose( count );
         }
+
         if ( config.trace_choices )
             trace.push_choice( result );
+
+        ++depth;
         return result;
     }
 

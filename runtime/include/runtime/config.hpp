@@ -26,6 +26,8 @@ namespace __lart::rt
         bool trace_choices = false;
         bool ask_choices = false;
 
+        unsigned choose_bound = 0;
+
         std::FILE *trace_file = nullptr;
     };
 

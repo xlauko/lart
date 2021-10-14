@@ -45,6 +45,11 @@ namespace __lart::rt
         config.trace_choices = option( "LART_TRACE_CHOICES", "trace choices" );
         config.ask_choices   = option( "LART_ASK_CHOICES", "ask choices" );
 
+        if ( auto opt = std::getenv( "LART_CHOOSE_BOUND" ); opt ) {
+            fprintf( stderr, "[lart config] choose bound = %s\n", opt );
+            config.choose_bound = std::atoi( opt );
+        }
+        
         if ( auto opt = std::getenv( "LART_TRACE_FILE" ); opt ) {
             fprintf( stderr, "[lart config] trace file = %s\n", opt );
             config.trace_file = std::fopen( opt, "w" );
