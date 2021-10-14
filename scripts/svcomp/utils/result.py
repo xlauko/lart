@@ -113,7 +113,7 @@ class analysis_result:
         logger().info(f"result: {self.verification_result}")
         logger().info(f"properties: {self.cfg.properties}")
         if get_result_class(self.verification_result) is result_class.false:
-            self.backtrace = self.parse_backtrace(report)
+            # self.backtrace = self.parse_backtrace(report)
             if self.cfg.symbolic:
                 self.model = self.parse_model(report)
 
@@ -150,21 +150,22 @@ class analysis_result:
         except EnvironmentError:
             return result.unknown
 
-    def parse_backtrace(self, report_path):
-        logger().info(f"parsing backtrace: {report_path}")
-        backtrace = []
+    # def parse_backtrace(self, report_path):
+    #     logger().info(f"parsing backtrace: {report_path}")
+    #     backtrace = []
 
-        with open(report_path, "r") as report:
-            prefix = "[lart backtrace]"
-            for line in report:
-                if line.startswith(prefix):
-                    name = line.removeprefix(prefix).strip()
-                    backtrace.append(name)
+    #     with open(report_path, "r") as report:
+    #         prefix = "[lart backtrace]"
+    #         for line in report:
+    #             if line.startswith(prefix):
+    #                 logger().info(line)
+    #                 name = line.removeprefix(prefix).strip()
+    #                 backtrace.append(name)
 
-        backtrace.reverse()
+    #     backtrace.reverse()
 
-        logger().info(f"backtrace {backtrace}")
-        return backtrace
+    #     logger().info(f"backtrace {backtrace}")
+    #     return backtrace
 
     def parse_model(self, report_path):
         logger().info(f"parsing model: {report_path}")

@@ -144,6 +144,8 @@ class runner(object):
         os.environ['LART_ERROR_BACKTRACE'] = 'ON'
         os.environ['TERM_TRACE_MODEL'] = 'ON'
         
+        os.environ['LART_CHOOSE_BOUND'] = '100'
+        
         self.preprocess()
 
         cc = compilation(self.cfg, self.preprocesed)
