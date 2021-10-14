@@ -89,6 +89,7 @@ class runner(object):
     def preprocess(self):
         with open(self.preprocesed, "w") as out, open(self.cfg.benchmark, "r") as bench:
             out.write("#include <lamp.h>\n")
+            out.write("#include <svcomp.h>\n")
             for line in bench:
                 out.write(self.preprocess_line(line))
 
@@ -110,9 +111,9 @@ class runner(object):
         def match_pthread() -> bool:
             return "pthread_" in line
 
-        def match_globals() -> bool:
-            extern = re.compile("extern[^(]*;")
-            return extern.match(line) is not None
+        # def match_globals() -> bool:
+        #     extern = re.compile("extern[^(]*;")
+        #     return extern.match(line) is not None
 
         def match_libm() -> bool:
             return '<math.h>' in line
@@ -127,8 +128,12 @@ class runner(object):
 
         self.cfg.sequential &= not match_pthread()
 
-        if match_globals():
-            assert False, "unimplemented"
+        # if match_globals():
+        #     assert False, "unimplemented"
+
+        # remove extern __VERIFIER_nondet lines
+        if "extern" in line and "__VERIFIER_nondet" in line:
+            return "\n"
         
         return line
 
