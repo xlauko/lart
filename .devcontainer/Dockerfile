@@ -30,6 +30,11 @@ RUN sh ./cmake-${CMAKE_VERSION}.0-linux-x86_64.sh --prefix=/usr/opt/cmake --skip
 RUN rm ./cmake-${CMAKE_VERSION}.0-linux-x86_64.sh
 ENV PATH="/usr/opt/cmake/bin:${PATH}"
 
+RUN apt-get install software-properties-common -y
+ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
+RUN pip3 install git+https://github.com/sosy-lab/benchexec.git coloredlogs
+RUN groupadd benchexec && adduser root benchexec
+
 #
 # LIBCXX build for LART runtime
 #
@@ -99,15 +104,3 @@ RUN vcpkg update
 RUN vcpkg install spdlog catch2 doctest
 
 ENV VCPKG_TOOLCHAIN "/usr/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
-
-FROM deps as svcomp
-
-WORKDIR /usr/set/
-
-RUN git clone --depth 1 https://gitlab.com/sosy-lab/benchmarking/sv-benchmarks.git
-
-FROM svcomp as benchexec
-
-RUN apt-get install software-properties-common  -y
-RUN pip3 install git+https://github.com/xlauko/benchexec.git coloredlogs
-RUN groupadd benchexec && adduser root benchexec
