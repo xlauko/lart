@@ -162,7 +162,7 @@ def verify(cfg):
     log.info(f"run verification")
     analysis = runner(cfg)
     result = analysis.run()
-    if cfg.witness:
+    if cfg.witness and result.can_generate_witness():
         result.generate_witness(cfg.workdir)
     result.dump()
 

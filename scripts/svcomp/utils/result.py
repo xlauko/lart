@@ -104,7 +104,7 @@ class analysis_result:
         self.cfg = cfg
         self.model = Model()
 
-        self.verification_result = self.process_report(report)
+        self.verification_result = self.process_report(report) if report else result.unknown
 
         if not self.valid_result():
             logger().info(f"invalid result: {self.verification_result}")
@@ -174,6 +174,10 @@ class analysis_result:
             model.parse(report, self.cfg.file_offset)
         return model
 
+
+    def can_generate_witness(self):
+        cls = get_result_class(self.verification_result)
+        return cls == result_class.true or cls == result_class.true 
 
     def generate_witness(self, path: str):
         assert path

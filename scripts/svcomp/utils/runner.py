@@ -159,7 +159,7 @@ class runner(object):
             print("error:")
             with open(ccerr, 'r') as err:
                 print(err.read())
-            return result.unknown
+            return analysis_result(None, self.cfg)
 
         # FIXME: if error empty
 
