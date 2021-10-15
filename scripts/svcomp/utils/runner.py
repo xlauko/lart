@@ -159,8 +159,7 @@ class runner(object):
             print("error:")
             with open(ccerr, 'r') as err:
                 print(err.read())
-            ## TODO unknown result
-            sys.exit()
+            return result.unknown
 
         # FIXME: if error empty
 
