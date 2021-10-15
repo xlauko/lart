@@ -1,7 +1,7 @@
 ARG CMAKE_VERSION=3.21
 ARG LLVM_VERSION=12.0.1
 ARG SVF_VERSION=2.3
-ARG BUILD_BASE=ubuntu:rolling
+ARG BUILD_BASE=ubuntu:latest
 
 #
 # Base layer
@@ -16,7 +16,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update
 RUN apt-get install -y \
         bash git ninja-build ccache curl wget \
-	build-essential clang zip unzip tar llvm-12 \
+	build-essential clang zip unzip tar llvm-12 clang-12 libz3-dev z3 gcc-10 g++-10 libstdc++-10-dev \
 	pkg-config zlib1g-dev cmake python3-pip gdb -y
 
 RUN pip install lit
@@ -67,9 +67,14 @@ RUN cmake --build build-dataflow --target install-cxx install-cxxabi
 FROM dataflow-libs as svf
 
 ENV SVF_INSTALL_DIR "/usr/opt/svf/"
+ENV Z3_DIR "/usr/opt/z3/"
 ARG SVF_VERSION
 
 WORKDIR /usr/src/
+
+RUN wget -c "https://github.com/Z3Prover/z3/releases/download/z3-4.8.8/z3-4.8.8-x64-ubuntu-16.04.zip" -O z3.zip
+RUN unzip -q z3.zip && mv ./z3-* ${Z3_DIR}
+RUN rm z3.zip
 
 RUN curl -sSL https://github.com/SVF-tools/SVF/archive/refs/tags/SVF-${SVF_VERSION}.tar.gz \
     | tar -xvz
@@ -80,6 +85,7 @@ WORKDIR /usr/src/svf
 RUN cmake \
         -GNinja \
 	-DLLVM_DIR=${LLVM_INSTALL_DIR} \
+        -DZ3_DIR=${Z3_DIR} \
         -DCMAKE_INSTALL_PREFIX=${SVF_INSTALL_DIR} \
         -B build \
         -S .
