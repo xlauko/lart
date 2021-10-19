@@ -187,7 +187,7 @@ class analysis_result:
 
     def can_generate_witness(self):
         cls = get_result_class(self.verification_result)
-        return cls == result_class.true or cls == result_class.true 
+        return cls == result_class.true or cls == result_class.false 
 
     def generate_witness(self, path: str):
         assert path
