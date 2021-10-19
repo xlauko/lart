@@ -11,7 +11,9 @@ To create submission file execute `setup-submission.sh`.
 
 ## Run Benchexec
 
-`benchexec ./scripts/svcomp/benchexec.xml --no-container --tool-directory=./submission -T 60 -t ReachSafety-BitVectors -N 20`
+from submission folder:
+
+`benchexec ../scripts/svcomp/benchexec.xml --no-container --tool-directory=./ -T 60 -t ReachSafety-BitVectors -N 20`
 
 ## Docker run:
 
