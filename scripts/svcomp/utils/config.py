@@ -61,6 +61,3 @@ class config:
                 unsupported(prp)
             if prp == property.memsafety:
                 self.leakcheck = True
-
-    def get_options(self) -> List[str]:
-        return []
