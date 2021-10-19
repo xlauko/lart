@@ -46,7 +46,8 @@ namespace __lart::rt
         
         auto bound = config.choose_bound;
         if ( bound && depth >= bound ) {
-            std::exit(EXIT_SUCCESS);
+            fprintf(stderr, "[lart status] bounded exit\n");
+            std::exit(EXIT_FAILURE);
         }
 
         int result = 0;
