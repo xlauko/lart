@@ -40,12 +40,12 @@ class Model:
         return int(var_name.split('_')[1])
 
     def parse_nondet_call(self, line):
-        name = line.removeprefix("[lamp any]").strip()
+        name = line.lstrip("[lamp any]").strip()
         parsed = name.split(":")
         return parsed
 
     def parse_term_var(self, line):
-        line = line.removeprefix("[term model]")
+        line = line.lstrip("[term model]")
         parts = line.split(" = ")
         return parts[0].strip(), parts[1].strip()
 
@@ -65,7 +65,7 @@ class Model:
 
         try:
             # integer models:
-            parsed = parsed.removeprefix("#x")
+            parsed = parsed.lstrip("#x")
             val = int(parsed, 16)
             bw = val.bit_length()
             if "uint" in nondet and bw <= 32:
