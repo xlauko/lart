@@ -19,6 +19,8 @@
 #include "fault.hpp"
 #include "utils.hpp"
 
+#include <sys/mman.h>
+
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
@@ -27,7 +29,7 @@
 
 namespace __lart::rt
 {
-    config_t config;
+    config_t *config = NULL;
     
     bool option( std::string_view option, std::string_view msg )
     {
@@ -41,23 +43,25 @@ namespace __lart::rt
 
     void load_config()
     {
-        config.backtrace     = option( "LART_ERROR_BACKTRACE", "trace error backtrace" );
-        config.trace_choices = option( "LART_TRACE_CHOICES", "trace choices" );
-        config.ask_choices   = option( "LART_ASK_CHOICES", "ask choices" );
+        config->backtrace     = option( "LART_ERROR_BACKTRACE", "trace error backtrace" );
+        config->trace_choices = option( "LART_TRACE_CHOICES", "trace choices" );
+        config->ask_choices   = option( "LART_ASK_CHOICES", "ask choices" );
 
         if ( auto opt = std::getenv( "LART_CHOOSE_BOUND" ); opt ) {
             fprintf( stderr, "[lart config] choose bound = %s\n", opt );
-            config.choose_bound = std::atoi( opt );
+            config->choose_bound = std::atoi( opt );
         }
         
         if ( auto opt = std::getenv( "LART_TRACE_FILE" ); opt ) {
             fprintf( stderr, "[lart config] trace file = %s\n", opt );
-            config.trace_file = std::fopen( opt, "w" );
+            config->trace_file = std::fopen( opt, "w" );
         }
     }
 
     constructor void lart_setup()
     {
+        config = (config_t*)mmap(NULL, sizeof(config_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
         load_config();
 
         init_fault_handler();
@@ -65,9 +69,11 @@ namespace __lart::rt
 
     destructor void lart_cleanup()
     {
-        if ( config.trace_file ) {
-            std::fclose( config.trace_file );
+        if ( config->trace_file ) {
+            std::fclose( config->trace_file );
         }
+        
+        munmap( config, sizeof(config_t) );
     }
 
 } // namespace __lart::rt

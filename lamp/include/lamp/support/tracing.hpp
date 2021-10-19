@@ -438,7 +438,7 @@ namespace __lamp
         
         configured_stream()
         {
-            auto file = __lart::rt::config.trace_file;
+            auto file = __lart::rt::config->trace_file;
             if ( file )
                 this->_file = file;
         }

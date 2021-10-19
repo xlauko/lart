@@ -43,21 +43,25 @@ namespace __lart::rt
     int choose( int count )
     {
         static unsigned depth = 0;
-        
-        auto bound = config.choose_bound;
+
+        if (config->error_found) {
+            std::exit(EXIT_SUCCESS);
+        }
+
+        auto bound = config->choose_bound;
         if ( bound && depth >= bound ) {
             fprintf(stderr, "[lart status] bounded exit\n");
-            std::exit(EXIT_FAILURE);
+            std::exit(EXIT_SUCCESS);
         }
 
         int result = 0;
-        if ( config.ask_choices ) {
+        if ( config->ask_choices ) {
             std::scanf( "%d", &result );
         } else {
             result = fork_choose( count );
         }
 
-        if ( config.trace_choices )
+        if ( config->trace_choices )
             trace.push_choice( result );
 
         ++depth;

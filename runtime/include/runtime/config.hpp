@@ -28,9 +28,11 @@ namespace __lart::rt
 
         unsigned choose_bound = 0;
 
+        bool error_found = false;
+
         std::FILE *trace_file = nullptr;
     };
 
-    extern config_t config;
+    extern config_t *config;
 
 } // namespace __lart::rt
