@@ -49,15 +49,10 @@ class config:
         self.setup_property_options()
 
     def setup_property_options(self):
-        unsupported_list = [
-            property.memcleanup,
-            property.termination,
-            property.defbehavior,
-            property.overflow
-        ]
+        supported_list = [property.reach]
 
         for prp in self.properties:
-            if prp in unsupported_list:
+            if prp not in supported_list:
                 unsupported(prp)
             if prp == property.memsafety:
                 self.leakcheck = True
