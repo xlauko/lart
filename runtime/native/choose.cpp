@@ -23,7 +23,7 @@
 
 namespace __lart::rt
 {
-    int fork_choose( int count )
+    int fork_choose_dec( int count )
     {
         if ( count == 1 )
             return 0;
@@ -37,7 +37,24 @@ namespace __lart::rt
             std::exit(status);
         }
 
-        return fork_choose( count - 1 );
+        return fork_choose_dec( count - 1 );
+    }
+
+    int fork_choose_inc( int count )
+    {
+        for (int i = 0; i < count - 1; i++) {
+            auto pid = fork();
+            if ( pid == 0 )
+                return count - 1;
+            int status;
+            pid_t done = wait(&status);
+            
+            if (status != 0) {
+                std::exit(status);
+            }
+        }
+
+        return count - 1;
     }
 
     int choose( int count )
@@ -57,8 +74,11 @@ namespace __lart::rt
         int result = 0;
         if ( config->ask_choices ) {
             std::scanf( "%d", &result );
+        // TODO: remove unnecessary condition
+        } else if ( config->choose_increasing ) {
+            result = fork_choose_inc( count );
         } else {
-            result = fork_choose( count );
+            result = fork_choose_dec( count );
         }
 
         if ( config->trace_choices )

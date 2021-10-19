@@ -27,6 +27,7 @@ namespace __lart::rt
         bool ask_choices = false;
 
         unsigned choose_bound = 0;
+        bool choose_increasing = false;
 
         bool error_found = false;
 

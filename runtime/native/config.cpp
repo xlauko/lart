@@ -46,6 +46,7 @@ namespace __lart::rt
         config->backtrace     = option( "LART_ERROR_BACKTRACE", "trace error backtrace" );
         config->trace_choices = option( "LART_TRACE_CHOICES", "trace choices" );
         config->ask_choices   = option( "LART_ASK_CHOICES", "ask choices" );
+        config->choose_increasing = option( "LART_INC_CHOOSE", "increasing choices" );
 
         if ( auto opt = std::getenv( "LART_CHOOSE_BOUND" ); opt ) {
             fprintf( stderr, "[lart config] choose bound = %s\n", opt );
