@@ -139,6 +139,8 @@ class analysis_result:
                 if "reach_error" in line:
                     return result.false_reach
                 return result.unknown
+            if "FATAL: DataFlowSanitizer" in line:
+                return result.unknown
         return result.true
 
     def process_report(self, report_path):
