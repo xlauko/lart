@@ -134,8 +134,9 @@ class runner(object):
         #     assert False, "unimplemented"
 
         # remove extern __VERIFIER_nondet lines
-        if "extern" in line and "__VERIFIER_nondet" in line:
-            return "\n"
+        if "__VERIFIER_nondet" in line:
+            if "extern" in line or " = " not in line:
+                return "\n"
         
         return line
 
@@ -166,8 +167,8 @@ class runner(object):
         ver = verifier(self.cfg, abstracted)
         vout, verr, status = ver.run()
 
-        if status:
-            return analysis_result(None, self.cfg) 
+        # if status:
+        #     return analysis_result(None, self.cfg) 
 
         # TODO: check return code of
         return analysis_result(verr, self.cfg)

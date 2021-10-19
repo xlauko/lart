@@ -169,7 +169,7 @@ class analysis_result:
     #         for line in report:
     #             if line.startswith(prefix):
     #                 logger().info(line)
-    #                 name = line.removeprefix(prefix).strip()
+    #                 name = line.lstrip(prefix).strip()
     #                 backtrace.append(name)
 
     #     backtrace.reverse()
