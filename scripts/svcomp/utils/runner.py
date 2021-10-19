@@ -65,6 +65,7 @@ class verifier(object):
         self.abstracted : str = abstracted
         self.err : str = cfg.workdir + "/verify.err"
         self.out : str = cfg.workdir + "/verify.out"
+        self.status = None
 
     def get_instance(self):
         inst = os.path.abspath(self.abstracted)
@@ -76,9 +77,8 @@ class verifier(object):
         logger().info("verify: " + " ".join(prog))
         with open(self.out, 'w') as out, open(self.err, 'w') as err:
             proc = Popen(prog, stdout = out, stderr = err)
-            status = proc.wait()
-
-        return self.out, self.err
+            self.status = proc.wait()
+        return self.out, self.err, self.status
 
 
 class runner(object):
@@ -164,7 +164,10 @@ class runner(object):
         # FIXME: if error empty
 
         ver = verifier(self.cfg, abstracted)
-        vout, verr = ver.run()
+        vout, verr, status = ver.run()
+
+        if status:
+            return analysis_result(None, self.cfg) 
 
         # TODO: check return code of
         return analysis_result(verr, self.cfg)
