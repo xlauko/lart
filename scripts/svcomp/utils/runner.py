@@ -135,7 +135,7 @@ class runner(object):
 
         # remove extern __VERIFIER_nondet lines
         if "__VERIFIER_nondet" in line:
-            if "extern" in line or " = " not in line:
+            if "extern" in line or "=" not in line:
                 return "\n"
         
         return line
