@@ -131,6 +131,8 @@ class analysis_result:
         return False
 
     def process_lines(self, report):
+        bounded = False
+        fatal = False
         for line in report:
             logger().info(f"report line: {line}")
             if self.ignore_result(line):
@@ -139,8 +141,14 @@ class analysis_result:
                 if "reach_error" in line:
                     return result.false_reach
                 return result.unknown
-            if "FATAL: DataFlowSanitizer" in line:
+            if line.startswith("[lart status]"):
+                if "bounded exit" in line:
+                    bounded = True
                 return result.unknown
+            if "FATAL: DataFlowSanitizer" in line:
+                fatal = True
+        if bounded or fatal:
+            return result.unknown
         return result.true
 
     def process_report(self, report_path):
