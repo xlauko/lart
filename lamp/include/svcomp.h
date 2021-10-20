@@ -20,9 +20,9 @@ extern "C" {
 
     uint8_t __lamp_any_i1_traced(const char *file, unsigned int line, const char *func);
     uint8_t __lamp_any_i8_traced(const char *file, unsigned int line, const char *func);
-    uint8_t __lamp_any_i16_traced(const char *file, unsigned int line, const char *func);
-    uint8_t __lamp_any_i32_traced(const char *file, unsigned int line, const char *func);
-    uint8_t __lamp_any_i64_traced(const char *file, unsigned int line, const char *func);
+    uint16_t __lamp_any_i16_traced(const char *file, unsigned int line, const char *func);
+    uint32_t __lamp_any_i32_traced(const char *file, unsigned int line, const char *func);
+    uint64_t __lamp_any_i64_traced(const char *file, unsigned int line, const char *func);
     
     float  __lamp_any_f32_traced(const char *file, unsigned int line, const char *func);
     double __lamp_any_f64_traced(const char *file, unsigned int line, const char *func);
