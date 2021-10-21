@@ -76,13 +76,8 @@ namespace lart
         }
 
         // delete stubs
-        for ( auto &fn : module ) {
-            // TODO add stub annotation
-            if ( fn.getName().startswith( "__lamp" ) )
-                fn.deleteBody();
-
-            if ( fn.getName().startswith( "__lart" ) )
-                fn.deleteBody();
+        if ( auto stub = module.getFunction( "__lamp_stub" ) ) {
+            stub->deleteBody();
         }
 
         spdlog::info("lartcc finished");
