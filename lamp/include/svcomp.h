@@ -14,20 +14,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <lamp.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    uint8_t __lamp_any_i1_traced(const char *file, unsigned int line, const char *func);
-    uint8_t __lamp_any_i8_traced(const char *file, unsigned int line, const char *func);
-    uint16_t __lamp_any_i16_traced(const char *file, unsigned int line, const char *func);
-    uint32_t __lamp_any_i32_traced(const char *file, unsigned int line, const char *func);
-    uint64_t __lamp_any_i64_traced(const char *file, unsigned int line, const char *func);
-    
-    float  __lamp_any_f32_traced(const char *file, unsigned int line, const char *func);
-    double __lamp_any_f64_traced(const char *file, unsigned int line, const char *func);
-    
-    void* __lamp_any_ptr_traced(const char *file, unsigned int line, const char *func);
+    __lamp_bool __lamp_any_i1_traced (const char *file, unsigned int line, const char *func);
+    __lamp_i8   __lamp_any_i8_traced (const char *file, unsigned int line, const char *func);
+    __lamp_i16  __lamp_any_i16_traced(const char *file, unsigned int line, const char *func);
+    __lamp_i32  __lamp_any_i32_traced(const char *file, unsigned int line, const char *func);
+    __lamp_i64  __lamp_any_i64_traced(const char *file, unsigned int line, const char *func);
+        
+    __lamp_f32 __lamp_any_f32_traced(const char *file, unsigned int line, const char *func);
+    __lamp_f64 __lamp_any_f64_traced(const char *file, unsigned int line, const char *func);
+    void*      __lamp_any_ptr_traced(const char *file, unsigned int line, const char *func);
 
     #define __VERIFIER_nondet_bool() \
         __lamp_any_i1_traced(__FILE__, __LINE__, "__VERIFIER_nondet_bool")
