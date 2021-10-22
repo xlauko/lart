@@ -52,11 +52,6 @@
     <propertyfile>/usr/set/sv-benchmarks/c/properties/unreach-call.prp</propertyfile>
   </tasks>
 
-  <tasks name="ConcurrencySafety-Main">
-    <includesfile>/usr/set/sv-benchmarks/c/ConcurrencySafety-Main.set</includesfile>
-    <propertyfile>/usr/set/sv-benchmarks/c/properties/unreach-call.prp</propertyfile>
-  </tasks>
-
   <tasks name="SoftwareSystems-AWS-C-Common-ReachSafety">
     <includesfile>/usr/set/sv-benchmarks/c/SoftwareSystems-AWS-C-Common-ReachSafety.set</includesfile>
     <propertyfile>/usr/set/sv-benchmarks/c/properties/unreach-call.prp</propertyfile>
