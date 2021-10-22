@@ -88,8 +88,6 @@ class runner(object):
 
     def preprocess(self):
         with open(self.preprocesed, "w") as out, open(self.cfg.benchmark, "r") as bench:
-            out.write("#include <lamp.h>\n")
-            self.cfg.file_offset += 1
             out.write("#include <svcomp.h>\n")
             self.cfg.file_offset += 1
             for line in bench:
