@@ -126,7 +126,7 @@ namespace __lava
 
         static inline st fail( const char *msg = "" )
         {
-            fprintf( stderr, "failed: %s\n", msg );
+            fprintf( stderr, "[lamp fail]: unsupported %s\n", msg );
             __builtin_trap();
         }
 
