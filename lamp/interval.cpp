@@ -4,7 +4,7 @@
 
 namespace __lamp
 {
-    using interval = __lava::interval< wrapped_storage >;    
+    using interval = __lava::interval< wrapped_storage >;
     using meta_domain = __lava::relational< interval, wrapped_storage >;
 } // namespace __lamp
 
