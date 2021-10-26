@@ -11,6 +11,8 @@ register_domain( tracing-term )
 register_domain( pa )
 register_domain( zero )
 register_domain( tracing-zero )
+register_domain( floats )
+register_domain( tracing-floats )
 
 add_library( lamp-api INTERFACE )
 target_include_directories( lamp-api
