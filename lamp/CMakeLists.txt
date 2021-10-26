@@ -4,6 +4,8 @@ include( cmake/lamp.cmake )
 
 register_domain( unit )
 register_domain( tracing-unit )
+register_domain( interval )
+register_domain( tracing-interval )
 register_domain( constant )
 register_domain( trivial )
 register_domain( term )
@@ -13,6 +15,7 @@ register_domain( zero )
 register_domain( tracing-zero )
 register_domain( floats )
 register_domain( tracing-floats )
+
 
 add_library( lamp-api INTERFACE )
 target_include_directories( lamp-api
