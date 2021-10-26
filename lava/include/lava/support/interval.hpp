@@ -447,7 +447,6 @@ namespace sup
                 }
 
 
-
                 interval int_neg = { r.low, static_cast< bound_t > (-1) };
                 interval int_pos = { static_cast<bound_t> (1), r.high };
                 return join( l / int_neg, l / int_pos );
