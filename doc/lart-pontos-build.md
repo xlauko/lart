@@ -108,7 +108,7 @@ cmake --build build-runtime --target install
 ### Add to `.bashrc`
 
 ```bash
-export PATH="${HOME}/src/lart/build-lart/lartcc:${PATH}"
+export PATH="${HOME}/opt/lart/bin/lartcc:${PATH}"
 ```
 
 
