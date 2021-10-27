@@ -31,13 +31,13 @@ namespace __lart::rt
 
         file_stream& operator<<(char c) noexcept
         {
-            std::putc(c, _file);
+            std::fprintf( _file, "%c", c );
             return *this;
         }
 
-        file_stream& operator<<(unsigned int i) noexcept
+        file_stream& operator<<(unsigned int u) noexcept
         {
-            std::fprintf( _file, "%u", i );
+            std::fprintf( _file, "%u", u );
             return *this;
         }
         
