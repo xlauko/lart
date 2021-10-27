@@ -38,15 +38,15 @@ macro( register_domain domain )
       -fsanitize-blacklist=${CMAKE_CURRENT_SOURCE_DIR}/dataflow-blacklist.txt
     )
 
-    # domain source
-    add_library( ${domain}-src STATIC ${domain}.cpp )
-    target_link_libraries( ${domain}-src
-      PUBLIC ${domain}-prop
-      PRIVATE lava runtime
-    )
+    # # domain source
+    # add_library( ${domain}-src STATIC ${domain}.cpp )
+    # target_link_libraries( ${domain}-src
+    #   PUBLIC ${domain}-prop
+    #   PRIVATE lava runtime
+    # )
 
-    set_property( TARGET ${domain}-src PROPERTY POSITION_INDEPENDENT_CODE ON )
-    set_property( TARGET ${domain}-src PROPERTY CXX_STANDARD 20 )
+    # set_property( TARGET ${domain}-src PROPERTY POSITION_INDEPENDENT_CODE ON )
+    # set_property( TARGET ${domain}-src PROPERTY CXX_STANDARD 20 )
 
     # sanitized domain library
     add_library( ${domain} STATIC ${domain}.cpp )
