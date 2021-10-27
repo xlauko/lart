@@ -154,4 +154,12 @@ namespace __lava::op
             return op( arg )( arg, args..., bind... );
         };
     };
+
+    static constexpr auto wrapr = []( const auto &op, const auto & ... bind  ) __inline
+    {
+        return [=]( auto &arg, const auto & ... args ) __inline
+        {
+            return op( arg )( arg, args..., bind... );
+        };
+    };
 } // namespace __lava::op
