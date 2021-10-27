@@ -140,7 +140,7 @@ namespace __lava
         using index_dom = self_t;
         using scalar_dom = self_t;
 
-        static inline st fail( const char *msg = "" )
+        [[noreturn]] static inline st fail( const char *msg = "" )
         {
             fprintf( stderr, "[lamp fail]: unsupported %s\n", msg );
             __builtin_trap();
