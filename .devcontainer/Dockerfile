@@ -55,6 +55,7 @@ WORKDIR /usr/src/llvm
 RUN cmake -GNinja \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_BUILD_TYPE=Release \
   -DLLVM_USE_SANITIZER="DataFlow" \
   -DCMAKE_INSTALL_PREFIX:PATH=${LIBCXX_DATAFLOW_DIR} \
   -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" \
