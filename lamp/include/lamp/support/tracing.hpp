@@ -443,9 +443,51 @@ namespace __lamp
                 this->_file = file;
         }
         
-        configured_stream& operator<<(std::string_view str) noexcept
+        configured_stream& operator<<(const std::string_view str) noexcept
         {
             underlying() << str;
+            return *this;
+        }
+
+        configured_stream& operator<<(char c) noexcept
+        {
+            underlying() << c;
+            return *this;
+        }
+
+        configured_stream& operator<<(unsigned int ui) noexcept
+        {
+            underlying() << ui;
+            return *this;
+        }
+        
+        configured_stream& operator<<(int si) noexcept
+        {
+            underlying() << si;
+            return *this;
+        }
+
+        configured_stream& operator<<(unsigned short us) noexcept
+        {
+            underlying() << us;
+            return *this;
+        }
+        
+        configured_stream& operator<<(short ss) noexcept
+        {
+            underlying() << ss;
+            return *this;
+        }
+
+        configured_stream& operator<<(unsigned long ul) noexcept
+        {
+            underlying() << ul;
+            return *this;
+        }
+        
+        configured_stream& operator<<(long sl) noexcept
+        {
+            underlying() << sl;
             return *this;
         }
     };
