@@ -82,6 +82,8 @@ namespace __lart::rt
             _size = 0;
         }
 
+        inline void resize( size_type n ) noexcept { _resize( n ); }
+
     private:
 
         void _resize( size_type n ) noexcept
