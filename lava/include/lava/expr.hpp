@@ -17,11 +17,33 @@
 #pragma once
 
 #include <lava/support/base.hpp>
+#include <lava/support/smt.hpp>
 #include <lava/support/tristate.hpp>
+
+#include <runtime/vector.hpp>
 
 namespace __lava
 {
-    struct [[gnu::packed]] expr_storage {};
+    struct [[gnu::packed]] expr_storage 
+    {
+        expr_storage() = default;
+        expr_storage(const expr_storage &) = default;
+        expr_storage(expr_storage &&) = default;
+
+        template< typename imm_t >
+        expr_storage( const smt_atom_t< imm_t > &a )
+        {
+            rpn.apply(a);
+        }
+
+        template< typename... args_t  >
+        expr_storage( const args_t &... args )
+        {
+            ( rpn.apply( args ) , ... );
+        }
+
+        smt_expr< __lart::rt::vector > rpn;
+    };
     
     template< template< typename > typename storage >
     struct expr : storage< expr_storage > 
@@ -36,95 +58,132 @@ namespace __lava
         using ev = expr;
         using er = const expr &;
 
-        template< typename type > static expr lift( const type& ) { return {}; }
-        template< typename type > static expr any() { return {}; }
+        using op = smt_op;
+
+        static int counter()
+        {
+            static int v = 0;
+            return ++v;
+        }
+
+        static uint16_t array_counter()
+        {
+            static uint16_t v = 0;
+            return ++v;
+        }
+
+        template< typename T >
+        static expr lift( T value )
+        {
+            static_assert( std::is_arithmetic_v< T > || std::is_pointer_v< T > );
+            constexpr auto op = smt_match_op< smt_op_const, T >;
+            return { smt_atom_t< T >( op, value ) };
+        }
+
+        static expr lift( __lava::array_ref ) { mixin::fail("unsupported array lift"); }
+
+        template< typename T >
+        static expr any()
+        {
+            constexpr auto op = smt_match_op< smt_op_var, T >;
+            return { smt_atom_t< smt_varid_t >( op, counter() ) };
+        }
+
+        static ev cast( er arg, bw w, op o )
+        {
+            smt_atom_t< uint8_t > atom( o, w );
+            return { arg->rpn, atom };
+        }
 
         template< typename size >
-        static expr op_alloca( const size&, uint8_t ) { return {}; }
+        static expr op_alloca( const size&, bw w ) 
+        { 
+            using array = smt_array_type;
 
-        static expr op_load( er, uint8_t ) { return {}; }
-        static expr op_load_at( er, er, uint8_t ) { return {}; }
-
-        template< typename scalar >
-        static void op_store( er, const scalar&, uint8_t ) {}
+            // TODO get type as argument
+            array type{ array_counter(), w, array::type_t::bitvector };
+            return { smt_atom_t( op::array, type ) };
+        }
 
         static void assume( er, bool ) {}
 
         static tristate to_tristate( er ) { return maybe; }
 
         /* arithmetic operations */
-        static expr op_add ( er, er ) { return {}; }
-        static expr op_fadd( er, er ) { return {}; }
-        static expr op_sub ( er, er ) { return {}; }
-        static expr op_fsub( er, er ) { return {}; }
-        static expr op_mul ( er, er ) { return {}; }
-        static expr op_fmul( er, er ) { return {}; }
-        static expr op_udiv( er, er ) { return {}; }
-        static expr op_sdiv( er, er ) { return {}; }
-        static expr op_fdiv( er, er ) { return {}; }
-        static expr op_urem( er, er ) { return {}; }
-        static expr op_srem( er, er ) { return {}; }
-        static expr op_frem( er, er ) { return {}; }
+        static ev op_add ( er a, er b ) { return { a->rpn, b->rpn, op::bv_add  }; }
+        static ev op_sub ( er a, er b ) { return { a->rpn, b->rpn, op::bv_sub  }; }
+        static ev op_mul ( er a, er b ) { return { a->rpn, b->rpn, op::bv_mul  }; }
+        static ev op_sdiv( er a, er b ) { return { a->rpn, b->rpn, op::bv_sdiv }; }
+        static ev op_udiv( er a, er b ) { return { a->rpn, b->rpn, op::bv_udiv }; }
+        static ev op_srem( er a, er b ) { return { a->rpn, b->rpn, op::bv_srem }; }
+        static ev op_urem( er a, er b ) { return { a->rpn, b->rpn, op::bv_urem }; }
 
-        static expr op_fneg( er ) { return {}; }
+        static ev op_fadd( er a, er b ) { return { a->rpn, b->rpn, op::fp_add }; }
+        static ev op_fsub( er a, er b ) { return { a->rpn, b->rpn, op::fp_sub }; }
+        static ev op_fmul( er a, er b ) { return { a->rpn, b->rpn, op::fp_mul }; }
+        static ev op_fdiv( er a, er b ) { return { a->rpn, b->rpn, op::fp_div }; }
+        static ev op_frem( er a, er b ) { return { a->rpn, b->rpn, op::fp_rem }; }
+
+        static ev op_not( er a ) { return { a, op::bv_not }; }
+        static ev op_neg( er a ) { return { a, op::bv_neg }; }
 
         /* bitwise operations */
-        static expr op_shl ( er, er ) { return {}; }
-        static expr op_lshr( er, er ) { return {}; }
-        static expr op_ashr( er, er ) { return {}; }
-        static expr op_and ( er, er ) { return {}; }
-        static expr op_or  ( er, er ) { return {}; }
-        static expr op_xor ( er, er ) { return {}; }
+        static ev op_shl ( er a, er b ) { return { a->rpn, b->rpn, op::bv_shl  }; }
+        static ev op_ashr( er a, er b ) { return { a->rpn, b->rpn, op::bv_ashr }; }
+        static ev op_lshr( er a, er b ) { return { a->rpn, b->rpn, op::bv_lshr }; }
+        static ev op_and ( er a, er b ) { return { a->rpn, b->rpn, op::bv_and  }; }
+        static ev op_or  ( er a, er b ) { return { a->rpn, b->rpn, op::bv_or   }; }
+        static ev op_xor ( er a, er b ) { return { a->rpn, b->rpn, op::bv_xor  }; }
 
         /* comparison operations */
-        static expr op_foeq( er, er ) { return {}; }
-        static expr op_fogt( er, er ) { return {}; }
-        static expr op_foge( er, er ) { return {}; }
-        static expr op_folt( er, er ) { return {}; }
-        static expr op_fole( er, er ) { return {}; }
-        static expr op_fone( er, er ) { return {}; }
-        static expr op_ford( er, er ) { return {}; }
-        static expr op_funo( er, er ) { return {}; }
-        static expr op_fueq( er, er ) { return {}; }
-        static expr op_fugt( er, er ) { return {}; }
-        static expr op_fuge( er, er ) { return {}; }
-        static expr op_fult( er, er ) { return {}; }
-        static expr op_fule( er, er ) { return {}; }
-        static expr op_fune( er, er ) { return {}; }
+        static ev op_eq ( er a, er b ) { return { a->rpn, b->rpn, op::eq }; };
+        static ev op_ne ( er a, er b ) { return { a->rpn, b->rpn, op::neq }; };
+        static ev op_ugt( er a, er b ) { return { a->rpn, b->rpn, op::bv_ugt }; };
+        static ev op_uge( er a, er b ) { return { a->rpn, b->rpn, op::bv_uge }; };
+        static ev op_ult( er a, er b ) { return { a->rpn, b->rpn, op::bv_ult }; };
+        static ev op_ule( er a, er b ) { return { a->rpn, b->rpn, op::bv_ule }; };
+        static ev op_sgt( er a, er b ) { return { a->rpn, b->rpn, op::bv_sgt }; };
+        static ev op_sge( er a, er b ) { return { a->rpn, b->rpn, op::bv_sge }; };
+        static ev op_slt( er a, er b ) { return { a->rpn, b->rpn, op::bv_slt }; };
+        static ev op_sle( er a, er b ) { return { a->rpn, b->rpn, op::bv_sle }; };
 
-        static expr op_eq ( er, er ) { return {}; }
-        static expr op_ne ( er, er ) { return {}; }
-        static expr op_ugt( er, er ) { return {}; }
-        static expr op_uge( er, er ) { return {}; }
-        static expr op_ult( er, er ) { return {}; }
-        static expr op_ule( er, er ) { return {}; }
-        static expr op_sgt( er, er ) { return {}; }
-        static expr op_sge( er, er ) { return {}; }
-        static expr op_slt( er, er ) { return {}; }
-        static expr op_sle( er, er ) { return {}; }
+        static ev op_foeq( er a, er b ) { return { a->rpn, b->rpn, op::fp_oeq }; }
+        static ev op_fogt( er a, er b ) { return { a->rpn, b->rpn, op::fp_ogt }; }
+        static ev op_foge( er a, er b ) { return { a->rpn, b->rpn, op::fp_oge }; }
+        static ev op_folt( er a, er b ) { return { a->rpn, b->rpn, op::fp_olt }; }
+        static ev op_fole( er a, er b ) { return { a->rpn, b->rpn, op::fp_ole }; }
+        static ev op_fone( er a, er b ) { return { a->rpn, b->rpn, op::fp_one }; }
+        static ev op_ford( er a, er b ) { return { a->rpn, b->rpn, op::fp_ord }; }
+        static ev op_funo( er a, er b ) { return { a->rpn, b->rpn, op::fp_uno }; }
+        static ev op_fueq( er a, er b ) { return { a->rpn, b->rpn, op::fp_ueq }; }
+        static ev op_fugt( er a, er b ) { return { a->rpn, b->rpn, op::fp_ugt }; }
+        static ev op_fuge( er a, er b ) { return { a->rpn, b->rpn, op::fp_uge }; }
+        static ev op_fult( er a, er b ) { return { a->rpn, b->rpn, op::fp_ult }; }
+        static ev op_fule( er a, er b ) { return { a->rpn, b->rpn, op::fp_ule }; }
+        static ev op_fune( er a, er b ) { return { a->rpn, b->rpn, op::fp_une }; }
 
-        static expr op_ffalse( er, er ) { return {}; }
-        static expr op_ftrue( er, er ) { return {}; }
+        static ev op_ffalse( er a, er b ) { return { a->rpn, b->rpn, op::fp_false }; }
+        static ev op_ftrue( er a, er b ) { return { a->rpn, b->rpn, op::fp_true }; }
 
-
-        static expr op_fpext( er, bw ) { return {}; }
-        static expr op_fptosi( er, bw ) { return {}; }
-        static expr op_fptoui( er, bw ) { return {}; }
-        static expr op_fptrunc( er, bw ) { return {}; }
-        static expr op_inttoptr( er, bw ) { return {}; }
-        static expr op_ptrtoint( er, bw ) { return {}; }
-        static expr op_sext( er, bw ) { return {}; }
-        static expr op_sitofp( er, bw ) { return {}; }
-        static expr op_trunc( er, bw ) { return {}; }
-        static expr op_uitofp( er, bw ) { return {}; }
-        static expr op_zext( er, bw ) { return {}; }
-        static expr op_zfit( er, bw ) { return {}; }
+        static ev op_trunc  ( er a, bw w ) { return cast( a->rpn, w, op::bv_trunc ); }
+        static ev op_fptrunc( er a, bw w ) { return cast( a->rpn, w, op::fp_trunc ); }
+        static ev op_sitofp ( er a, bw w ) { return cast( a->rpn, w, op::bv_stofp ); }
+        static ev op_uitofp ( er a, bw w ) { return cast( a->rpn, w, op::bv_utofp ); }
+        static ev op_zext   ( er a, bw w ) { return cast( a->rpn, w, op::bv_zext ); }
+        static ev op_zfit   ( er a, bw w ) { return cast( a->rpn, w, op::bv_zfit ); }
+        static ev op_sext   ( er a, bw w ) { return cast( a->rpn, w, op::bv_sext ); }
+        static ev op_fpext  ( er a, bw w ) { return cast( a->rpn, w, op::fp_ext ); }
+        static ev op_fptosi ( er a, bw w ) { return cast( a->rpn, w, op::fp_tosbv ); }
+        static ev op_fptoui ( er a, bw w ) { return cast( a->rpn, w, op::fp_toubv ); }
 
         static void dump( er ) { printf( "expr\n" ); }
         static std::string trace( er ) { return "expr"; }
         
         template< typename stream >
-        friend stream& operator<<( stream &os, er ) { return os << "expr"; }
+        friend stream& operator<<( stream &os, er e )
+        { 
+            return os << e->rpn;
+        }
     };
 
 } // namespace __lava
