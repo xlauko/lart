@@ -1,6 +1,7 @@
 
 /*
  * (c) 2020 Henrich Lauko <xlauko@mail.muni.cz>
+ * (c) 2021 Hugo Adamove <xadamove@mail.muni.cz>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
