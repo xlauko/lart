@@ -271,7 +271,7 @@ extern "C"
 
     bool __lamp_to_bool( __lamp_ptr v )
     {
-        bool lowered = __lava::lower( __lamp_to_tristate( v ) );
+        bool lowered = __lava::lower( tristate( __lamp_to_tristate( v ) ) );
         __lart_set_taint( &lowered, sizeof( lowered ) );
         return lowered;
     }
