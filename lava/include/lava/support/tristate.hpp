@@ -47,7 +47,7 @@ namespace __lava
         constexpr tristate() noexcept : value( false_value ) {}
 
         constexpr tristate( value_t v ) noexcept : value( v ) {}
-        constexpr tristate( uint8_t v ) noexcept : tristate( value_t( v ) ) {}
+        constexpr explicit tristate( uint8_t v ) noexcept : tristate( value_t( v ) ) {}
 
         constexpr explicit tristate( bool v ) noexcept
             : value( v ? true_value : false_value )
