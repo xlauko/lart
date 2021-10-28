@@ -35,15 +35,39 @@ namespace __lart::rt
             return *this;
         }
 
-        file_stream& operator<<(unsigned int u) noexcept
+        file_stream& operator<<(unsigned int ui) noexcept
         {
-            std::fprintf( _file, "%u", u );
+            std::fprintf( _file, "%u", ui );
             return *this;
         }
         
-        file_stream& operator<<(int i) noexcept
+        file_stream& operator<<(int si) noexcept
         {
-            std::fprintf( _file, "%d", i );
+            std::fprintf( _file, "%d", si );
+            return *this;
+        }
+
+        file_stream& operator<<(unsigned short us) noexcept
+        {
+            std::fprintf( _file, "%hu", us );
+            return *this;
+        }
+        
+        file_stream& operator<<(short ss) noexcept
+        {
+            std::fprintf( _file, "%hd", ss );
+            return *this;
+        }
+
+        file_stream& operator<<(unsigned long ul) noexcept
+        {
+            std::fprintf( _file, "%lu", ul );
+            return *this;
+        }
+        
+        file_stream& operator<<(long sl) noexcept
+        {
+            std::fprintf( _file, "%ld", sl );
             return *this;
         }
 
