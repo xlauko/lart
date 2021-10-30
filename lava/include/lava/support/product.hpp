@@ -73,8 +73,6 @@ namespace __lava
 
         using bw = typename mixin::bw;
         using base::base;
-        // using data = product_data< A, B >;
-        // using storage = product_storage< A, B >;
 
         using pv = product;
         using pr = const product &;
