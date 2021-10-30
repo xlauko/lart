@@ -13,11 +13,15 @@ SCRIPTPATH=`dirname $SCRIPT`
 RUNTIME="${SCRIPTPATH}/../lib/libnative.a"
 DOMAIN="${SCRIPTPATH}/../lib/lib$domain.a"
 PASS="${SCRIPTPATH}/../lib/liblartcc.so"
+LIBCXX="${LIBCXX_DATAFLOW_DIR}"
 
 LART_INTERFACE="${SCRIPTPATH}/../include/"
 
 RED='\033[0;31m'
 NC='\033[0m' # No Color
+
+CFLAGS="-isystem ${LIBCXX}/include/c++/v1 -nostdlib++"
+LDFLAGS="-L${LIBCXX}/lib -Wl,-rpath,${LIBCXX}/lib -lstdc++ -lc++ -stdlib=libc++"
 
 if [ -z $domain ]; then
      echo -e "${RED}[LART ERROR]${NC} No domain provided. Please specify a domain name."
@@ -27,7 +31,9 @@ fi
 exec @CLANG_BINARY@                             \
      -Xclang -load -Xclang "$PASS"              \
      -fsanitize=dataflow                        \
+     ${CFLAGS}                                  \
      "${@:2}"                                   \
+     ${LDFLAGS}                                 \
      "$RUNTIME"                                 \
      "$DOMAIN"                                  \
      -I"$LART_INTERFACE"                        \
