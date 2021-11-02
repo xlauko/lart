@@ -116,10 +116,25 @@ namespace __lava
         }
 
         template< typename op_t >
+        static constexpr void bin_bop( op_t op, pr r, pr a, pr b )
+        {
+            op( r->first, a->first, b->first );
+            op( r->second, a->second, b->second );
+        }
+
+        template< typename op_t >
         static constexpr pv un( op_t op, pr a )
         {
             return { op( a->first ), op( a->second ) };
         }
+
+        template< typename op_t >
+        static constexpr void un_bop( op_t op, pr r, pr a )
+        {
+            op( r->first, a->first );
+            op( r->second, a->second );
+        }
+
 
         // static pv lift( const constant& con ) { return constant::lift_to< product >( con ); }
 
@@ -260,5 +275,65 @@ namespace __lava
         {
             return os << "(" << a->first << ", " << a->second << ")";
         }
+        
+        // backward operations
+        static void bop_add ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::add ), r, a, b ); }
+        static void bop_sub ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::sub ), r, a, b ); }
+        static void bop_mul ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::mul ), r, a, b ); }
+        static void bop_sdiv( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::sdiv ), r, a, b ); }
+        static void bop_udiv( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::udiv ), r, a, b ); }
+        static void bop_srem( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::srem ), r, a, b ); }
+        static void bop_urem( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::urem ), r, a, b ); }
+
+        static void bop_fadd( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fadd ), r, a, b ); }
+        static void bop_fsub( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fsub ), r, a, b ); }
+        static void bop_fmul( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fmul ), r, a, b ); }
+        static void bop_fdiv( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fdiv ), r, a, b ); }
+        static void bop_frem( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::frem ), r, a, b ); }
+
+        static void bop_shl ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::shl ), r, a, b ); }
+        static void bop_ashr( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::ashr ), r, a, b ); }
+        static void bop_lshr( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::lshr ), r, a, b ); }
+        static void bop_and ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::op_and ), r, a, b ); }
+        static void bop_or  ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::op_or ), r, a, b ); }
+        static void bop_xor ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::op_xor ), r, a, b ); }
+
+        static void bop_eq ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::eq ), r, a, b ); }
+        static void bop_ne ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::ne ), r, a, b ); }
+        static void bop_ugt( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::ugt ), r, a, b ); }
+        static void bop_uge( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::uge ), r, a, b ); }
+        static void bop_ult( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::ult ), r, a, b ); }
+        static void bop_ule( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::ule ), r, a, b ); }
+        static void bop_sgt( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::sgt ), r, a, b ); }
+        static void bop_sge( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::sge ), r, a, b ); }
+        static void bop_slt( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::slt ), r, a, b ); }
+        static void bop_sle( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::sle ), r, a, b ); }
+
+        static void bop_foeq( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::foeq ), r, a, b ); }
+        static void bop_fogt( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fogt ), r, a, b ); }
+        static void bop_foge( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::foge ), r, a, b ); }
+        static void bop_folt( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::folt ), r, a, b ); }
+        static void bop_fole( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fole ), r, a, b ); }
+        static void bop_ford( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::ford ), r, a, b ); }
+        static void bop_funo( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::funo ), r, a, b ); }
+        static void bop_fueq( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fueq ), r, a, b ); }
+        static void bop_fugt( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fugt ), r, a, b ); }
+        static void bop_fuge( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fuge ), r, a, b ); }
+        static void bop_fult( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fult ), r, a, b ); }
+        static void bop_fule( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::fule ), r, a, b ); }
+
+        static void bop_ffalse( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::ffalse ), r, a, b ); }
+        static void bop_ftrue ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::ftrue ), r, a, b ); }
+
+        static void bop_trunc  ( pr r, pr a ) { un_bop( wrap( op::backward::trunc ), r, a ); }
+        static void bop_fptrunc( pr r, pr a ) { un_bop( wrap( op::backward::fptrunc ), r, a ); }
+        static void bop_sitofp ( pr r, pr a ) { un_bop( wrap( op::backward::sitofp ), r, a ); }
+        static void bop_uitofp ( pr r, pr a ) { un_bop( wrap( op::backward::uitofp ), r, a ); }
+        static void bop_zext   ( pr r, pr a ) { un_bop( wrap( op::backward::zext ), r, a ); }
+        static void bop_zfit   ( pr r, pr a ) { un_bop( wrap( op::backward::zfit ), r, a ); }
+        static void bop_sext   ( pr r, pr a ) { un_bop( wrap( op::backward::sext ), r, a ); }
+        static void bop_fpext  ( pr r, pr a ) { un_bop( wrap( op::backward::fpext ), r, a ); }
+        static void bop_fptosi ( pr r, pr a ) { un_bop( wrap( op::backward::fptosi ), r, a ); }
+        static void bop_fptoui ( pr r, pr a ) { un_bop( wrap( op::backward::fptoui ), r, a ); }
     };
 }
