@@ -17,12 +17,15 @@
  */
 
 #include <lava/zero.hpp>
+#include <lava/support/relational.hpp>
+
 #include <lamp/support/storage.hpp>
 #include <lamp/support/tracing.hpp>
 
 namespace __lamp
 {
-    using meta_domain = tracing< __lava::zero< wrapped_storage > >;
+    using zero = __lava::zero< wrapped_storage >;    
+    using meta_domain = tracing< __lava::relational< zero, wrapped_storage > >;
 } // namespace __lamp
 
 #include "wrapper.hpp"
