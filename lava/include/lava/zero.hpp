@@ -285,6 +285,65 @@ namespace __lava
         {
             return os << str( z );
         }
+
+        static void bop_add ( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_sub ( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_mul ( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_sdiv( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_udiv( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_srem( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_urem( zr r, zr a, zr b ) { /* noop */ }
+
+        static void bop_fadd( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fsub( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fmul( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fdiv( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_frem( zr r, zr a, zr b ) { /* noop */ }
+
+        static void bop_shl ( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_ashr( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_lshr( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_and ( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_or  ( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_xor ( zr r, zr a, zr b ) { /* noop */ }
+
+        static void bop_eq ( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_ne ( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_ugt( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_uge( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_ult( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_ule( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_sgt( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_sge( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_slt( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_sle( zr r, zr a, zr b ) { /* noop */ }
+
+        static void bop_foeq( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fogt( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_foge( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_folt( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fole( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_ford( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_funo( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fueq( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fugt( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fuge( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fult( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_fule( zr r, zr a, zr b ) { /* noop */ }
+
+        static void bop_ffalse( zr r, zr a, zr b ) { /* noop */ }
+        static void bop_ftrue ( zr r, zr a, zr b ) { /* noop */ }
+
+        static void bop_trunc  ( zr r, zr a ) { /* noop */ }
+        static void bop_fptrunc( zr r, zr a ) { /* noop */ }
+        static void bop_sitofp ( zr r, zr a ) { /* noop */ }
+        static void bop_uitofp ( zr r, zr a ) { /* noop */ }
+        static void bop_zext   ( zr r, zr a ) { /* noop */ }
+        static void bop_zfit   ( zr r, zr a ) { /* noop */ }
+        static void bop_sext   ( zr r, zr a ) { /* noop */ }
+        static void bop_fpext  ( zr r, zr a ) { /* noop */ }
+        static void bop_fptosi ( zr r, zr a ) { /* noop */ }
+        static void bop_fptoui ( zr r, zr a ) { /* noop */ }
     };
 
 } // namespace __lava
