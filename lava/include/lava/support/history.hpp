@@ -35,7 +35,8 @@ namespace __lava
         {}
 
         std::shared_ptr< domain > value;
-        std::vector< std::shared_ptr< domain > > children;
+        // TODO: shared pointers< with_shistory > to children
+        std::vector< void* > children;
     };
 
     template< typename domain, template< typename > typename storage >
@@ -49,7 +50,6 @@ namespace __lava
         using base::base;
 
         with_history( const domain &v ) = delete; 
-        with_history( domain &&v ) : base(std::move(v)) {}
         
         using self = with_history;
         using sref = const with_history &;
@@ -71,8 +71,8 @@ namespace __lava
         static self bin( op_t op, sref a, sref b )
         {
             self r = op( *a->value, *b->value );
-            r->children.push_back( a->value );
-            r->children.push_back( b->value );
+            r->children.push_back( a.unsafe_ptr() );
+            r->children.push_back( b.unsafe_ptr() );
             return r;
         }
         
@@ -80,7 +80,7 @@ namespace __lava
         static self cast( op_t op, sref a, bw b )
         {
             self r = op( *a->value, b );
-            r->children.push_back( a->value );
+            r->children.push_back( a.unsafe_ptr() );
             return r;
         }
 
@@ -149,21 +149,10 @@ namespace __lava
         static self op_zext    ( sref a, bw b ) { return cast( domain::op_zext, a, b ); }
         static self op_zfit    ( sref a, bw b ) { return cast( domain::op_zfit, a, b ); }
 
-        static void dump( sref v )
-        {
-            //apply( domain::dump, a, b );
-        }
-
-        // static std::string trace( sref v ) { 
-        //     return apply( domain::trace, a, b ); }
-
         template< typename stream >
         friend stream& operator<<( stream &os, sref v )
         {
-            os << *v->value;
-            for (const auto &ch : v->children)
-                os << " " << *ch;
-            return os;
+            return os << *v->value;
         }
     };
 
