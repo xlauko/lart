@@ -77,14 +77,25 @@ namespace __lava
         using pv = product;
         using pr = const product &;
 
+        using left_type = A;
+        using right_type = B;
+
+
+        const auto &self() const
+        {
+            return static_cast< const product& >( *this );
+        }
+    
+        const left_type& left()  const { return self()->first; }
+        const right_type& right() const { return self()->second; }
+
         // product( void * p, __dios::construct_shared_t s ) : storage( p, s ) {}
         // product( const A &a, const B &b ) : storage( data{ a, b } ) {}
         // product( A &&a, B &&b ) : storage( data{ std::forward< A >( a ), std::forward< B >( b ) } ) {}
 
         product clone() const
         {
-            const auto& self = static_cast< const product& >( *this );
-            return product( self->first.clone(), self->second.clone() );
+            return product( left().clone(), right().clone() );
         }
 
         static tristate to_tristate( pr v )
