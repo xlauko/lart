@@ -298,6 +298,7 @@ namespace __lava
         static void bop_foge( sr, sr, sr ) { report( "foge" ); }
         static void bop_folt( sr, sr, sr ) { report( "folt" ); }
         static void bop_fole( sr, sr, sr ) { report( "fole" ); }
+        static void bop_fone( sr, sr, sr ) { report( "fone" ); }
         static void bop_ford( sr, sr, sr ) { report( "ford" ); }
         static void bop_funo( sr, sr, sr ) { report( "funo" ); }
         static void bop_fueq( sr, sr, sr ) { report( "fueq" ); }
@@ -305,6 +306,7 @@ namespace __lava
         static void bop_fuge( sr, sr, sr ) { report( "fuge" ); }
         static void bop_fult( sr, sr, sr ) { report( "fult" ); }
         static void bop_fule( sr, sr, sr ) { report( "fule" ); }
+        static void bop_fune( sr, sr, sr ) { report( "fune" ); }
 
         static void bop_ffalse( sr, sr, sr ) { report( "ffalse" ); }
         static void bop_ftrue ( sr, sr, sr ) { report( "ftrue" ); }
