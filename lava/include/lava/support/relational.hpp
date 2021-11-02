@@ -81,7 +81,7 @@ namespace __lava
 
         static constexpr auto wrap = __lava::op::wrap;
 
-        static void backward_propagate( self &a )
+        static void backward_propagate( sref a )
         {
             using ref = domain_ref< base >;
 
@@ -108,75 +108,75 @@ namespace __lava
                 case op::tag::store:  mixin::fail("unsupported store bop");
                 case op::tag::load:   mixin::fail("unsupported load bop");
 
-                case op::tag::add: return bin( op::backward::add );
-                case op::tag::sub: return bin( op::backward::sub );
-                case op::tag::mul: return bin( op::backward::mul );
-                case op::tag::sdiv: return bin( op::backward::sdiv );
-                case op::tag::udiv: return bin( op::backward::udiv );
-                case op::tag::srem: return bin( op::backward::srem );
-                case op::tag::urem: return bin( op::backward::urem );
+                case op::tag::add: bin( op::backward::add ); break;
+                case op::tag::sub: bin( op::backward::sub ); break;
+                case op::tag::mul: bin( op::backward::mul ); break;
+                case op::tag::sdiv: bin( op::backward::sdiv ); break;
+                case op::tag::udiv: bin( op::backward::udiv ); break;
+                case op::tag::srem: bin( op::backward::srem ); break;
+                case op::tag::urem: bin( op::backward::urem ); break;
 
-                case op::tag::fadd: return bin( op::backward::fadd );
-                case op::tag::fsub: return bin( op::backward::fsub );
-                case op::tag::fmul: return bin( op::backward::fmul );
-                case op::tag::fdiv: return bin( op::backward::fdiv );
-                case op::tag::frem: return bin( op::backward::frem );
+                case op::tag::fadd: bin( op::backward::fadd ); break;
+                case op::tag::fsub: bin( op::backward::fsub ); break;
+                case op::tag::fmul: bin( op::backward::fmul ); break;
+                case op::tag::fdiv: bin( op::backward::fdiv ); break;
+                case op::tag::frem: bin( op::backward::frem ); break;
 
                 case op::tag::fneg: mixin::fail("unsupported fneg bop");
                 
-                case op::tag::op_and: return bin( op::backward::op_and );
-                case op::tag::op_or: return bin( op::backward::op_or );
-                case op::tag::op_xor: return bin( op::backward::op_xor );
+                case op::tag::op_and: bin( op::backward::op_and ); break;
+                case op::tag::op_or:  bin( op::backward::op_or ); break;
+                case op::tag::op_xor: bin( op::backward::op_xor ); break;
 
-                case op::tag::zfit: return un( op::backward::zfit );
-                case op::tag::zext: return un( op::backward::zext ); 
-                case op::tag::sext: return un( op::backward::sext ); 
-                case op::tag::trunc: return un( op::backward::trunc );
+                case op::tag::zfit:  un( op::backward::zfit ); break;
+                case op::tag::zext:  un( op::backward::zext ); break;
+                case op::tag::sext:  un( op::backward::sext ); break;
+                case op::tag::trunc: un( op::backward::trunc ); break;
 
-                case op::tag::fptrunc: return un( op::backward::fptrunc );
-                case op::tag::sitofp: return un( op::backward::sitofp );
-                case op::tag::uitofp: return un( op::backward::uitofp );
-                case op::tag::fptosi: return un( op::backward::fptosi );
-                case op::tag::fptoui: return un( op::backward::fptoui );
-                case op::tag::fpext:  return un( op::backward::fpext );
+                case op::tag::fptrunc: un( op::backward::fptrunc ); break;
+                case op::tag::sitofp:  un( op::backward::sitofp ); break;
+                case op::tag::uitofp:  un( op::backward::uitofp ); break;
+                case op::tag::fptosi:  un( op::backward::fptosi ); break;
+                case op::tag::fptoui:  un( op::backward::fptoui ); break;
+                case op::tag::fpext:   un( op::backward::fpext ); break;
 
                 case op::tag::inttoptr: mixin::fail("unsupported inttoptr bop");
                 case op::tag::ptrtoint: mixin::fail("unsupported ptrtoint bop");
 
-                case op::tag::ne: return bin( op::backward::ne );
-                case op::tag::eq: return bin( op::backward::eq );
+                case op::tag::ne: bin( op::backward::ne ); break;
+                case op::tag::eq: bin( op::backward::eq ); break;
 
-                case op::tag::slt: return bin( op::backward::slt );
-                case op::tag::sgt: return bin( op::backward::sgt );
-                case op::tag::sle: return bin( op::backward::sle );
-                case op::tag::sge: return bin( op::backward::sge );
+                case op::tag::slt: bin( op::backward::slt ); break;
+                case op::tag::sgt: bin( op::backward::sgt ); break;
+                case op::tag::sle: bin( op::backward::sle ); break;
+                case op::tag::sge: bin( op::backward::sge ); break;
 
-                case op::tag::ult: return bin( op::backward::ult );
-                case op::tag::ugt: return bin( op::backward::ugt );
-                case op::tag::ule: return bin( op::backward::ule );
-                case op::tag::uge: return bin( op::backward::uge );
+                case op::tag::ult: bin( op::backward::ult ); break;
+                case op::tag::ugt: bin( op::backward::ugt ); break;
+                case op::tag::ule: bin( op::backward::ule ); break;
+                case op::tag::uge: bin( op::backward::uge ); break;
 
-                case op::tag::foeq: return bin( op::backward::foeq );
-                case op::tag::fogt: return bin( op::backward::fogt );
-                case op::tag::foge: return bin( op::backward::foge );
-                case op::tag::folt: return bin( op::backward::folt );
-                case op::tag::fole: return bin( op::backward::fole );
-                case op::tag::fone: return bin( op::backward::fone );
-                case op::tag::ford: return bin( op::backward::ford ); 
-                case op::tag::funo: return bin( op::backward::funo );
-                case op::tag::fueq: return bin( op::backward::fueq );
-                case op::tag::fugt: return bin( op::backward::fugt );
-                case op::tag::fuge: return bin( op::backward::fuge );
-                case op::tag::fult: return bin( op::backward::fult );
-                case op::tag::fule: return bin( op::backward::fule );
-                case op::tag::fune: return bin( op::backward::fune );
+                case op::tag::foeq: bin( op::backward::foeq ); break;
+                case op::tag::fogt: bin( op::backward::fogt ); break;
+                case op::tag::foge: bin( op::backward::foge ); break;
+                case op::tag::folt: bin( op::backward::folt ); break;
+                case op::tag::fole: bin( op::backward::fole ); break;
+                case op::tag::fone: bin( op::backward::fone ); break;
+                case op::tag::ford: bin( op::backward::ford ); break; 
+                case op::tag::funo: bin( op::backward::funo ); break;
+                case op::tag::fueq: bin( op::backward::fueq ); break;
+                case op::tag::fugt: bin( op::backward::fugt ); break;
+                case op::tag::fuge: bin( op::backward::fuge ); break;
+                case op::tag::fult: bin( op::backward::fult ); break;
+                case op::tag::fule: bin( op::backward::fule ); break;
+                case op::tag::fune: bin( op::backward::fune ); break;
 
-                case op::tag::ffalse: return bin( op::backward::ffalse );
-                case op::tag::ftrue:  return bin( op::backward::ftrue );
+                case op::tag::ffalse: bin( op::backward::ffalse ); break;
+                case op::tag::ftrue:  bin( op::backward::ftrue ); break;
 
-                case op::tag::shl:  return bin( op::backward::shl );
-                case op::tag::lshr: return bin( op::backward::lshr );
-                case op::tag::ashr: return bin( op::backward::ashr );
+                case op::tag::shl:  bin( op::backward::shl ); break;
+                case op::tag::lshr: bin( op::backward::lshr ); break;
+                case op::tag::ashr: bin( op::backward::ashr ); break;
 
                 case op::tag::concat: mixin::fail("unsupported concat bop");
                 case op::tag::extract: mixin::fail("unsupported extract bop");
@@ -186,6 +186,11 @@ namespace __lava
                 
                 case op::tag::dealloca: mixin::fail("unsupported dealloca bop");
                 case op::tag::free: mixin::fail("unsupported free bop");
+            }
+
+            for (const auto &ch : a.underlying()->children) {
+                using rel_ref = domain_ref< self >;
+                backward_propagate( rel_ref(ch) );
             }
         }
 
