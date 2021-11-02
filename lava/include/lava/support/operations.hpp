@@ -288,9 +288,9 @@ namespace __lava::op
         static constexpr auto fdiv = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fdiv; };
         static constexpr auto frem = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_frem; };
 
-        static constexpr auto _and = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_and; };
-        static constexpr auto _or = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_or; };
-        static constexpr auto _xor = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_xor; };
+        static constexpr auto op_and = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_and; };
+        static constexpr auto op_or  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_or; };
+        static constexpr auto op_xor = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_xor; };
 
         static constexpr auto zfit  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_zfit; };
         static constexpr auto zext  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_zext; };
