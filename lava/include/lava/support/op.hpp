@@ -129,6 +129,65 @@ namespace __lava
         
         template< typename stream >
         friend stream& operator<<( stream &os, ref op ) { return os << op::to_string(op->value); }
+
+        static void bop_add ( ref, ref, ref ) { /* noop */ }
+        static void bop_sub ( ref, ref, ref ) { /* noop */ }
+        static void bop_mul ( ref, ref, ref ) { /* noop */ }
+        static void bop_sdiv( ref, ref, ref ) { /* noop */ }
+        static void bop_udiv( ref, ref, ref ) { /* noop */ }
+        static void bop_srem( ref, ref, ref ) { /* noop */ }
+        static void bop_urem( ref, ref, ref ) { /* noop */ }
+
+        static void bop_fadd( ref, ref, ref ) { /* noop */ }
+        static void bop_fsub( ref, ref, ref ) { /* noop */ }
+        static void bop_fmul( ref, ref, ref ) { /* noop */ }
+        static void bop_fdiv( ref, ref, ref ) { /* noop */ }
+        static void bop_frem( ref, ref, ref ) { /* noop */ }
+
+        static void bop_shl ( ref, ref, ref ) { /* noop */ }
+        static void bop_ashr( ref, ref, ref ) { /* noop */ }
+        static void bop_lshr( ref, ref, ref ) { /* noop */ }
+        static void bop_and ( ref, ref, ref ) { /* noop */ }
+        static void bop_or  ( ref, ref, ref ) { /* noop */ }
+        static void bop_xor ( ref, ref, ref ) { /* noop */ }
+
+        static void bop_eq ( ref, ref, ref ) { /* noop */ }
+        static void bop_ne ( ref, ref, ref ) { /* noop */ }
+        static void bop_ugt( ref, ref, ref ) { /* noop */ }
+        static void bop_uge( ref, ref, ref ) { /* noop */ }
+        static void bop_ult( ref, ref, ref ) { /* noop */ }
+        static void bop_ule( ref, ref, ref ) { /* noop */ }
+        static void bop_sgt( ref, ref, ref ) { /* noop */ }
+        static void bop_sge( ref, ref, ref ) { /* noop */ }
+        static void bop_slt( ref, ref, ref ) { /* noop */ }
+        static void bop_sle( ref, ref, ref ) { /* noop */ }
+
+        static void bop_foeq( ref, ref, ref ) { /* noop */ }
+        static void bop_fogt( ref, ref, ref ) { /* noop */ }
+        static void bop_foge( ref, ref, ref ) { /* noop */ }
+        static void bop_folt( ref, ref, ref ) { /* noop */ }
+        static void bop_fole( ref, ref, ref ) { /* noop */ }
+        static void bop_ford( ref, ref, ref ) { /* noop */ }
+        static void bop_funo( ref, ref, ref ) { /* noop */ }
+        static void bop_fueq( ref, ref, ref ) { /* noop */ }
+        static void bop_fugt( ref, ref, ref ) { /* noop */ }
+        static void bop_fuge( ref, ref, ref ) { /* noop */ }
+        static void bop_fult( ref, ref, ref ) { /* noop */ }
+        static void bop_fule( ref, ref, ref ) { /* noop */ }
+
+        static void bop_ffalse( ref, ref, ref ) { /* noop */ }
+        static void bop_ftrue ( ref, ref, ref ) { /* noop */ }
+
+        static void bop_trunc  ( ref, ref ) { /* noop */ }
+        static void bop_fptrunc( ref, ref ) { /* noop */ }
+        static void bop_sitofp ( ref, ref ) { /* noop */ }
+        static void bop_uitofp ( ref, ref ) { /* noop */ }
+        static void bop_zext   ( ref, ref ) { /* noop */ }
+        static void bop_zfit   ( ref, ref ) { /* noop */ }
+        static void bop_sext   ( ref, ref ) { /* noop */ }
+        static void bop_fpext  ( ref, ref ) { /* noop */ }
+        static void bop_fptosi ( ref, ref ) { /* noop */ }
+        static void bop_fptoui ( ref, ref ) { /* noop */ }
     };
 
 } // namespace __lava
