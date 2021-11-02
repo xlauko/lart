@@ -268,6 +268,78 @@ namespace __lava::op
     static constexpr auto dealloca = []( const auto &a ) { return std::decay_t< decltype( a ) >::op_dealloca; };
     static constexpr auto free = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_free; };
 
+
+    namespace backward
+    {
+        static constexpr auto _alloca = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_alloca; };
+
+        static constexpr auto add = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_add; };
+        static constexpr auto sub = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_sub; };
+        static constexpr auto mul = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_mul; };
+
+        static constexpr auto sdiv = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_sdiv; };
+        static constexpr auto udiv = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_udiv; };
+        static constexpr auto srem = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_srem; };
+        static constexpr auto urem = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_urem; };
+
+        static constexpr auto fadd = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fadd; };
+        static constexpr auto fsub = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fsub; };
+        static constexpr auto fmul = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fmul; };
+        static constexpr auto fdiv = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fdiv; };
+        static constexpr auto frem = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_frem; };
+
+        static constexpr auto _and = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_and; };
+        static constexpr auto _or = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_or; };
+        static constexpr auto _xor = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_xor; };
+
+        static constexpr auto zfit  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_zfit; };
+        static constexpr auto zext  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_zext; };
+        static constexpr auto sext  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_sext; };
+        static constexpr auto trunc = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_trunc; };
+
+        static constexpr auto fptrunc = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fptrunc; };
+        static constexpr auto sitofp  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_sitofp; };
+        static constexpr auto uitofp  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_uitofp; };
+        static constexpr auto fptosi  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fptosi; };
+        static constexpr auto fptoui  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fptoui; };
+        static constexpr auto fpext   = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fpext; };
+
+        static constexpr auto ne   = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_ne; };
+        static constexpr auto eq   = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_eq; };
+
+        static constexpr auto slt  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_slt; };
+        static constexpr auto sgt  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_sgt; };
+        static constexpr auto sle  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_sle; };
+        static constexpr auto sge  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_sge; };
+
+        static constexpr auto ult  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_ult; };
+        static constexpr auto ugt  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_ugt; };
+        static constexpr auto ule  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_ule; };
+        static constexpr auto uge  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_uge; };
+
+        static constexpr auto foeq  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_foeq; };
+        static constexpr auto fogt  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fogt; };
+        static constexpr auto foge  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_foge; };
+        static constexpr auto folt  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_folt; };
+        static constexpr auto fole  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fole; };
+        static constexpr auto fone  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fone; };
+        static constexpr auto ford  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_ford; };
+        static constexpr auto funo  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_funo; };
+        static constexpr auto fueq  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fueq; };
+        static constexpr auto fugt  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fugt; };
+        static constexpr auto fuge  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fuge; };
+        static constexpr auto fult  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fult; };
+        static constexpr auto fule  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fule; };
+        static constexpr auto fune  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_fune; };
+
+        static constexpr auto ffalse  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_ffalse; };
+        static constexpr auto ftrue  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_ftrue; };
+
+        static constexpr auto shl  = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_shl; };
+        static constexpr auto lshr = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_lshr; };
+        static constexpr auto ashr = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_ashr; };
+    }
+
     static constexpr auto run = []( const auto &op, const auto & ... bind  ) __inline
     {
         return [=]( const auto &arg, const auto & ... args ) __inline
