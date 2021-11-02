@@ -251,6 +251,76 @@ namespace __lava
 
         static void dump( sr ) { printf( "dump not implemented" ); }
         static std::string trace( sr ) { return "trace is not implemented"; }
+        
+        static void report( const char * op )
+        { 
+            fprintf( stderr, "[lamp warning]: unsupported bop %s\n", op );
+        }
+
+        // backward operations
+        static void bop_not ( sr, sr ) { report( "not" ); }
+        static void bop_neg ( sr, sr ) { report( "neg" ); }
+
+        static void bop_add ( sr, sr, sr ) { report( "add" ); }
+        static void bop_sub ( sr, sr, sr ) { report( "sub" ); }
+        static void bop_mul ( sr, sr, sr ) { report( "mul" ); }
+        static void bop_sdiv( sr, sr, sr ) { report( "sdiv" ); }
+        static void bop_udiv( sr, sr, sr ) { report( "udiv" ); }
+        static void bop_srem( sr, sr, sr ) { report( "srem" ); }
+        static void bop_urem( sr, sr, sr ) { report( "urem" ); }
+
+        static void bop_fadd( sr, sr, sr ) { report( "fadd" ); }
+        static void bop_fsub( sr, sr, sr ) { report( "fsub" ); }
+        static void bop_fmul( sr, sr, sr ) { report( "fmul" ); }
+        static void bop_fdiv( sr, sr, sr ) { report( "fdiv" ); }
+        static void bop_frem( sr, sr, sr ) { report( "frem" ); }
+
+        static void bop_shl ( sr, sr, sr ) { report( "shl" ); }
+        static void bop_ashr( sr, sr, sr ) { report( "ashr" ); }
+        static void bop_lshr( sr, sr, sr ) { report( "lshr" ); }
+        static void bop_and ( sr, sr, sr ) { report( "and" ); }
+        static void bop_or  ( sr, sr, sr ) { report( "or" ); }
+        static void bop_xor ( sr, sr, sr ) { report( "xor" ); }
+
+        static void bop_eq ( sr, sr, sr ) { report( "eq" ); }
+        static void bop_ne ( sr, sr, sr ) { report( "ne" ); }
+        static void bop_ugt( sr, sr, sr ) { report( "ugt" ); }
+        static void bop_uge( sr, sr, sr ) { report( "uge" ); }
+        static void bop_ult( sr, sr, sr ) { report( "ult" ); }
+        static void bop_ule( sr, sr, sr ) { report( "ule" ); }
+        static void bop_sgt( sr, sr, sr ) { report( "sgt" ); }
+        static void bop_sge( sr, sr, sr ) { report( "sge" ); }
+        static void bop_slt( sr, sr, sr ) { report( "slt" ); }
+        static void bop_sle( sr, sr, sr ) { report( "sle" ); }
+
+        static void bop_foeq( sr, sr, sr ) { report( "foeq" ); }
+        static void bop_fogt( sr, sr, sr ) { report( "fogt" ); }
+        static void bop_foge( sr, sr, sr ) { report( "foge" ); }
+        static void bop_folt( sr, sr, sr ) { report( "folt" ); }
+        static void bop_fole( sr, sr, sr ) { report( "fole" ); }
+        static void bop_ford( sr, sr, sr ) { report( "ford" ); }
+        static void bop_funo( sr, sr, sr ) { report( "funo" ); }
+        static void bop_fueq( sr, sr, sr ) { report( "fueq" ); }
+        static void bop_fugt( sr, sr, sr ) { report( "fugt" ); }
+        static void bop_fuge( sr, sr, sr ) { report( "fuge" ); }
+        static void bop_fult( sr, sr, sr ) { report( "fult" ); }
+        static void bop_fule( sr, sr, sr ) { report( "fule" ); }
+
+        static void bop_ffalse( sr, sr, sr ) { report( "ffalse" ); }
+        static void bop_ftrue ( sr, sr, sr ) { report( "ftrue" ); }
+
+        static void bop_trunc  ( sr, sr ) { report( "trunc" ); }
+        static void bop_fptrunc( sr, sr ) { report( "fptrunc" ); }
+        static void bop_sitofp ( sr, sr ) { report( "sitofp" ); }
+        static void bop_uitofp ( sr, sr ) { report( "uitofp" ); }
+        static void bop_zext   ( sr, sr ) { report( "zext" ); }
+        static void bop_zfit   ( sr, sr ) { report( "zfit" ); }
+        static void bop_sext   ( sr, sr ) { report( "sext" ); }
+        static void bop_fpext  ( sr, sr ) { report( "fpext" ); }
+        static void bop_fptosi ( sr, sr ) { report( "fptosi" ); }
+        static void bop_fptoui ( sr, sr ) { report( "fptoui" ); }
+
+        static void bop_concat ( sr, sr, sr ) { report( "concat" ); }
     };
 
     struct base {};
