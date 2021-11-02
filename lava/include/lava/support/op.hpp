@@ -15,6 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#pragma once
+
 #include <lava/support/base.hpp>
 #include <lava/support/tristate.hpp>
 #include <lava/support/operations.hpp>
