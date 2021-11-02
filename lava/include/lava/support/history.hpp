@@ -60,17 +60,20 @@ namespace __lava
         template< typename type >
         static self any() { return domain::template any< type >(); }
 
-        static void assume( self &a, bool expected ) { domain::assume( *a->value, expected ); }
+        static void assume( self &a, bool expected ) { domain::assume( value(a), expected ); }
 
         static tristate to_tristate( sref a )
         {
-            return domain::to_tristate( *a->value );
+            return domain::to_tristate( value(a) );
         }
+
+        static const domain& value(sref v) { return *v->value; }
+        static domain& value(self &v) { return *v->value; }
 
         template< typename op_t >
         static self bin( op_t op, sref a, sref b )
         {
-            self r = op( *a->value, *b->value );
+            self r = op( value(a), value(b) );
             r->children.push_back( a.unsafe_ptr() );
             r->children.push_back( b.unsafe_ptr() );
             return r;
@@ -79,7 +82,7 @@ namespace __lava
         template< typename op_t >
         static self cast( op_t op, sref a, bw b )
         {
-            self r = op( *a->value, b );
+            self r = op( value(a), b );
             r->children.push_back( a.unsafe_ptr() );
             return r;
         }
@@ -154,6 +157,73 @@ namespace __lava
         {
             return os << *v->value;
         }
+
+        using mixin::report;
+
+        // backward operations
+        static void bop_not ( sref r, sref a ) { domain::bop_not( value(r), value(a) ); }
+        static void bop_neg ( sref r, sref a ) { domain::bop_neg( value(r), value(a) ); }
+
+        static void bop_add ( sref r, sref a, sref b ) { domain::bop_add( value(r), value(a), value(b) ); }
+        static void bop_sub ( sref r, sref a, sref b ) { domain::bop_sub( value(r), value(a), value(b) ); }
+        static void bop_mul ( sref r, sref a, sref b ) { domain::bop_mul( value(r), value(a), value(b) ); }
+        static void bop_sdiv( sref r, sref a, sref b ) { domain::bop_sdiv( value(r), value(a), value(b) ); }
+        static void bop_udiv( sref r, sref a, sref b ) { domain::bop_udiv( value(r), value(a), value(b) ); }
+        static void bop_srem( sref r, sref a, sref b ) { domain::bop_srem( value(r), value(a), value(b) ); }
+        static void bop_urem( sref r, sref a, sref b ) { domain::bop_urem( value(r), value(a), value(b) ); }
+
+        static void bop_fadd( sref r, sref a, sref b ) { domain::bop_fadd( value(r), value(a), value(b) ); }
+        static void bop_fsub( sref r, sref a, sref b ) { domain::bop_fsub( value(r), value(a), value(b) ); }
+        static void bop_fmul( sref r, sref a, sref b ) { domain::bop_fmul( value(r), value(a), value(b) ); }
+        static void bop_fdiv( sref r, sref a, sref b ) { domain::bop_fdiv( value(r), value(a), value(b) ); }
+        static void bop_frem( sref r, sref a, sref b ) { domain::bop_frem( value(r), value(a), value(b) ); }
+
+        static void bop_shl ( sref r, sref a, sref b ) { domain::bop_shl( value(r), value(a), value(b) ); }
+        static void bop_ashr( sref r, sref a, sref b ) { domain::bop_ashr( value(r), value(a), value(b) ); }
+        static void bop_lshr( sref r, sref a, sref b ) { domain::bop_lshr( value(r), value(a), value(b) ); }
+        static void bop_and ( sref r, sref a, sref b ) { domain::bop_and( value(r), value(a), value(b) ); }
+        static void bop_or  ( sref r, sref a, sref b ) { domain::bop_or( value(r), value(a), value(b) ); }
+        static void bop_xor ( sref r, sref a, sref b ) { domain::bop_xor( value(r), value(a), value(b) ); }
+
+        static void bop_eq ( sref r, sref a, sref b ) { domain::bop_eq( value(r), value(a), value(b) ); }
+        static void bop_ne ( sref r, sref a, sref b ) { domain::bop_ne( value(r), value(a), value(b) ); }
+        static void bop_ugt( sref r, sref a, sref b ) { domain::bop_ugt( value(r), value(a), value(b) ); }
+        static void bop_uge( sref r, sref a, sref b ) { domain::bop_uge( value(r), value(a), value(b) ); }
+        static void bop_ult( sref r, sref a, sref b ) { domain::bop_ult( value(r), value(a), value(b) ); }
+        static void bop_ule( sref r, sref a, sref b ) { domain::bop_ule( value(r), value(a), value(b) ); }
+        static void bop_sgt( sref r, sref a, sref b ) { domain::bop_sgt( value(r), value(a), value(b) ); }
+        static void bop_sge( sref r, sref a, sref b ) { domain::bop_sge( value(r), value(a), value(b) ); }
+        static void bop_slt( sref r, sref a, sref b ) { domain::bop_slt( value(r), value(a), value(b) ); }
+        static void bop_sle( sref r, sref a, sref b ) { domain::bop_sle( value(r), value(a), value(b) ); }
+
+        static void bop_foeq( sref r, sref a, sref b ) { domain::bop_foeq( value(r), value(a), value(b) ); }
+        static void bop_fogt( sref r, sref a, sref b ) { domain::bop_fogt( value(r), value(a), value(b) ); }
+        static void bop_foge( sref r, sref a, sref b ) { domain::bop_foge( value(r), value(a), value(b) ); }
+        static void bop_folt( sref r, sref a, sref b ) { domain::bop_folt( value(r), value(a), value(b) ); }
+        static void bop_fole( sref r, sref a, sref b ) { domain::bop_fole( value(r), value(a), value(b) ); }
+        static void bop_ford( sref r, sref a, sref b ) { domain::bop_ford( value(r), value(a), value(b) ); }
+        static void bop_funo( sref r, sref a, sref b ) { domain::bop_funo( value(r), value(a), value(b) ); }
+        static void bop_fueq( sref r, sref a, sref b ) { domain::bop_fueq( value(r), value(a), value(b) ); }
+        static void bop_fugt( sref r, sref a, sref b ) { domain::bop_fugt( value(r), value(a), value(b) ); }
+        static void bop_fuge( sref r, sref a, sref b ) { domain::bop_fuge( value(r), value(a), value(b) ); }
+        static void bop_fult( sref r, sref a, sref b ) { domain::bop_fult( value(r), value(a), value(b) ); }
+        static void bop_fule( sref r, sref a, sref b ) { domain::bop_fule( value(r), value(a), value(b) ); }
+
+        static void bop_ffalse( sref r, sref a, sref b ) { domain::bop_ffalse( value(r), value(a), value(b) ); }
+        static void bop_ftrue ( sref r, sref a, sref b ) { domain::bop_ftrue( value(r), value(a), value(b) ); }
+
+        static void bop_trunc  ( sref r, sref a ) { domain::bop_trunc( value(r), value(a) ); }
+        static void bop_fptrunc( sref r, sref a ) { domain::bop_fptrunc( value(r), value(a) ); }
+        static void bop_sitofp ( sref r, sref a ) { domain::bop_sitofp( value(r), value(a) ); }
+        static void bop_uitofp ( sref r, sref a ) { domain::bop_uitofp( value(r), value(a) ); }
+        static void bop_zext   ( sref r, sref a ) { domain::bop_zext( value(r), value(a) ); }
+        static void bop_zfit   ( sref r, sref a ) { domain::bop_zfit( value(r), value(a) ); }
+        static void bop_sext   ( sref r, sref a ) { domain::bop_sext( value(r), value(a) ); }
+        static void bop_fpext  ( sref r, sref a ) { domain::bop_fpext( value(r), value(a) ); }
+        static void bop_fptosi ( sref r, sref a ) { domain::bop_fptosi( value(r), value(a) ); }
+        static void bop_fptoui ( sref r, sref a ) { domain::bop_fptoui( value(r), value(a) ); }
+
+        static void bop_concat ( sref r, sref a, sref b ) { domain::bop_concat( value(r), value(a), value(b) ); }
     };
 
 } // namespace __lava
