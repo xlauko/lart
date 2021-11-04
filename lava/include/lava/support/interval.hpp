@@ -209,7 +209,11 @@ namespace sup
         template< typename stream >
         friend stream& operator<<( stream &os, const bound& b )
         {
-            return os << "0"; //b._value;
+            if (b == minus_infinity())
+                return os << "-∞";
+            if (b == plus_infinity())
+                return os << "-∞";
+            return os << b._value;
         }
 
         friend constexpr bound operator+( bound l, bound r )   { return l += r; }
@@ -304,6 +308,10 @@ namespace sup
                 low = high = static_cast< bool >( t );
             }
         }
+        
+        explicit constexpr interval( bool b )
+            : low( b ), high( b )
+        {}
 
         constexpr interval() = default;
 
