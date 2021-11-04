@@ -57,7 +57,6 @@ namespace __lava
 
         interval( tristate t )  : interval_storage( t ) {}
         interval( bool t )  : interval_storage( t ) {}
-
         interval clone() const {
             auto const &self = static_cast< const interval& > ( *this );
             return interval( self->low, self->high );
@@ -384,6 +383,11 @@ namespace __lava
         static void bop_zfit( ir r, ref a )
         {
             a.get() = r.get(); // TODO
+        }
+
+        static void dump( ir i )
+        {
+            printf( "%s\n", trace(i).c_str() );
         }
 
         static std::string trace( ir i )
