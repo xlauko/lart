@@ -22,11 +22,7 @@
 
 namespace __lamp
 {
-<<<<<<< HEAD
     using interval = __lava::interval< wrapped_storage >;
-=======
-    using interval = __lava::interval< wrapped_storage >;    
->>>>>>> 782e922 (lamp: make interval domain relational)
     using meta_domain = tracing< __lava::relational< interval, wrapped_storage > >;
 }
 

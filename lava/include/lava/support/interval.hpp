@@ -310,6 +310,10 @@ namespace sup
                 low = high = static_cast< bool >( t );
             }
         }
+        
+        explicit constexpr interval( bool b )
+            : low( b ), high( b )
+        {}
 
         explicit constexpr interval( bool b )
             : low( b ), high( b )
