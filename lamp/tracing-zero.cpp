@@ -1,5 +1,3 @@
-
-
 /*
  * (c) 2021 Henrich Lauko <xlauko@mail.muni.cz>
  *

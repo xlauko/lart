@@ -90,7 +90,7 @@ namespace __lava
             };
 
             auto un = [&] (const auto &bop ) {
-                wrap( bop )( a.underlying(), ref( a.arg(1) ) );
+                wrap( bop )( a.underlying(), ref( a.arg(0) ) );
             };
 
             switch (a.tag())
