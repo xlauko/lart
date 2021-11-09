@@ -86,7 +86,7 @@ namespace __lava
             using ref = domain_ref< base >;
 
             auto bin = [&] (const auto &bop ) {
-                wrap( bop )( a.underlying(), ref( a.arg(1) ), ref( a.arg(2) ) );
+                wrap( bop )( a.underlying(), ref( a.arg(0) ), ref( a.arg(1) ) );
             };
 
             auto un = [&] (const auto &bop ) {
