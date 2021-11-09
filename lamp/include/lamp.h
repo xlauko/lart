@@ -68,7 +68,7 @@ __lamp_f32 __lamp_lift_f32( __lamp_f32 v );
 __lamp_f64 __lamp_lift_f64( __lamp_f64 v );
 
 void *__lamp_lift_arr( void *v, __lamp_i32 s );
-char *__lamp_lift_str( char *s );
+// char *__lamp_lift_str( char *s );
 
 __lamp_ptr __lamp_wrap_i1 ( __lamp_bool     v );
 __lamp_ptr __lamp_wrap_i8 ( __lamp_i8  v );
@@ -98,11 +98,11 @@ double   __lamp_any_f64  ( void );
 void    *__lamp_any_ptr  ( void );
 char    *__lamp_any_array( void );
 
-__lamp_bool __lamp_lower_i1 ( __lamp_ptr v );
-__lamp_i8   __lamp_lower_i8 ( __lamp_ptr v );
-__lamp_i16  __lamp_lower_i16( __lamp_ptr v );
-__lamp_i32  __lamp_lower_i32( __lamp_ptr v );
-__lamp_i64  __lamp_lower_i64( __lamp_ptr v );
+// __lamp_bool __lamp_lower_i1 ( __lamp_ptr v );
+// __lamp_i8   __lamp_lower_i8 ( __lamp_ptr v );
+// __lamp_i16  __lamp_lower_i16( __lamp_ptr v );
+// __lamp_i32  __lamp_lower_i32( __lamp_ptr v );
+// __lamp_i64  __lamp_lower_i64( __lamp_ptr v );
 
 __lamp_ptr __lamp_alloca( __lamp_ptr size, __lamp_bw bw );
 
@@ -182,7 +182,7 @@ __lamp_bool __lamp_to_bool( __lamp_ptr v );
 void __lamp_assume( __lamp_ptr a, __lamp_bool c );
 __lamp_ptr __lamp_extract( __lamp_ptr a, __lamp_bw s, __lamp_bw e );
 
-void __lamp_dealloca( void *p, __lamp_i64 size );
+// void __lamp_dealloca( void *p, __lamp_i64 size );
 
 void __lamp_dump( void *twin );
 
@@ -191,7 +191,7 @@ void __lamp_dump( void *twin );
 #endif
 
 #ifdef __cplusplus
-std::string __lamp_trace( void *twin );
+// std::string __lamp_trace( void *twin );
 #endif
 
 void __lamp_stub()
@@ -212,7 +212,7 @@ void __lamp_stub()
     __lamp_lift_f64(0);
 
     __lamp_lift_arr( __lamp_null, 0 );
-    __lamp_lift_str( __lamp_null );
+    // __lamp_lift_str( __lamp_null );
 
     __lamp_wrap_i1 (0);
     __lamp_wrap_i8 (0);
@@ -240,11 +240,11 @@ void __lamp_stub()
     __lamp_any_ptr  ();
     __lamp_any_array();
 
-    __lamp_lower_i1 ( ptr );
-    __lamp_lower_i8 ( ptr );
-    __lamp_lower_i16( ptr );
-    __lamp_lower_i32( ptr );
-    __lamp_lower_i64( ptr );
+    // __lamp_lower_i1 ( ptr );
+    // __lamp_lower_i8 ( ptr );
+    // __lamp_lower_i16( ptr );
+    // __lamp_lower_i32( ptr );
+    // __lamp_lower_i64( ptr );
 
     __lamp_alloca( ptr, 0 );
 
@@ -324,11 +324,11 @@ void __lamp_stub()
     __lamp_assume( ptr, 0 );
     __lamp_extract( ptr, 0, 0 );
 
-    __lamp_dealloca( __lamp_null, 0 );
+    // __lamp_dealloca( __lamp_null, 0 );
 
     __lamp_dump( __lamp_null );
 
     #ifdef __cplusplus
-    __lamp_trace( ptr );
+    // __lamp_trace( __lamp_null );
     #endif
 }
