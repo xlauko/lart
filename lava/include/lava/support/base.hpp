@@ -31,12 +31,12 @@
 #include <memory>
 #include <limits>
 
-void* operator new(std::size_t n) {
-  void * const p = std::malloc(n);
-  return p;
-}
+// void* operator new(std::size_t n) {
+//   void * const p = std::malloc(n);
+//   return p;
+// }
 
-void operator delete(void * p) { std::free(p); }
+// void operator delete(void * p) noexcept { std::free(p); }
 
 namespace __lava
 {
