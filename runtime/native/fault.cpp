@@ -79,6 +79,12 @@ namespace __lart::rt
             }
         }
 
+        void handle_abort() const noexcept
+        {
+            // TODO: report/filter aborts
+            std::exit( EXIT_SUCCESS );
+        }
+
         void print_backtrace(file_stream &out) const noexcept
         {
             constexpr size_t size = 1024;
@@ -134,5 +140,14 @@ namespace __lart::rt
         std::exit(EXIT_FAILURE);
     }
 
-    void init_fault_handler() noexcept {}
+    static void handle_abort(int) noexcept
+    {
+        handler.handle_abort();
+    }
+
+    void init_fault_handler() noexcept 
+    {
+        signal( SIGABRT, handle_abort );
+    }
+
 } // namespace __lart::rt
