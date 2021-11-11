@@ -39,18 +39,45 @@ namespace lart
 
         spdlog::debug( "preprocess {}", fn->getName().str() );
 
-        // TODO:
-        // auto lse = std::unique_ptr< llvm::FunctionPass >( lart::createLowerSelectPass() );
-        // lse.get()->runOnFunction( *fn );
+        lower_selects( fn );
 
         auto lsi = std::unique_ptr< llvm::FunctionPass >( llvm::createLowerSwitchPass() );
         lsi.get()->runOnFunction( *fn );
 
         lower_cmps( fn );
+    }
 
-        // TODO:
-        // if ( duplicate_called_functions( fn ) )
-        //    update_aa();
+    void preprocessor::lower_selects( llvm::Function *fn )
+    {
+        auto lower = [] ( auto select ) {
+            auto bb = select->getParent();
+            // Split this basic block in half right before the select instruction.
+            auto newCont = bb->splitBasicBlock( select, bb->getName()+".selectcont" );
+
+            // Make the true block, and make it branch to the continue block.
+            auto newTrue = llvm::BasicBlock::Create( bb->getContext(),
+                        bb->getName()+".selecttrue", bb->getParent(), newCont );
+            llvm::BranchInst::Create( newCont, newTrue );
+
+            // Make the unconditional branch in the incoming block be a
+            // conditional branch on the select predicate.
+            bb->getInstList().erase( bb->getTerminator() );
+            llvm::BranchInst::Create( newTrue, newCont, select->getCondition(), bb );
+
+            // Create a new PHI node in the cont block with the entries we need.
+            std::string name = select->getName().str(); select->setName("");
+            auto *pn = llvm::PHINode::Create( select->getType(), 2, name, &*newCont->begin() );
+            pn->addIncoming( select->getTrueValue(), newTrue );
+            pn->addIncoming( select->getFalseValue(), bb );
+
+            // Use the PHI instead of the select.
+            select->replaceAllUsesWith( pn );
+            newCont->getInstList().erase( select );
+        };
+
+        auto selects = sv::filter< llvm::SelectInst >( *fn );
+        for ( auto select : selects )
+            lower( select );
     }
 
     void preprocessor::lower_cmps( llvm::Function *fn )
