@@ -54,7 +54,6 @@ namespace __lava
 
     term_state_t *__term_state;
     term_config_t *__term_cfg;
-
     template< template< typename > typename storage >
     struct term : storage< cvc::Term >
                 , domain_mixin< term< storage > >
@@ -123,7 +122,6 @@ namespace __lava
                 slv.assertFormula( b );
             else
                 slv.assertFormula( b.notTerm() );
-
             if ( slv.checkSat().isUnsat() ) {
                 __lart_cancel();
             }
@@ -136,7 +134,6 @@ namespace __lava
         {
             return solver().mkTerm( cvc::BITVECTOR_ADD, a.get(), b.get() );
         }
-
         static term op_sub ( tr a, tr b )
         {
             return solver().mkTerm( cvc::BITVECTOR_SUB, a.get(), b.get() );
@@ -146,22 +143,18 @@ namespace __lava
         {
             return solver().mkTerm( cvc::BITVECTOR_MULT, a.get(), b.get() );
         }
-
         static term op_udiv( tr a, tr b )
         {
             return solver().mkTerm( cvc::BITVECTOR_UDIV, a.get(), b.get() );
         }
-
         static term op_sdiv( tr a, tr b )
         {
             return solver().mkTerm( cvc::BITVECTOR_SDIV, a.get(), b.get() );
         }
-
         static term op_urem( tr a, tr b )
         {
             return solver().mkTerm( cvc::BITVECTOR_UREM, a.get(), b.get() );
         }
-
         static term op_srem( tr a, tr b )
         {
             return solver().mkTerm( cvc::BITVECTOR_SREM, a.get(), b.get() );
@@ -177,22 +170,18 @@ namespace __lava
         {
            return solver().mkTerm( cvc::BITVECTOR_LSHR, a.get(), b.get() );
         }
-
         static term op_ashr( tr a, tr b )
         {
            return solver().mkTerm( cvc::BITVECTOR_ASHR, a.get(), b.get() );
         }
-
         static term op_and ( tr a, tr b )
         {
            return solver().mkTerm( cvc::BITVECTOR_AND, a.get(), b.get() );
         }
-
         static term op_or( tr a, tr b )
         {
            return solver().mkTerm( cvc::BITVECTOR_OR, a.get(), b.get() );
         }
-
         static term op_xor( tr a, tr b )
         {
            return solver().mkTerm( cvc::BITVECTOR_XOR, a.get(), b.get() );
@@ -208,7 +197,6 @@ namespace __lava
         {
             return solver().mkTerm( cvc::DISTINCT, a.get(), b.get() );
         }
-
         static term op_ugt( tr a, tr b )
         {
            return solver().mkTerm( cvc::BITVECTOR_UGT, a.get(), b.get() );
@@ -223,7 +211,6 @@ namespace __lava
         {
            return solver().mkTerm( cvc::BITVECTOR_ULT, a.get(), b.get() );
         }
-
         static term op_ule( tr a, tr b )
         {
            return solver().mkTerm( cvc::BITVECTOR_ULE, a.get(), b.get() );
