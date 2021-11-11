@@ -41,6 +41,8 @@ namespace lart
 
         void lower_cmps( llvm::Function *fn );
 
+        void lower_selects( llvm::Function *fn );
+
         inline static const std::string tag = "lart.abstract.preprocessed";
 
         llvm::Module &module;
