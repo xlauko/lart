@@ -360,12 +360,23 @@ namespace lart::op
         args_t arguments() const { llvm_unreachable( "invalid op" ); }
     };
 
+    struct phi : without_taints_base {
+        std::string name() const { return "phi"; }
+        std::string impl() const { llvm_unreachable( "invalid op" ); }
+        args_t arguments() const { llvm_unreachable( "invalid op" ); }
+
+        std::optional< default_wrapper > default_value() const
+        {
+            return concrete_argument_default{ 1 };
+        }
+    };
+
     using operation = std::variant<
         melt, freeze,
         binary, cast, cmp,
         tobool, assume,
         alloc, store, load,
-        stash, unstash, identity >;
+        stash, unstash, identity, phi >;
 
     namespace detail
     {
