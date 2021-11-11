@@ -105,7 +105,14 @@ namespace lart
                     // TODO
                 }
             },
-            [&] ( llvm::Value * ) { /* fallthrough */ }
+            [&] ( llvm::Argument * ) { /* fallthrough */ },
+            [&] ( llvm::Value *value ) { 
+                /* fallthrough */
+                std::string buff;
+                llvm::raw_string_ostream ss(buff);
+                value->print(ss);
+                spdlog::info( "ignore abstract: {}", ss.str() );
+            }
         );
         return result;
     }
