@@ -41,14 +41,18 @@ namespace lart
 
     bool is_lamp_call( llvm::CallBase *call )
     {
-        if ( call->isIndirectCall() )
+        if ( call->isIndirectCall() || !call->getCalledFunction() )
+            return false;
+        if ( !call->getCalledFunction()->hasName() )
             return false;
         return call->getCalledFunction()->getName().startswith( "__lamp" );
     }
 
     bool is_testtaint( llvm::CallBase *call )
     {
-        if ( call->isIndirectCall() )
+        if ( call->isIndirectCall() || !call->getCalledFunction() )
+            return false;
+        if ( !call->getCalledFunction()->hasName() )
             return false;
         return call->getCalledFunction()->getName().startswith( "lart.test.taint" );
     }
