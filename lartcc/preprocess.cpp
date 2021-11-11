@@ -41,8 +41,8 @@ namespace lart
 
         lower_selects( fn );
 
-        auto lsi = std::unique_ptr< llvm::FunctionPass >( llvm::createLowerSwitchPass() );
-        lsi.get()->runOnFunction( *fn );
+        // auto lsi = std::unique_ptr< llvm::FunctionPass >( llvm::createLowerSwitchPass() );
+        // lsi.get()->runOnFunction( *fn );
 
         lower_cmps( fn );
     }
