@@ -105,7 +105,12 @@ namespace lart
                     // TODO
                 }
             },
-            [&] ( llvm::Argument * ) { /* fallthrough */ },
+            [&] ( llvm::Argument * ) { 
+                /* fallthrough */ 
+            },
+            [&] ( llvm::PHINode *phi ) {
+                result = op::phi( phi );
+            },
             [&] ( llvm::Value *value ) { 
                 /* fallthrough */
                 std::string buff;
@@ -129,7 +134,7 @@ namespace lart
                 co_yield op.value();
             }
         }
-
+        
         for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
             if ( is_abstract( store->getPointerOperand() ) )
                 if ( auto op = make_operation(store); op.has_value() )
@@ -227,6 +232,12 @@ namespace lart
         }
     }
 
+    sc::generator< ir::arg::paired > paired_view( llvm::PHINode *concrete, llvm::PHINode *abstract )
+    {
+        for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i )
+            co_yield { concrete->getOperandUse(i), abstract->getOperandUse(i) };
+    }
+
     std::optional< ir::intrinsic > syntactic::process( operation o )
     {
         spdlog::debug( "process {}", op::name(o) );
@@ -236,6 +247,33 @@ namespace lart
             auto src = cast->getOperand( 0 );
             identity[src] = cast;
             propagate_identity(src);
+            return std::nullopt;
+        }
+
+        // TODO join with taint processing
+        if ( std::holds_alternative< op::phi >( o ) ) {
+            auto concrete = llvm::cast< llvm::PHINode >( op::value(o) );
+            llvm::IRBuilder<> irb( op::location(o) );
+            auto aptr = op::abstract_pointer();
+            
+            auto phi = irb.CreatePHI( aptr->getType(), concrete->getNumIncomingValues() );
+            for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i ) {
+                phi->addIncoming( aptr, concrete->getIncomingBlock( i ) );
+            }
+            
+            abstract[concrete] = phi;
+           
+            for ( auto &arg : paired_view( concrete, phi ) ) {
+                auto &con = arg.concrete;
+                if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
+                    arg.abstract.set( abs->second );
+                else
+                    places[con].push_back( arg );
+            }
+            
+            update_places( concrete );
+            propagate_identity( concrete );
+
             return std::nullopt;
         }
 
