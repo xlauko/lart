@@ -23,43 +23,13 @@
 
 namespace __lart::rt
 {
-    int fork_choose_dec( int count )
+    static unsigned depth = 0;
+
+    void check_terminate(int status = 0)
     {
-        if ( count == 1 )
-            return 0;
-        auto pid = fork();
-        if ( pid == 0 )
-            return count - 1;
-        int status;
-        pid_t done = wait(&status);
-        
         if (status != 0) {
             std::exit(status);
         }
-
-        return fork_choose_dec( count - 1 );
-    }
-
-    int fork_choose_inc( int count )
-    {
-        for (int i = 0; i < count - 1; i++) {
-            auto pid = fork();
-            if ( pid == 0 )
-                return count - 1;
-            int status;
-            pid_t done = wait(&status);
-            
-            if (status != 0) {
-                std::exit(status);
-            }
-        }
-
-        return count - 1;
-    }
-
-    int choose( int count )
-    {
-        static unsigned depth = 0;
 
         if (config->error_found) {
             std::exit(EXIT_SUCCESS);
@@ -70,7 +40,38 @@ namespace __lart::rt
             fprintf(stderr, "[lart status] bounded exit\n");
             std::exit(EXIT_SUCCESS);
         }
+    }
 
+    int fork_choose_dec( int count )
+    {
+        if ( count == 1 )
+            return 0;
+        auto pid = fork();
+        if ( pid == 0 )
+            return count - 1;
+        int status;
+        pid_t done = wait(&status);
+
+        check_terminate( status ); 
+        return choose( count - 1 );
+    }
+
+    int fork_choose_inc( int count )
+    {
+        for (int i = 0; i < count - 1; i++) {
+            auto pid = fork();
+            if ( pid == 0 )
+                return count - 1;
+            int status;
+            pid_t done = wait(&status);
+            check_terminate( status );
+        }
+
+        return count - 1;
+    }
+
+    int choose( int count )
+    {
         int result = 0;
         if ( config->ask_choices ) {
             std::scanf( "%d", &result );
