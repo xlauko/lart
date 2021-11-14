@@ -154,7 +154,7 @@ namespace lart
                 co_yield op::tobool( br );
 
                 for ( auto intr : constrain::assume( br, cond ) )
-                    co_yield intr;
+                     co_yield intr;
             }
         }
 
@@ -308,11 +308,7 @@ namespace lart
         // in default case (when concrete path was taken),
         // intrinsic returns the concrete value
         if ( auto re = op::replaces(intr.op) ) {
-            for ( auto &u : re.value()->uses() ) {
-                if ( u.getUser() != intr.call ) {
-                    u.set( intr.call );
-                }
-            }
+            re.value()->set( intr.call );
         }
 
         return intr;

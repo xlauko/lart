@@ -70,7 +70,7 @@ namespace lart::op
         llvm::Value *_what;
         llvm::Instruction *_where;
 
-        std::optional< llvm::Value* > replaces;
+        std::optional< llvm::Use* > replaces;
 
         constexpr bool with_taints() const { return false; }
     };
@@ -336,7 +336,7 @@ namespace lart::op
         explicit tobool( llvm::BranchInst *br )
             : with_taints_base( br, br )
         {
-            replaces = br->getCondition();
+            replaces = &(br->getOperandUse(0));
         }
 
         std::string name() const { return "tobool"; }
