@@ -24,6 +24,9 @@
 
 #include <cc/backend/native.hpp>
 
+#include <llvm/Support/raw_os_ostream.h>
+#include <llvm/IR/Verifier.h>
+
 #include <sc/erase.hpp>
 #include <sc/ranges.hpp>
 
@@ -34,6 +37,15 @@
 namespace lart
 {
     namespace sv = sc::views;
+
+    void verify( llvm::Module &module )
+    {
+        llvm::raw_os_ostream cerr( std::cerr );
+        if ( llvm::verifyModule( module, &cerr ) ) {
+            cerr.flush(); // otherwise nothing will be displayed
+            std::exit( EXIT_FAILURE );
+        }
+    }
 
     bool driver::run()
     {
@@ -61,9 +73,12 @@ namespace lart
         // syntactic pass
         std::vector< ir::intrinsic > intrinsics;
         syntactic syn( module, types );
-        for ( const auto &op : syn.toprocess() )
-            if ( auto intr = syn.process( op ) )
+        for ( const auto &op : syn.toprocess() ) {
+            if ( auto intr = syn.process( op ) ) {
                 intrinsics.push_back( intr.value() );
+                verify(module);
+            }
+        }
 
         // 6. release ?
 
@@ -81,6 +96,8 @@ namespace lart
         }
 
         spdlog::info("lartcc finished");
+        verify(module);
+        
         return true;
     }
 
