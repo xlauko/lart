@@ -75,7 +75,7 @@ namespace lart
             newCont->getInstList().erase( select );
         };
 
-        auto selects = sv::filter< llvm::SelectInst >( *fn );
+        auto selects = sv::to_vector( sv::filter< llvm::SelectInst >( *fn ) );
         for ( auto select : selects )
             lower( select );
     }
