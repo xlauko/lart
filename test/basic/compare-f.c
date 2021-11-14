@@ -8,5 +8,5 @@
 
 int main() {
     int x = __lamp_any_i32();
-    ASSERT( x <= 0 ); // CHECK: assertion `x <= 0' failed
+    assert( x <= 0 ); // CHECK: assertion x <= 0 failed
 }

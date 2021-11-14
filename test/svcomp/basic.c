@@ -1,4 +1,5 @@
 #include <lamp.h>
+#include <stdint.h>
 
 extern void abort(void);
 

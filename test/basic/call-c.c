@@ -1,6 +1,7 @@
 // RUN: %testrun %lartcc unit %s -o %t | %filecheck %s
 
 #include <lamp.h>
+#include <stdint.h>
 #include "utils.h"
 
 void fn(int i, int j) {

@@ -1,6 +1,7 @@
-// RUN: %testrun %lartcc term -lz3 %s -o %t | %filecheck %s
+// RUN: %testrun %lartcc term -lz3 %s -o %t 2>&1 | %filecheck %s
 
 #include <lamp.h>
+#include <stdint.h>
 #include <stdint.h>
 #include <assert.h>
 #include <limits.h>

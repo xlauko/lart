@@ -10,5 +10,5 @@ int y = 0;
 
 int main() {
     uint64_t x = __lamp_any_i64();
-    ASSERT( x != y ); // CHECK: assertion `x != y' failed
+    assert( x != y ); // CHECK: assertion x != y failed
 }
