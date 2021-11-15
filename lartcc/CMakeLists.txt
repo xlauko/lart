@@ -124,6 +124,20 @@ if ( NOT CLANG_BINARY )
   message( FATAL_ERROR "Clang not found; please make sure that the version corresponding to your LLVM installation is available." )
 endif()
 
+find_program( OPT_BINARY "opt"
+  HINTS ${LLVM_TOOLS_BINARY_DIR}
+  DOC "The opt binary to use in the lart wrapper script.")
+if ( NOT OPT_BINARY )
+  message( FATAL_ERROR "Opt not found; please make sure that the version corresponding to your LLVM installation is available." )
+endif()
+
+find_program( LLC_BINARY "llc"
+  HINTS ${LLVM_TOOLS_BINARY_DIR}
+  DOC "The llc binary to use in the lart wrapper script.")
+if ( NOT LLC_BINARY )
+  message( FATAL_ERROR "llc not found; please make sure that the version corresponding to your LLVM installation is available." )
+endif()
+
 configure_file( "lartcc.in"
   ${CMAKE_CURRENT_BINARY_DIR}/lartcc @ONLY
   FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
