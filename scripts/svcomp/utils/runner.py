@@ -34,9 +34,6 @@ class compilation(object):
         cc = os.path.abspath(self.cfg.lartcc)
 
         cmd = [cc, self.cfg.lamp, self.preprocesed]
-        if self.cfg.lamp == "term":
-            cmd.append("-lz3")
-
         # TODO: usupported by dataflow sanitizer
         # if self.cfg.architecture == 32:
         #     cmd.append("-m32")
