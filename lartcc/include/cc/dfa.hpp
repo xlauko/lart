@@ -17,7 +17,6 @@
 #pragma once
 
 #include <cc/alias.hpp>
-#include <cc/preprocess.hpp>
 #include <cc/tristate.hpp>
 #include <cc/logger.hpp>
 #include <cc/roots.hpp>
@@ -251,7 +250,7 @@ namespace detail
     struct dataflow_analysis : sc::with_context
     {
         explicit dataflow_analysis( llvm::Module &m )
-            : sc::with_context( m ), module( m ), prep( m )
+            : sc::with_context( m ), module( m ) 
         {}
 
         void push( edge &&e ) noexcept;
@@ -265,8 +264,6 @@ namespace detail
 
         sc::generator< llvm::Function * > destinations( llvm::CallBase *call );
 
-        void preprocess( llvm::Function * ) const;
-
         type_map run_from( const roots_map &roots );
 
         std::queue< edge > worklist;
@@ -275,7 +272,6 @@ namespace detail
         aa::andersen aliases;
 
         llvm::Module &module;
-        preprocessor prep;
     };
 
 } // namespace lart::detail

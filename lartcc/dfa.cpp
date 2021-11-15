@@ -57,10 +57,7 @@ namespace lart::dfa::detail
     {
         if ( llvm::isa< llvm::ConstantData >( v ) )
             return; //ignore
-
-        if ( util::is_one_of< llvm::Instruction, llvm::Argument >( v ) )
-            prep.run( sc::get_function( v ) );
-
+        spdlog::debug( "push {}", sc::fmt::llvm_to_string( v ) );
         for ( auto && e : edges( v ) )
             push( std::move( e ) );
     }
@@ -153,14 +150,9 @@ namespace lart::dfa::detail
         };*/
 
         auto uses = [&] ( auto val ) {
-            // for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
-            //            push( store_edge( lhs, p ) )
-            /*if ( auto aml = dfg.gv_to_aml( node ) )
-                return query::query( aml->succs )
-                    .filter( std::not_fn( in_abstractable_function ) )
-                    .filter( std::not_fn( in_lava ) )
-                    .filter( std::not_fn( in_lamp ) )
-                    .freeze();*/
+            for ( auto p : aliases.pointsto( v ) ) {
+                forward_use( v, p );
+            }
             return val->uses();
         };
 
@@ -199,7 +191,8 @@ namespace lart::dfa::detail
             {
                 if ( lhs == s->getValueOperand() )
                 {
-                    for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
+                    auto ptr = s->getPointerOperand();
+                    for ( auto p : aliases.pointsto( ptr ) )
                         push( store_edge( lhs, p ) );
                     // TODO: stores.insert( s );
                 }
