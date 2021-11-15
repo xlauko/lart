@@ -28,13 +28,18 @@ if [ -z $domain ]; then
      exit 1
 fi
 
+if [[ "term" == *${domain}* ]]; then
+     LINK_SOLVER="-lz3"
+fi
+
 exec @CLANG_BINARY@                             \
      -Xclang -load -Xclang "$PASS"              \
      -fsanitize=dataflow                        \
      ${CFLAGS}                                  \
-     "${@:2}"                                   \
+     ${LINK_SOLVER}                             \
+     ${@:2}                                     \
      ${LDFLAGS}                                 \
-     "$RUNTIME"                                 \
-     "$DOMAIN"                                  \
-     -I"$LART_INTERFACE"                        \
+     ${RUNTIME}                                 \
+     ${DOMAIN}                                  \
+     -I${LART_INTERFACE}                        \
      -Qunused-arguments
