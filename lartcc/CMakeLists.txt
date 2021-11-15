@@ -76,6 +76,8 @@ add_library( lartcc
 
     backend/base.cpp
     backend/native.cpp
+
+    transforms/RemoveConstantExprs.cpp
 )
 
 set_target_properties( lartcc PROPERTIES
@@ -89,7 +91,7 @@ target_include_directories( lartcc
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-add_dependencies( lartcc svflib )
+add_dependencies( lartcc svflib cuddlib )
 
 find_package( spdlog CONFIG REQUIRED )
 find_package( fmt CONFIG REQUIRED )
@@ -97,6 +99,7 @@ find_package( fmt CONFIG REQUIRED )
 target_link_libraries( lartcc PRIVATE
   llvmsc::llvmsc
   svflib
+  cuddlib
   fmt::fmt
   spdlog::spdlog
 )
