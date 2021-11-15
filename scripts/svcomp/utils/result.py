@@ -131,7 +131,7 @@ class analysis_result:
         return False
 
     def process_lines(self, report):
-        bounded, fatal, unsupported, unknown = False, False, False, False
+        bounded, fatal, unsupported, unknown, verified = False, False, False, False, False
         for line in report:
             logger().info(f"report line: {line}")
             if self.ignore_result(line):
@@ -143,12 +143,14 @@ class analysis_result:
             if line.startswith("[lart status]"):
                 if "bounded exit" in line:
                     bounded = True
+                if "verified" in line:
+                    verified = True
             if line.startswith("[lamp fail]"):
                 if "unsupported" in line:
                     unsupported = True
             if "FATAL: DataFlowSanitizer" in line:
                 fatal = True
-        if bounded or fatal or unsupported or unknown:
+        if bounded or fatal or unsupported or unknown or not verified:
             return result.unknown
         return result.true
 
