@@ -66,6 +66,10 @@ namespace lart
 
     std::optional< operation > syntactic::make_operation( llvm::Value *val )
     {
+        auto abstract_operand = [&] (auto inst, unsigned i) {
+            return is_abstract( types[inst->getOperand(i)] );
+        };
+
         std::optional< operation > result;
         sc::llvmcase( val,
             [&] ( llvm::AllocaInst * ) {
@@ -89,11 +93,13 @@ namespace lart
                     result = op::freeze{ val };
                 }
             },
-            [&] ( llvm::BinaryOperator * ) {
-                result = op::binary{ val };
+            [&] ( llvm::BinaryOperator *bin ) {
+                if ( abstract_operand( bin, 0 ) || abstract_operand( bin, 1 ) )
+                    result = op::binary{ val };
             },
-            [&] ( llvm::CmpInst * ) {
-                result = op::cmp{ val };
+            [&] ( llvm::CmpInst *cmp ) {
+                if ( abstract_operand( cmp, 0 ) || abstract_operand( cmp, 1 ) )
+                    result = op::cmp{ val };
             },
             [&] ( llvm::CastInst * ) {
                 if ( is_identity_cast( val ) )
@@ -117,10 +123,7 @@ namespace lart
             },
             [&] ( llvm::Value *value ) { 
                 /* fallthrough */
-                std::string buff;
-                llvm::raw_string_ostream ss(buff);
-                value->print(ss);
-                spdlog::warn( "ignore abstract: {}", ss.str() );
+                spdlog::warn( "ignore abstract: {}", sc::fmt::llvm_to_string( value ) );
             }
         );
         return result;
