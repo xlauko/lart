@@ -22,6 +22,7 @@ namespace __lart::rt
 {
     struct config_t
     {
+        pid_t origin = 0;
         bool backtrace = false;
         bool trace_choices = false;
         bool ask_choices = false;

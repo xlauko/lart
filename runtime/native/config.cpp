@@ -20,6 +20,7 @@
 #include "utils.hpp"
 
 #include <sys/mman.h>
+#include <unistd.h>
 
 #include <cstring>
 #include <cstdio>
@@ -62,6 +63,7 @@ namespace __lart::rt
     constructor void lart_setup()
     {
         config = (config_t*)mmap(NULL, sizeof(config_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        config->origin = getpid();
 
         load_config();
 
@@ -70,10 +72,14 @@ namespace __lart::rt
 
     destructor void lart_cleanup()
     {
+        if ( getpid() == config->origin && !config->error_found ) {
+            fprintf(stderr, "[lart status] verified\n");
+        } 
+        
         if ( config->trace_file ) {
             std::fclose( config->trace_file );
         }
-        
+
         munmap( config, sizeof(config_t) );
     }
 
