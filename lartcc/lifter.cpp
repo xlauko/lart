@@ -106,9 +106,16 @@ namespace lart
             auto fargs = args | std::views::transform( [&] (const auto &a) {
                 auto value = final( a );
                 auto dst = types[ count++ ];
-                if  ( value->getType() != dst ) {
+                auto src = value->getType();
+                if  ( src != dst ) {
                     llvm::IRBuilder<> irb( where );
-                    return irb.CreatePointerCast( value, dst );
+                    if ( src->isIntegerTy() )
+                        return irb.CreateIntCast( value, dst, false );
+                    if ( src->isPointerTy() )
+                        return irb.CreatePointerCast( value, dst );
+                    if ( src->isFloatingPointTy() )
+                        return irb.CreateFPCast( value, dst );
+                    llvm_unreachable( "unknown type" );
                 }
                 return value;
             });
