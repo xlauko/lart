@@ -1,6 +1,13 @@
 add_library( svflib STATIC IMPORTED GLOBAL )
 
 set_target_properties( svflib PROPERTIES
-    IMPORTED_LOCATION ${SVF_INSTALL_DIR}/lib/libSvf.a
+    IMPORTED_LOCATION ${SVF_INSTALL_DIR}/lib/libSvf.a 
+    INTERFACE_INCLUDE_DIRECTORIES "${SVF_INSTALL_DIR}/include;${SVF_INSTALL_DIR}/include/svf"
+)
+
+add_library( cuddlib STATIC IMPORTED GLOBAL )
+
+set_target_properties( cuddlib PROPERTIES
+    IMPORTED_LOCATION ${SVF_INSTALL_DIR}/lib/libCudd.a 
     INTERFACE_INCLUDE_DIRECTORIES "${SVF_INSTALL_DIR}/include;${SVF_INSTALL_DIR}/include/svf"
 )
