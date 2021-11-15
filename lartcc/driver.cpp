@@ -43,6 +43,7 @@ namespace lart
         llvm::raw_os_ostream cerr( std::cerr );
         if ( llvm::verifyModule( module, &cerr ) ) {
             cerr.flush(); // otherwise nothing will be displayed
+            // module.print(llvm::errs(), nullptr);
             std::exit( EXIT_FAILURE );
         }
     }
@@ -52,23 +53,13 @@ namespace lart
         spdlog::cfg::load_env_levels();
         spdlog::info("lartcc started");
 
+        preprocessor prep(module);
+        for (auto &fn : module) {
+            prep.run(fn);
+        }
+
         // propagate abstraction type from annotated roots
         auto types = dfa::analysis::run_on( module );
-
-        // lower pointer arithmetic to scalar operations
-        {
-            sc::deferred_erase_vector erase([&] (auto inst) { types.erase(inst); });
-            
-            for ( auto &[val, type] : types ) {
-                if ( auto gep = llvm::dyn_cast< llvm::GetElementPtrInst >( val ) ) {
-                    for ( auto [src, inst] : lower_pointer_arithmetic( gep ) ) {
-                        if ( types.count(src) )
-                            types[inst] = types[src];
-                    }
-                    erase.push(gep);
-                }
-            }
-        }
 
         // syntactic pass
         std::vector< ir::intrinsic > intrinsics;
@@ -76,7 +67,6 @@ namespace lart
         for ( const auto &op : syn.toprocess() ) {
             if ( auto intr = syn.process( op ) ) {
                 intrinsics.push_back( intr.value() );
-                verify(module);
             }
         }
 

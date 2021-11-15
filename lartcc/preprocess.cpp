@@ -26,28 +26,44 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/Transforms/Utils.h> // LowerSwitchPass
 
+#include <transforms/RemoveConstantExprs.hpp>
+
 #include <algorithm>
+
 
 namespace lart
 {
     namespace sv = sc::views;
 
-    void preprocessor::run( llvm::Function *fn )
+    void preprocessor::run( llvm::Function &fn )
     {
-        if ( !util::tag_function_with_metadata( *fn, preprocessor::tag ) )
+        if ( !util::tag_function_with_metadata( fn, preprocessor::tag ) )
             return;
 
-        spdlog::debug( "preprocess {}", fn->getName().str() );
-
-        lower_selects( fn );
-
-        // auto lsi = std::unique_ptr< llvm::FunctionPass >( llvm::createLowerSwitchPass() );
-        // lsi.get()->runOnFunction( *fn );
-
-        lower_cmps( fn );
+        if ( fn.getName().startswith("__lamp") || fn.getName().startswith("__lava") )
+            return;
+        
+        spdlog::debug( "preprocess {}", fn.getName().str() );
+        bool change = false;
+        
+        do {
+            change = false;
+            // if ( lower_pointer_arithmetic( fn ) ) change = true;
+            if ( lower_selects( fn ) ) change = true;
+            if ( lower_constant_exprs( fn ) ) change = true; 
+            // auto lsi = std::unique_ptr< llvm::FunctionPass >( llvm::createLowerSwitchPass() );
+            // lsi.get()->runOnFunction( *fn );
+            if ( lower_cmps( fn ) ) change = true;
+        } while (change);
     }
 
-    void preprocessor::lower_selects( llvm::Function *fn )
+    bool preprocessor::lower_constant_exprs( llvm::Function &fn )
+    {
+        RemoveConstantExprs rce;
+        return rce.runOnFunction( fn );
+    }
+
+    bool preprocessor::lower_selects( llvm::Function &fn )
     {
         auto lower = [] ( auto select ) {
             auto bb = select->getParent();
@@ -75,14 +91,41 @@ namespace lart
             newCont->getInstList().erase( select );
         };
 
-        auto selects = sv::to_vector( sv::filter< llvm::SelectInst >( *fn ) );
+        auto selects = sv::to_vector( sv::filter< llvm::SelectInst >( fn ) );
         for ( auto select : selects )
             lower( select );
+        return !selects.empty();
     }
 
-    void preprocessor::lower_cmps( llvm::Function *fn )
+    bool preprocessor::lower_switch( llvm::Function &/*fn*/ )
     {
-        auto lower = [fn] ( auto cmp ) {
+        // bool Changed = false;
+        // llvm::SmallPtrSet<BasicBlock*, 8> DeleteList;
+
+        // for (auto I = F.begin(), E = F.end(); I != E; ) {
+        //     llvm::BasicBlock *Cur = &*I++; // Advance over block so we don't traverse new blocks
+
+        //     // If the block is a dead Default block that will be deleted later, don't
+        //     // waste time processing it.
+        //     if (DeleteList.count(Cur))
+        //         continue;
+
+        //     if (SwitchInst *SI = dyn_cast<SwitchInst>(Cur->getTerminator())) {
+        //         Changed = true;
+        //         processSwitchInst(SI, DeleteList);
+        //     }
+        // }
+
+        // for (BasicBlock* BB: DeleteList) {
+        //     DeleteDeadBlock(BB);
+        // }
+        return false;
+    }
+
+    bool preprocessor::lower_cmps( llvm::Function &fn )
+    {
+        bool change = false;
+        auto lower = [&] ( auto cmp ) {
             auto src = cmp->getParent();
             auto next = cmp->getNextNonDebugInstruction();
             auto dst = src->splitBasicBlock( next, "lart.lower.cmp" );
@@ -91,8 +134,8 @@ namespace lart
             src->getTerminator()->eraseFromParent();
 
             auto & ctx = cmp->getContext();
-            auto tbb = llvm::BasicBlock::Create( ctx, "lart.lower.true", fn, dst );
-            auto fbb = llvm::BasicBlock::Create( ctx, "lart.lower.false", fn, dst );
+            auto tbb = llvm::BasicBlock::Create( ctx, "lart.lower.true", &fn, dst );
+            auto fbb = llvm::BasicBlock::Create( ctx, "lart.lower.false", &fn, dst );
 
             irb.SetInsertPoint( tbb );
             irb.CreateBr( dst );
@@ -109,15 +152,17 @@ namespace lart
 
             auto br = irb.CreateCondBr( cmp, tbb, fbb );
             br->moveAfter( &cmp->getParent()->back() );
+            change = true;
         };
 
         auto nonbr = [] ( auto i ) {
             return std::ranges::any_of( i->users(), sv::isnot< llvm::BranchInst > );
         };
 
-        auto cmps = sv::filter< llvm::CmpInst >( *fn );
+        auto cmps = sv::filter< llvm::CmpInst >( fn );
         for ( auto cmp : cmps | std::views::filter( nonbr ) )
             lower( cmp );
+        return change;
     }
 
     namespace
@@ -161,15 +206,17 @@ namespace lart
             return offset;
         }
 
-        sc::generator< dependence > lower_to_arithmetic( llvm::GetElementPtrInst * gep, uint64_t accum_offset )
+        void lower_to_arithmetic( llvm::GetElementPtrInst * gep, uint64_t accum_offset )
         {
             auto dl = llvm::DataLayout( sc::get_module( gep ) );
 
             llvm::IRBuilder irb( gep );
             auto pty = dl.getIntPtrType( gep->getType() );
 
+            if ( llvm::isa< llvm::Constant >( gep->getOperand( 0 ) ) )
+                return;
+            
             auto res = instruction( irb.CreatePtrToInt( gep->getOperand( 0 ), pty ) );
-            co_yield { gep, res };
             auto gti = llvm::gep_type_begin( *gep );
 
             // Create ADD/SHL/MUL arithmetic operations for each sequential indices. We
@@ -191,41 +238,48 @@ namespace lart
                         llvm::Value * val = nullptr;
                         if ( element_size.isPowerOf2() ) {
                             val = irb.CreateShl( idx, constant( pty, element_size.logBase2() ) );
-                            if ( auto ival = llvm::dyn_cast< llvm::Instruction >( val ) )
-                                co_yield { idx, ival };
                         } else {
                             val = irb.CreateMul( idx, constant( pty, element_size ) );
-                            if ( auto ival = llvm::dyn_cast< llvm::Instruction >( val ) )
-                                co_yield { idx, ival };
                         }
-
                         idx = val;
                     }
 
                     // Create an ADD for each index.
                     res = instruction( irb.CreateAdd( res, idx ) );
-                    co_yield { gep, res };
                 }
             }
 
             // Create an ADD for the constant offset index.
             if ( accum_offset != 0 ) {
                 res = instruction( irb.CreateAdd( res, constant( pty, accum_offset ) ) );
-                co_yield { gep, res };
             }
 
             res = instruction( irb.CreateIntToPtr( res, gep->getType() ) );
             gep->replaceAllUsesWith( res );
-            co_yield { gep, res };
         }
     } // anonymous namespace
 
-    sc::generator< dependence > lower_pointer_arithmetic( llvm::GetElementPtrInst *gep )
+    void lower_gep( llvm::GetElementPtrInst *gep )
     {
         canonicalize( gep );
         auto offset = accumulate_byte_offset( gep );
-        for ( auto dep : lower_to_arithmetic( gep, offset ) )
-            co_yield dep;
+        lower_to_arithmetic( gep, offset );
+    }
+
+    bool preprocessor::lower_pointer_arithmetic( llvm::Function &fn )
+    {
+        std::vector< llvm::Instruction * > erase;
+        
+        auto geps = sv::filter< llvm::GetElementPtrInst >( fn );
+        for ( auto gep : geps ) {
+            lower_gep( gep );
+            erase.push_back(gep);
+        }
+
+        bool change = !erase.empty();
+        for (auto e : erase)
+            e->eraseFromParent();
+        return change;
     }
 
 } // namespace lart

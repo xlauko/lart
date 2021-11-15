@@ -37,19 +37,21 @@ namespace lart
     {
         explicit preprocessor( llvm::Module &m ) : sc::with_context( m ), module( m ) {}
 
-        void run( llvm::Function *fn );
+        void run( llvm::Function &fn );
 
-        void lower_cmps( llvm::Function *fn );
+        bool lower_cmps( llvm::Function &fn );
 
-        void lower_selects( llvm::Function *fn );
+        bool lower_switch( llvm::Function &fn );
+
+        bool lower_selects( llvm::Function &fn );
+
+        bool lower_pointer_arithmetic( llvm::Function &fn );
+
+        bool lower_constant_exprs( llvm::Function &fn );
 
         inline static const std::string tag = "lart.abstract.preprocessed";
 
         llvm::Module &module;
     };
-
-    using dependence = std::pair< llvm::Value*, llvm::Instruction* >;
-
-    sc::generator< dependence > lower_pointer_arithmetic( llvm::GetElementPtrInst *gep );
 
 } // namespace lart
