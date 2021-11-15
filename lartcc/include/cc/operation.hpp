@@ -361,6 +361,10 @@ namespace lart::op
     };
 
     struct phi : without_taints_base {
+        explicit phi( llvm::PHINode *node )
+            : without_taints_base( node, node )
+        {}
+        
         std::string name() const { return "phi"; }
         std::string impl() const { llvm_unreachable( "invalid op" ); }
         args_t arguments() const { llvm_unreachable( "invalid op" ); }
