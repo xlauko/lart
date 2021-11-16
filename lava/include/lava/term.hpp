@@ -68,6 +68,44 @@ namespace __lava
 
         using tr = const term &;
 
+        static z3::sort fpa_sort( int bw )
+        {
+            auto &ctx = __term_state->ctx;
+
+            if ( bw == 32 )
+                return ctx.fpa_sort< 32 >();
+            if ( bw == 64 )
+                return ctx.fpa_sort< 64 >();
+            __builtin_unreachable();
+            // UNREACHABLE( "unsupported fpa sort type of bitwidth ", bw );
+        }
+        
+        static z3::expr make_expr( Z3_ast ast )
+        {
+            return z3::expr( __term_state->ctx, ast );
+        }
+
+        static z3::expr make_fpa_val( auto v, int bw )
+        {
+            auto &ctx = __term_state->ctx;
+            
+            auto sort = fpa_sort( bw );
+            switch( std::fpclassify( v ) )
+            {
+                case FP_INFINITE:
+                    return make_expr( Z3_mk_fpa_inf( ctx, sort, std::signbit( v ) ) );
+                case FP_NAN:
+                    return make_expr( Z3_mk_fpa_nan( ctx, sort ) );
+                case FP_ZERO:
+                    return make_expr( Z3_mk_fpa_zero( ctx, sort, std::signbit( v ) ) );
+                default:
+                    return ctx.fpa_val( v );
+            }
+        }
+
+        static z3::expr make_fpa_val( float v )  { return make_fpa_val( v, 32 ); }
+        static z3::expr make_fpa_val( double v ) { return make_fpa_val( v, 64 ); }
+
         template< typename type > static term lift( const type &value )
         {
             auto &ctx = __term_state->ctx;
@@ -75,6 +113,11 @@ namespace __lava
             if constexpr ( std::is_integral_v < type > )
             {
                 return ctx.bv_val( value, bitwidth_v< type > );
+            }
+
+            if constexpr ( std::is_floating_point_v< type > )
+            {
+                return make_fpa_val( value );
             }
 
             __builtin_unreachable();
@@ -123,7 +166,7 @@ namespace __lava
         }
 
         static tristate to_tristate( tr ) { return maybe; }
-
+        
         /* arithmetic operations */
         static term op_add ( tr a, tr b ) { return a.get() + b.get(); }
         static term op_sub ( tr a, tr b ) { return a.get() - b.get(); }
@@ -170,6 +213,78 @@ namespace __lava
             return z3::zext( v, b - v.get_sort().bv_size() );
         }
         // static term op_zfit( tr t, bw ) { return {}; }
+        
+        // floats
+        static term op_fadd( tr a, tr b ) { return a.get() + b.get(); }
+        static term op_fsub( tr a, tr b ) { return a.get() - b.get(); }
+        static term op_fmul( tr a, tr b ) { return a.get() * b.get(); }
+        static term op_fdiv( tr a, tr b ) { return a.get() / b.get(); }
+        // static term op_frem( tr a, tr b ) { return { a, b, op::fp_rem }; }
+
+        static term op_foeq( tr a, tr b ) { return make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fogt( tr a, tr b ) { return a.get() > b.get(); }
+        static term op_foge( tr a, tr b ) { return make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_folt( tr a, tr b ) { return a.get() < b.get(); }
+        static term op_fole( tr a, tr b ) { return a.get() <= b.get(); }
+        static term op_fone( tr a, tr b ) { return a.get() != b.get(); }
+        // static term op_ford( tr a, tr b ) { return ; }
+        // static term op_funo( tr a, tr b ) { return ; }
+        static term op_fueq( tr a, tr b ) { return make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fugt( tr a, tr b ) { return a.get() > b.get(); }
+        static term op_fuge( tr a, tr b ) { return make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fult( tr a, tr b ) { return a.get() < b.get(); }
+        static term op_fule( tr a, tr b ) { return a.get() <= b.get(); }
+        static term op_fune( tr a, tr b ) { return a.get() != b.get(); }
+
+        static term op_fptrunc( tr a, bw w )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr(
+                Z3_mk_fpa_to_fp_float( ctx, ctx.fpa_rounding_mode(), a.get(), fpa_sort( w ) )
+            );
+        }
+
+        static term op_sitofp( tr a, bw w )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr(
+                Z3_mk_fpa_to_fp_signed( ctx, ctx.fpa_rounding_mode(), a.get(), fpa_sort( w ) )
+            );
+        }
+        
+        static term op_uitofp( tr a, bw w )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr(
+                Z3_mk_fpa_to_fp_unsigned( ctx, ctx.fpa_rounding_mode(), a.get(), fpa_sort( w ) )
+            );
+        }
+        
+        static term op_fpext( tr a, bw w )
+        { 
+            auto &ctx = __term_state->ctx;
+            return make_expr(
+                Z3_mk_fpa_to_fp_float( ctx, ctx.fpa_rounding_mode(), a.get(), fpa_sort( w ) )
+            );
+        }
+        
+        static term op_fptosi( tr a, bw w ) 
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr(
+                Z3_mk_fpa_to_sbv( ctx, ctx.fpa_rounding_mode(), a.get(), w )
+            );
+        }
+        
+        static term op_fptoui ( tr a, bw w )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr(
+                Z3_mk_fpa_to_ubv( ctx, ctx.fpa_rounding_mode(), a.get(), w )
+            );
+        }
+
+        // static term fn_fabs( tr a ) {}
 
         static void dump( tr t )
         {
