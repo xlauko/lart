@@ -49,7 +49,9 @@ namespace __lava::op
 
         shl, lshr, ashr, concat, extract,
 
-        malloc, realloc, dealloca, free
+        malloc, realloc, dealloca, free,
+
+        fabs
     };
 
     std::string_view to_string(tag t)
@@ -141,7 +143,9 @@ namespace __lava::op
             case tag::realloc: return "realloc";
             
             case tag::dealloca: return "dealloca";
-            case tag::free : return "free";    
+            case tag::free : return "free";
+
+            case tag::fabs: return "fabs";
         }
 
         __builtin_unreachable();
@@ -239,6 +243,8 @@ namespace __lava::op
 
     static constexpr auto assume = []( const auto &a ) { return std::decay_t< decltype( a ) >::assume; };
     static constexpr auto to_tristate = []( const auto &a ) { return std::decay_t< decltype( a ) >::to_tristate; };
+
+    static constexpr auto fabs = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fabs; };
 
     static constexpr auto strcmp = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_strcmp; };
     static constexpr auto strlen = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_strlen; };

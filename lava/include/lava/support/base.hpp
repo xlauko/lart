@@ -155,8 +155,8 @@ namespace __lava
         static st lift_si32( si32 v ) { return st::lift( v ); }
         static st lift_si64( si64 v ) { return st::lift( v ); }
 
-        static st lift_f32( f32 v ) { return st::lift( v ); }
-        static st lift_f64( f64 v ) { return st::lift( v ); }
+        static st lift_float( f32 v ) { return st::lift( v ); }
+        static st lift_double( f64 v ) { return st::lift( v ); }
 
         static st lift_arr( void *v, unsigned s ) { return st::lift( array_ref{ v, s } ); }
         static st lift_ptr( void *v ) { return st::lift( v ); }
@@ -232,6 +232,8 @@ namespace __lava
         static st op_fpext  ( sr, bw ) { return fail( "fpext"   ); }
         static st op_fptosi ( sr, bw ) { return fail( "fptosi"  ); }
         static st op_fptoui ( sr, bw ) { return fail( "fptoui"  ); }
+
+        static st fn_fabs( sr ) { return fail( "fabs"  ); }
 
         static st op_concat ( sr, sr ) { return fail( "concat" ); }
         static st op_extract( sr, bw, bw ) { return fail( "extract" ); }

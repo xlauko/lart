@@ -48,6 +48,8 @@ namespace lart
         bool lower_pointer_arithmetic( llvm::Function &fn );
 
         bool lower_constant_exprs( llvm::Function &fn );
+        
+        bool lower_intrinsics( llvm::Function &fn );
 
         inline static const std::string tag = "lart.abstract.preprocessed";
 

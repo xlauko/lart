@@ -186,6 +186,8 @@ namespace __lava
                 
                 case op::tag::dealloca: mixin::fail("unsupported dealloca bop");
                 case op::tag::free: mixin::fail("unsupported free bop");
+
+                case op::tag::fabs: mixin::fail("unsupported fabs bop");
             }
 
             for (const auto &ch : a.underlying()->children) {

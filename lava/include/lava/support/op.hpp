@@ -124,6 +124,8 @@ namespace __lava
         static optag op_zext  ( ref, bw ) { return tag::zext; }
         static optag op_zfit  ( ref, bw ) { return tag::zfit; }
 
+        static optag fn_fabs( ref ) { return tag::fabs; }
+
         static void dump( ref op ) { printf("%s\n", op::to_string(op->value).data()); }
         static std::string trace( ref op ) { return op::to_string(op->value); }
         
