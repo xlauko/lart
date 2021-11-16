@@ -12,8 +12,8 @@ int main()
     uint32_t c = __lamp_any_i32();
     uint64_t d = __lamp_any_i64();
 
-    float  e = __lamp_any_f32();
-    double f = __lamp_any_f64();
+    float  e = __lamp_any_float();
+    double f = __lamp_any_double();
     REACHABLE // CHECK: lart-reachable
 }
 
