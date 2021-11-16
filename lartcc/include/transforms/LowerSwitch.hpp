@@ -15,7 +15,7 @@
 
 namespace llvm
 {
-    struct LowerSwitchLegacyPass {
+    struct LowerSwitch {
       bool runOnFunction(Function &F);
     };
 

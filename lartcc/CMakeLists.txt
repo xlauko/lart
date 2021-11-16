@@ -77,6 +77,7 @@ add_library( lartcc
     backend/base.cpp
     backend/native.cpp
 
+    transforms/LowerSwitch.cpp
     transforms/RemoveConstantExprs.cpp
 )
 
