@@ -48,6 +48,36 @@ namespace lart
         }
     }
 
+    void replace_abstractable_functions( llvm::Module &module )
+    {
+        std::vector< std::pair< llvm::Function *, llvm::Function * > > abstractable;
+        for (auto &fn : module) {
+            auto name = fn.getName();
+            std::string prefix = "__lamp_lifter_";
+            if (name.startswith(prefix)) {
+                auto suffix = name.drop_front(prefix.size());
+                if (auto concrete = module.getFunction(suffix)) {
+                    if (concrete->getType() == fn.getType()) {
+                        abstractable.emplace_back( &fn, concrete );
+                    }
+                }
+                if (suffix.consume_back("f")) {
+                    if (auto concrete = module.getFunction(suffix)) {
+                        if (concrete->getType() == fn.getType()) {
+                            abstractable.emplace_back( &fn, concrete );
+                        }
+                    }
+                }
+            }
+        }
+
+        for ( auto [abs, con] : abstractable ) {
+            for ( auto user : con->users() ) {
+                user->replaceUsesOfWith( con, abs );
+            }
+        }
+    }
+
     bool driver::run()
     {
         spdlog::cfg::load_env_levels();
@@ -58,6 +88,8 @@ namespace lart
             prep.run(fn);
         }
 
+        replace_abstractable_functions(module);
+        
         // propagate abstraction type from annotated roots
         auto types = dfa::analysis::run_on( module );
 
