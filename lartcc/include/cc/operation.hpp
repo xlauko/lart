@@ -208,6 +208,8 @@ namespace lart::op
         {
             auto c = llvm::cast< llvm::CmpInst >( _what );
             auto pred = llvm::CmpInst::getPredicateName( c->getPredicate() );
+            if ( llvm::isa< llvm::FCmpInst >( _what ) )
+                return "f" + std::string( pred ); 
             return std::string( pred );
         }
         std::string impl() const { return "__lamp_" + name(); }
