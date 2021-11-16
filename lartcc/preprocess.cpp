@@ -355,7 +355,7 @@ namespace lart
             change = true;
             switch (id) {
                 case llvm::Intrinsic::fabs:
-                    replace_fpintrinsic_with_call( intr, "fabs", "fabsf", "fabsl" ); break;
+                    replace_fpintrinsic_with_call( intr, "fabsf", "fabs", "fabsl" ); break;
                 case llvm::Intrinsic::maxnum:
                     replace_fpintrinsic_with_call( intr, "fmaxf", "fmax", "fmaxl" ); break;
                 case llvm::Intrinsic::minnum:
