@@ -64,8 +64,8 @@ __lamp_si16 __lamp_lift_si16( __lamp_si16 v );
 __lamp_si32 __lamp_lift_si32( __lamp_si32 v );
 __lamp_si64 __lamp_lift_si64( __lamp_si64 v );
 
-__lamp_f32 __lamp_lift_f32( __lamp_f32 v );
-__lamp_f64 __lamp_lift_f64( __lamp_f64 v );
+__lamp_f32 __lamp_lift_float( __lamp_f32 v );
+__lamp_f64 __lamp_lift_double( __lamp_f64 v );
 
 void *__lamp_lift_arr( void *v, __lamp_i32 s );
 // char *__lamp_lift_str( char *s );
@@ -81,8 +81,8 @@ __lamp_ptr __lamp_wrap_si16( __lamp_si16 v );
 __lamp_ptr __lamp_wrap_si32( __lamp_si32 v );
 __lamp_ptr __lamp_wrap_si64( __lamp_si64 v );
 
-__lamp_ptr __lamp_wrap_f32( __lamp_f32 v );
-__lamp_ptr __lamp_wrap_f64( __lamp_f64 v );
+__lamp_ptr __lamp_wrap_float( __lamp_f32 v );
+__lamp_ptr __lamp_wrap_double( __lamp_f64 v );
 
 __lamp_ptr __lamp_wrap_ptr( void *v );
 void *__lamp_lift_ptr( void *v );
@@ -93,8 +93,8 @@ __lamp_i16  __lamp_any_i16( void );
 __lamp_i32  __lamp_any_i32( void );
 __lamp_i64  __lamp_any_i64( void );
 
-float    __lamp_any_f32  ( void );
-double   __lamp_any_f64  ( void );
+float    __lamp_any_float  ( void );
+double   __lamp_any_double  ( void );
 void    *__lamp_any_ptr  ( void );
 char    *__lamp_any_array( void );
 
@@ -173,6 +173,8 @@ __lamp_ptr __lamp_fpext  ( __lamp_ptr a, __lamp_bw  b );
 __lamp_ptr __lamp_fptosi ( __lamp_ptr a, __lamp_bw  b );
 __lamp_ptr __lamp_fptoui ( __lamp_ptr a, __lamp_bw  b );
 
+__lamp_ptr __lamp_fn_fabs( __lamp_ptr a );
+
 void __lamp_store( __lamp_ptr a, __lamp_ptr b, __lamp_bw w );
 __lamp_ptr __lamp_load( __lamp_ptr a, __lamp_bw w );
 
@@ -208,8 +210,8 @@ void __lamp_stub()
     __lamp_lift_si32(0);
     __lamp_lift_si64(0);
 
-    __lamp_lift_f32(0);
-    __lamp_lift_f64(0);
+    __lamp_lift_float(0);
+    __lamp_lift_double(0);
 
     __lamp_lift_arr( __lamp_null, 0 );
     // __lamp_lift_str( __lamp_null );
@@ -224,8 +226,8 @@ void __lamp_stub()
     __lamp_wrap_si16(0);
     __lamp_wrap_si32(0);
     __lamp_wrap_si64(0);
-    __lamp_wrap_f32(0);
-    __lamp_wrap_f64(0);
+    __lamp_wrap_float(0);
+    __lamp_wrap_double(0);
 
     __lamp_wrap_ptr( __lamp_null );
     __lamp_lift_ptr( __lamp_null );
@@ -235,8 +237,8 @@ void __lamp_stub()
     __lamp_any_i16  ();
     __lamp_any_i32  ();
     __lamp_any_i64  ();
-    __lamp_any_f32  ();
-    __lamp_any_f64  ();
+    __lamp_any_float  ();
+    __lamp_any_double  ();
     __lamp_any_ptr  ();
     __lamp_any_array();
 
@@ -323,6 +325,8 @@ void __lamp_stub()
 
     __lamp_assume( ptr, 0 );
     __lamp_extract( ptr, 0, 0 );
+
+    __lamp_fn_fabs( ptr );
 
     // __lamp_dealloca( __lamp_null, 0 );
 

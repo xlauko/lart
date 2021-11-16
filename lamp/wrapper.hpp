@@ -137,8 +137,8 @@ extern "C"
     si32 __lamp_lift_si32( si32 v )  { return lift( dom::lift_si32, v ); }
     si64 __lamp_lift_si64( si64 v )  { return lift( dom::lift_si64, v ); }
 
-    f32 __lamp_lift_f32( f32 v )     { return lift( dom::lift_f32, v ); }
-    f64 __lamp_lift_f64( f64 v )     { return lift( dom::lift_f64, v ); }
+    f32 __lamp_lift_float( f32 v )     { return lift( dom::lift_float, v ); }
+    f64 __lamp_lift_double( f64 v )     { return lift( dom::lift_double, v ); }
 
     __lamp_ptr __lamp_wrap_i1 ( i1  v )     { return wrap( dom::lift_i1,  v ); }
     __lamp_ptr __lamp_wrap_i8 ( i8  v )     { return wrap( dom::lift_i8,  v ); }
@@ -151,8 +151,8 @@ extern "C"
     __lamp_ptr __lamp_wrap_si32( si32 v )     { return wrap( dom::lift_si32, v ); }
     __lamp_ptr __lamp_wrap_si64( si64 v )     { return wrap( dom::lift_si64, v ); }
 
-    __lamp_ptr __lamp_wrap_f32( f32 v )     { return wrap( dom::lift_f32, v ); }
-    __lamp_ptr __lamp_wrap_f64( f64 v )     { return wrap( dom::lift_f64, v ); }
+    __lamp_ptr __lamp_wrap_float( f32 v )     { return wrap( dom::lift_float, v ); }
+    __lamp_ptr __lamp_wrap_double( f64 v )     { return wrap( dom::lift_double, v ); }
 
     __lamp_ptr  __lamp_wrap_ptr( void *v )   { return wrap( dom::lift_ptr, v ); }
 
@@ -171,8 +171,8 @@ extern "C"
     i32   __lamp_any_i32()   { return any< dom, i32 >(); }
     i64   __lamp_any_i64()   { return any< dom, i64 >(); }
 
-    f32   __lamp_any_f32()   { return any< dom, f32 >(); }
-    f64   __lamp_any_f64()   { return any< dom, f64 >(); }
+    f32   __lamp_any_float()   { return any< dom, f32 >(); }
+    f64   __lamp_any_double()   { return any< dom, f64 >(); }
 
     void* __lamp_any_ptr() { return any< dom, void * >(); }
     char* __lamp_any_array() { return any< dom, char * >(); }
@@ -289,6 +289,8 @@ extern "C"
     {
         return { ref( p.ptr ).clone().disown() };
     }
+
+    __lamp_ptr __lamp_fn_fabs( __lamp_ptr a ) { return wrap( dom::fn_fabs, a );}
 
     void __lamp_dump( void *twin )
     {

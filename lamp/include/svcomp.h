@@ -26,8 +26,8 @@ extern "C" {
     __lamp_i32  __lamp_any_i32_traced(const char *file, unsigned int line, const char *func);
     __lamp_i64  __lamp_any_i64_traced(const char *file, unsigned int line, const char *func);
         
-    __lamp_f32 __lamp_any_f32_traced(const char *file, unsigned int line, const char *func);
-    __lamp_f64 __lamp_any_f64_traced(const char *file, unsigned int line, const char *func);
+    __lamp_f32 __lamp_any_float_traced(const char *file, unsigned int line, const char *func);
+    __lamp_f64 __lamp_any_double_traced(const char *file, unsigned int line, const char *func);
     void*      __lamp_any_ptr_traced(const char *file, unsigned int line, const char *func);
 
     #define __VERIFIER_nondet_bool() \
@@ -76,10 +76,10 @@ extern "C" {
         __lamp_any_ptr_traced(__FILE__, __LINE__, "__VERIFIER_nondet_const_char_pointer")
     
     #define __VERIFIER_nondet_float() \
-        __lamp_any_f32_traced(__FILE__, __LINE__, "__VERIFIER_nondet_float")
+        __lamp_any_float_traced(__FILE__, __LINE__, "__VERIFIER_nondet_float")
     
     #define __VERIFIER_nondet_double() \
-        __lamp_any_f64_traced(__FILE__, __LINE__, "__VERIFIER_nondet_double")
+        __lamp_any_double_traced(__FILE__, __LINE__, "__VERIFIER_nondet_double")
 
 #ifdef __cplusplus
 }

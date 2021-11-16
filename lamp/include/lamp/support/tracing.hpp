@@ -211,6 +211,8 @@ namespace __lamp
         static self op_uitofp  ( sref a, bw b ) { return TRACE( domain::op_uitofp, a, b ); }
         static self op_zext    ( sref a, bw b ) { return TRACE( domain::op_zext, a, b ); }
         static self op_zfit    ( sref a, bw b ) { return TRACE( domain::op_zfit, a, b ); }
+
+        // static self fn_fabs( sref a ) { return TRACE( domain::fn_fabs, a ); }
     };
 
     template< typename domain, typename outstream >
