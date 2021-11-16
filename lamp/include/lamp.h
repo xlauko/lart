@@ -174,6 +174,8 @@ __lamp_ptr __lamp_fptosi ( __lamp_ptr a, __lamp_bw  b );
 __lamp_ptr __lamp_fptoui ( __lamp_ptr a, __lamp_bw  b );
 
 __lamp_ptr __lamp_fn_fabs( __lamp_ptr a );
+double __lamp_lifter_fabs( double );
+float __lamp_lifter_fabsf( float );
 
 void __lamp_store( __lamp_ptr a, __lamp_ptr b, __lamp_bw w );
 __lamp_ptr __lamp_load( __lamp_ptr a, __lamp_bw w );
@@ -327,6 +329,8 @@ void __lamp_stub()
     __lamp_extract( ptr, 0, 0 );
 
     __lamp_fn_fabs( ptr );
+    __lamp_lifter_fabs( 0.0 );
+    __lamp_lifter_fabsf( 0.0f );
 
     // __lamp_dealloca( __lamp_null, 0 );
 
