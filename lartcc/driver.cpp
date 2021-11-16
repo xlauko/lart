@@ -59,13 +59,8 @@ namespace lart
                 if (auto concrete = module.getFunction(suffix)) {
                     if (concrete->getType() == fn.getType()) {
                         abstractable.emplace_back( &fn, concrete );
-                    }
-                }
-                if (suffix.consume_back("f")) {
-                    if (auto concrete = module.getFunction(suffix)) {
-                        if (concrete->getType() == fn.getType()) {
-                            abstractable.emplace_back( &fn, concrete );
-                        }
+                    } else {
+                        spdlof::warn("mismatched type of abstractable function {}", suffix);
                     }
                 }
             }
