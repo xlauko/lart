@@ -24,9 +24,10 @@
 
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Instructions.h>
-#include <llvm/Transforms/Utils.h> // LowerSwitchPass
+#include <llvm/CodeGen/IntrinsicLowering.h>
 
 #include <transforms/RemoveConstantExprs.hpp>
+#include <transforms/LowerSwitch.hpp>
 
 #include <algorithm>
 
@@ -50,12 +51,13 @@ namespace lart
             change = false;
             // if ( lower_pointer_arithmetic( fn ) ) change = true;
             if ( lower_selects( fn ) ) change = true;
-            if ( lower_constant_exprs( fn ) ) change = true; 
-            // auto lsi = std::unique_ptr< llvm::FunctionPass >( llvm::createLowerSwitchPass() );
-            // lsi.get()->runOnFunction( *fn );
+            if ( lower_constant_exprs( fn ) ) change = true;
+            if ( lower_switch( fn ) ) change = true; 
             if ( lower_cmps( fn ) ) change = true;
+            if ( lower_intrinsics( fn ) ) change = true;
         } while (change);
     }
+
 
     bool preprocessor::lower_constant_exprs( llvm::Function &fn )
     {
@@ -97,29 +99,9 @@ namespace lart
         return !selects.empty();
     }
 
-    bool preprocessor::lower_switch( llvm::Function &/*fn*/ )
+    bool preprocessor::lower_switch( llvm::Function &fn )
     {
-        // bool Changed = false;
-        // llvm::SmallPtrSet<BasicBlock*, 8> DeleteList;
-
-        // for (auto I = F.begin(), E = F.end(); I != E; ) {
-        //     llvm::BasicBlock *Cur = &*I++; // Advance over block so we don't traverse new blocks
-
-        //     // If the block is a dead Default block that will be deleted later, don't
-        //     // waste time processing it.
-        //     if (DeleteList.count(Cur))
-        //         continue;
-
-        //     if (SwitchInst *SI = dyn_cast<SwitchInst>(Cur->getTerminator())) {
-        //         Changed = true;
-        //         processSwitchInst(SI, DeleteList);
-        //     }
-        // }
-
-        // for (BasicBlock* BB: DeleteList) {
-        //     DeleteDeadBlock(BB);
-        // }
-        return false;
+        return llvm::LowerSwitch().runOnFunction( fn );
     }
 
     bool preprocessor::lower_cmps( llvm::Function &fn )
@@ -279,6 +261,94 @@ namespace lart
         bool change = !erase.empty();
         for (auto e : erase)
             e->eraseFromParent();
+        return change;
+    }
+
+
+    template < class ArgIt >
+    static llvm::CallInst *replace_call_with(const char *NewFn, llvm::CallInst *CI,
+                                             ArgIt ArgBegin, ArgIt ArgEnd,
+                                             llvm::Type *RetTy)
+    {
+        // If we haven't already looked up this function, check to see if the
+        // program already contains a function with this name.
+        llvm::Module *M = CI->getModule();
+        // Get or insert the definition now.
+        std::vector<llvm::Type *> ParamTys;
+        for (ArgIt I = ArgBegin; I != ArgEnd; ++I)
+            ParamTys.push_back((*I)->getType());
+        auto FCache = M->getOrInsertFunction(NewFn, llvm::FunctionType::get(RetTy, ParamTys, false));
+
+        llvm::IRBuilder<> Builder(CI->getParent(), CI->getIterator());
+        llvm::SmallVector<llvm::Value *, 8> Args(ArgBegin, ArgEnd);
+        llvm::CallInst *NewCI = Builder.CreateCall(FCache, Args);
+        NewCI->setName(CI->getName());
+        if (!CI->use_empty())
+            CI->replaceAllUsesWith(NewCI);
+        return NewCI;
+    }
+
+    static void replace_fpintrinsic_with_call(llvm::CallInst *CI, const char *Fname,
+                                           const char *Dname,
+                                           const char *LDname) 
+    {
+        switch (CI->getArgOperand(0)->getType()->getTypeID()) {
+            default: llvm_unreachable("Invalid type in intrinsic");
+            case llvm::Type::FloatTyID:
+                replace_call_with(Fname, CI, CI->arg_begin(), CI->arg_end(),
+                                llvm::Type::getFloatTy(CI->getContext()));
+                break;
+            case llvm::Type::DoubleTyID:
+                replace_call_with(Dname, CI, CI->arg_begin(), CI->arg_end(),
+                                llvm::Type::getDoubleTy(CI->getContext()));
+                break;
+            case llvm::Type::X86_FP80TyID:
+            case llvm::Type::FP128TyID:
+            case llvm::Type::PPC_FP128TyID:
+                replace_call_with(LDname, CI, CI->arg_begin(), CI->arg_end(),
+                                CI->getArgOperand(0)->getType());
+                break;
+        }
+        CI->eraseFromParent();
+    }
+
+    bool preprocessor::lower_intrinsics( llvm::Function &fn )
+    {
+        bool change = false;
+
+        auto keep = [] (auto id) -> bool {
+            switch (id) {
+                case llvm::Intrinsic::eh_typeid_for:
+                case llvm::Intrinsic::trap:
+                case llvm::Intrinsic::vastart:
+                case llvm::Intrinsic::vacopy:
+                case llvm::Intrinsic::vaend:
+                case llvm::Intrinsic::stacksave:
+                case llvm::Intrinsic::stackrestore:
+                case llvm::Intrinsic::dbg_declare:
+                case llvm::Intrinsic::dbg_value:
+                case llvm::Intrinsic::lifetime_start:
+                case llvm::Intrinsic::lifetime_end:
+                    return true;
+            }
+            return false;
+        };
+
+        llvm::IntrinsicLowering il( module.getDataLayout() );
+
+        auto intrinsics =  sv::to_vector( sv::filter< llvm::IntrinsicInst >( fn ) );
+        for ( auto intr : intrinsics ) {
+            auto id = intr->getIntrinsicID();
+            if (keep(id)) continue;
+            switch (id) {
+                case llvm::Intrinsic::fabs:
+                    replace_fpintrinsic_with_call( intr, "fabs", "fabsf", "fabsl" );
+                    break;
+                default:
+                    il.LowerIntrinsicCall( intr );
+            }
+        }
+
         return change;
     }
 
