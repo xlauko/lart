@@ -285,7 +285,7 @@ namespace __lava
             );
         }
 
-        // static term fn_fabs( tr a ) {}
+        static term fn_fabs( tr a ) { return z3::abs( a.get() ); }
 
         static void dump( tr t )
         {
