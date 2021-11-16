@@ -45,9 +45,10 @@ extern "C" {
     uint16_t __lamp_any_i16(void);
     uint32_t __lamp_any_i32(void);
     uint64_t __lamp_any_i64(void);
-    float    __lamp_any_f32(void);
-    double   __lamp_any_f64(void);
     void*    __lamp_any_ptr(void);
+    
+    float    __lamp_any_float(void);
+    double   __lamp_any_double(void);
     
     uint8_t __lamp_any_i1_traced(const char *file, unsigned int line, const char *func)
     {
@@ -74,14 +75,14 @@ extern "C" {
         return TRACED( __lamp_any_i64 );
     }
     
-    float __lamp_any_f32_traced(const char *file, unsigned int line, const char *func)
+    float __lamp_any_float_traced(const char *file, unsigned int line, const char *func)
     {
-        return TRACED( __lamp_any_f32 );
+        return TRACED( __lamp_any_float );
     }
     
-    float __lamp_any_f64_traced(const char *file, unsigned int line, const char *func)
+    float __lamp_any_double_traced(const char *file, unsigned int line, const char *func)
     {
-        return TRACED( __lamp_any_f64 );
+        return TRACED( __lamp_any_double );
     }
     
     void* __lamp_any_ptr_traced(const char *file, unsigned int line, const char *func)
