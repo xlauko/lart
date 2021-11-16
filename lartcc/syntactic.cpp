@@ -67,7 +67,8 @@ namespace lart
     std::optional< operation > syntactic::make_operation( llvm::Value *val )
     {
         auto abstract_operand = [&] (auto inst, unsigned i) {
-            return is_abstract( types[inst->getOperand(i)] );
+            auto arg = inst->getOperand(i);
+            return types.count(arg) && is_abstract( types[arg] );
         };
 
         std::optional< operation > result;
@@ -196,8 +197,16 @@ namespace lart
 
         for ( auto &fn : module ) {
             if (function_has_abstract_arg(fn)) {
-                for (auto &arg : fn.args())
+                if (fn.empty()) {
+                    if ( !fn.getName().startswith("__lamp") ) {
+                        spdlog::warn("ignoring missing function {}", fn.getName());
+                    }
+                    continue;
+                }
+                
+                for (auto &arg : fn.args()) {
                     co_yield op::unstash(&arg, fn.getEntryBlock().getFirstNonPHIOrDbg() );
+                }
             }
         }
     }
