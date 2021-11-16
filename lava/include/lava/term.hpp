@@ -23,6 +23,7 @@
 
 #include <sys/mman.h>
 
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <type_traits>
