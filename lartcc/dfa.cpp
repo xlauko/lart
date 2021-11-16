@@ -95,7 +95,8 @@ namespace lart::dfa::detail
                 if ( abstract_function(fn) ) {
                     // if ( lart::tag::has( afn, tag::abstract ) )
                     //     use( call.getInstruction(), afn );
-                    llvm_unreachable( "abstraction of functions not supported yet" );
+                    /* TODO deal with different return values */
+                    forward_use( use.get(), use.getUser() );
                 } else {
                     assert( !fn->isVarArg() && "abstract varargs are not yet supported" );
                     // unify call argument and function argument abstraction
@@ -103,11 +104,12 @@ namespace lart::dfa::detail
                 }
             }
         };
-
         auto calluse = [&] (const llvm::Use &use) {
             auto call = llvm::cast< llvm::CallBase >( use.getUser() );
-            if ( use.get() == call->getCalledOperand() )
-                forward_use( use.get(), use.getUser() ); // use of function return value
+            auto callee = call->getCalledOperand();
+
+            if ( use.get() == callee )
+                forward_use( use.get(), call ); // use of function return value
             else
                 arguse( use );
         };
@@ -141,13 +143,6 @@ namespace lart::dfa::detail
             );
         };
 
-        /*auto in_abstractable_function = [] ( auto value ) -> bool {
-            if ( llvm::isa< llvm::GlobalValue >( value ) )
-                return false;
-            if ( llvm::isa< llvm::ConstantExpr >( value ) )
-                return false;
-            return abstract_function( sc::get_function( value ) );
-        };*/
 
         auto uses = [&] ( auto val ) {
             for ( auto p : aliases.pointsto( v ) ) {
