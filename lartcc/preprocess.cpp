@@ -340,10 +340,20 @@ namespace lart
         for ( auto intr : intrinsics ) {
             auto id = intr->getIntrinsicID();
             if (keep(id)) continue;
+            change = true;
             switch (id) {
                 case llvm::Intrinsic::fabs:
-                    replace_fpintrinsic_with_call( intr, "fabs", "fabsf", "fabsl" );
-                    break;
+                    replace_fpintrinsic_with_call( intr, "fabs", "fabsf", "fabsl" ); break;
+                case llvm::Intrinsic::maxnum:
+                    replace_fpintrinsic_with_call( intr, "fmaxf", "fmax", "fmaxl" ); break;
+                case llvm::Intrinsic::minnum:
+                    replace_fpintrinsic_with_call( intr, "fminf", "fmin", "fminl" ); break;
+                case llvm::Intrinsic::rint:
+                    replace_fpintrinsic_with_call( intr, "rintf", "rint", "rintl" ); break;
+                case llvm::Intrinsic::nearbyint:
+                    replace_fpintrinsic_with_call( intr, "nearbyintf", "nearbyint", "nearbyintl" ); break;
+                case llvm::Intrinsic::round:
+                    replace_fpintrinsic_with_call( intr, "roundf", "round", "roundl" ); break;
                 default:
                     il.LowerIntrinsicCall( intr );
             }
