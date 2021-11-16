@@ -56,6 +56,18 @@ namespace lart
             if ( lower_cmps( fn ) ) change = true;
             if ( lower_intrinsics( fn ) ) change = true;
         } while (change);
+
+        auto fptobv = [] ( auto i ) {
+            return i->getSrcTy()->isFloatingPointTy() && i->getDestTy()->isIntegerTy();
+        };
+
+        auto casts = sv::to_vector( sv::filter< llvm::BitCastInst >( fn ) );
+        for ( auto cast : casts | std::views::filter( fptobv ) ) {
+            auto irb = llvm::IRBuilder( cast );
+            auto fpcast = irb.CreateFPToUI( cast->getOperand(0), cast->getDestTy() );
+            cast->replaceAllUsesWith(fpcast);
+            cast->eraseFromParent();
+        }
     }
 
 
