@@ -125,6 +125,9 @@ namespace __lava
         static optag op_zfit  ( ref, bw ) { return tag::zfit; }
 
         static optag fn_fabs( ref ) { return tag::fabs; }
+        static optag fn_round( ref ) { return tag::round; }
+        static optag fn_rint( ref ) { return tag::rint; }
+        static optag fn_copysign( ref, ref ) { return tag::copysign; }
         static optag fn_fmax( ref, ref ) { return tag::fmax; }
         static optag fn_fmin( ref, ref ) { return tag::fmin; }
 

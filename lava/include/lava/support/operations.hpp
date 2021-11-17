@@ -51,7 +51,7 @@ namespace __lava::op
 
         malloc, realloc, dealloca, free,
 
-        fabs, fmin, fmax, rint
+        fabs, round, copysign, fmin, fmax, rint
     };
 
     std::string_view to_string(tag t)
@@ -146,6 +146,8 @@ namespace __lava::op
             case tag::free : return "free";
 
             case tag::fabs: return "fabs";
+            case tag::round: return "round";
+            case tag::copysign: return "copysign";
             case tag::fmax: return "fmax";
             case tag::fmin: return "fmin";
             case tag::rint: return "rint";
@@ -248,9 +250,11 @@ namespace __lava::op
     static constexpr auto to_tristate = []( const auto &a ) { return std::decay_t< decltype( a ) >::to_tristate; };
 
     static constexpr auto fabs = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fabs; };
+    static constexpr auto round = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_round; };
+    static constexpr auto rint = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_rint; };
+    static constexpr auto copysign = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_copysign; };
     static constexpr auto fmax = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fmax; };
     static constexpr auto fmin = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fmin; };
-    static constexpr auto rint = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_rint; };
 
     static constexpr auto strcmp = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_strcmp; };
     static constexpr auto strlen = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_strlen; };

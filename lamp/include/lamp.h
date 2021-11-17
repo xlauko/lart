@@ -177,6 +177,18 @@ __lamp_ptr __lamp_fn_fabs( __lamp_ptr a );
 double __lamp_lifter_fabs( double );
 float __lamp_lifter_fabsf( float );
 
+__lamp_ptr __lamp_fn_round( __lamp_ptr a );
+double __lamp_lifter_round( double );
+float __lamp_lifter_roundf( float );
+
+__lamp_ptr __lamp_fn_copysing( __lamp_ptr a, __lamp_ptr b );
+double __lamp_lifter_copysign( double, double );
+float __lamp_lifter_copysignf( float, float );
+
+__lamp_ptr __lamp_fn_rint( __lamp_ptr a );
+double __lamp_lifter_rint( double );
+float __lamp_lifter_rintf( float );
+
 void __lamp_store( __lamp_ptr a, __lamp_ptr b, __lamp_bw w );
 __lamp_ptr __lamp_load( __lamp_ptr a, __lamp_bw w );
 
@@ -331,6 +343,18 @@ void __lamp_stub()
     __lamp_fn_fabs( ptr );
     __lamp_lifter_fabs( 0.0 );
     __lamp_lifter_fabsf( 0.0f );
+
+    __lamp_fn_round( ptr );
+    __lamp_lifter_round( 0.0 );
+    __lamp_lifter_roundf( 0.0f );
+
+    __lamp_fn_rint( ptr );
+    __lamp_lifter_rint( 0.0 );
+    __lamp_lifter_rintf( 0.0f );
+
+    __lamp_fn_copysing( ptr, ptr );
+    __lamp_lifter_copysign( 0.0, 0.0 );
+    __lamp_lifter_copysignf( 0.0f, 0.0f );
 
     // __lamp_dealloca( __lamp_null, 0 );
 

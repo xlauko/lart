@@ -24,6 +24,7 @@
 #include <sys/mman.h>
 
 #include <cmath>
+#include <cfenv>
 #include <cstdio>
 #include <cstring>
 #include <type_traits>
@@ -167,6 +168,12 @@ namespace __lava
         }
 
         static tristate to_tristate( tr ) { return maybe; }
+
+        static z3::expr is_nan( tr a )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr( Z3_mk_fpa_is_nan( ctx, a.get() ) );
+        }
         
         /* arithmetic operations */
         static term op_add ( tr a, tr b ) { return a.get() + b.get(); }
@@ -203,12 +210,10 @@ namespace __lava
             auto &v = t.get();
             return z3::sext( v, b - v.get_sort().bv_size() ); 
         }
-        // static term op_sitofp( tr, bw ) { return {}; }
         static term op_trunc( tr t, bw b ) { 
             // TODO: check
             return t.get().extract( b - 1, 0 ); 
         }
-        // static term op_uitofp( tr, bw ) { return {}; }
         static term op_zext( tr t, bw b ) { 
             auto &v = t.get();
             return z3::zext( v, b - v.get_sort().bv_size() );
@@ -216,29 +221,43 @@ namespace __lava
         // static term op_zfit( tr t, bw ) { return {}; }
         
         // floats
-        static term op_fadd( tr a, tr b ) { return a.get() + b.get(); }
-        static term op_fsub( tr a, tr b ) { return a.get() - b.get(); }
-        static term op_fmul( tr a, tr b ) { return a.get() * b.get(); }
-        static term op_fdiv( tr a, tr b ) { return a.get() / b.get(); }
-        // static term op_frem( tr a, tr b ) { return { a, b, op::fp_rem }; }
+        static term op_fadd( tr a, tr b ) { return feupdateround(), a.get() + b.get(); }
+        static term op_fsub( tr a, tr b ) { return feupdateround(), a.get() - b.get(); }
+        static term op_fmul( tr a, tr b ) { return feupdateround(), a.get() * b.get(); }
+        static term op_fdiv( tr a, tr b ) { return feupdateround(), a.get() / b.get(); }
+        static term op_frem( tr a, tr b ) { return feupdateround(), make_expr( Z3_mk_fpa_rem( __term_state->ctx, a.get(), b.get() ) ); }
 
-        static term op_foeq( tr a, tr b ) { return make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); }
-        static term op_fogt( tr a, tr b ) { return a.get() > b.get(); }
-        static term op_foge( tr a, tr b ) { return make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
-        static term op_folt( tr a, tr b ) { return a.get() < b.get(); }
-        static term op_fole( tr a, tr b ) { return a.get() <= b.get(); }
-        static term op_fone( tr a, tr b ) { return a.get() != b.get(); }
-        // static term op_ford( tr a, tr b ) { return ; }
-        // static term op_funo( tr a, tr b ) { return ; }
-        static term op_fueq( tr a, tr b ) { return make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); }
-        static term op_fugt( tr a, tr b ) { return a.get() > b.get(); }
-        static term op_fuge( tr a, tr b ) { return make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
-        static term op_fult( tr a, tr b ) { return a.get() < b.get(); }
-        static term op_fule( tr a, tr b ) { return a.get() <= b.get(); }
-        static term op_fune( tr a, tr b ) { return a.get() != b.get(); }
+        static z3::expr unordered( tr a, tr b ) { return is_nan(a) || is_nan(b); }
+
+        static void feupdateround()
+        {
+            auto &ctx = __term_state->ctx;
+            switch (fegetround()) {
+                case FE_TONEAREST:  ctx.set_rounding_mode(z3::rounding_mode::RNA); break;
+                case FE_DOWNWARD:   ctx.set_rounding_mode(z3::rounding_mode::RTN); break;
+                case FE_UPWARD:     ctx.set_rounding_mode(z3::rounding_mode::RTP); break;
+                case FE_TOWARDZERO: ctx.set_rounding_mode(z3::rounding_mode::RTZ); break;
+            };
+        }
+
+        static term op_foeq( tr a, tr b ) { return feupdateround(), make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fogt( tr a, tr b ) { return feupdateround(), a.get() > b.get(); }
+        static term op_foge( tr a, tr b ) { return feupdateround(), make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_folt( tr a, tr b ) { return feupdateround(), a.get() < b.get(); }
+        static term op_fole( tr a, tr b ) { return feupdateround(), a.get() <= b.get(); }
+        static term op_fone( tr a, tr b ) { return feupdateround(), a.get() != b.get(); }
+        static term op_ford( tr a, tr b ) { return feupdateround(), !unordered(a, b); }
+        static term op_funo( tr a, tr b ) { return feupdateround(), unordered(a, b); }
+        static term op_fueq( tr a, tr b ) { return feupdateround(), unordered(a, b) || make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fugt( tr a, tr b ) { return feupdateround(), unordered(a, b) || (a.get() > b.get()); }
+        static term op_fuge( tr a, tr b ) { return feupdateround(), unordered(a, b) || make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fult( tr a, tr b ) { return feupdateround(), unordered(a, b) || (a.get() < b.get()); }
+        static term op_fule( tr a, tr b ) { return feupdateround(), unordered(a, b) || (a.get() <= b.get()); }
+        static term op_fune( tr a, tr b ) { return feupdateround(), unordered(a, b) || (a.get() != b.get()); }
 
         static term op_fptrunc( tr a, bw w )
         {
+            feupdateround();
             auto &ctx = __term_state->ctx;
             return make_expr(
                 Z3_mk_fpa_to_fp_float( ctx, ctx.fpa_rounding_mode(), a.get(), fpa_sort( w ) )
@@ -247,6 +266,7 @@ namespace __lava
 
         static term op_sitofp( tr a, bw w )
         {
+            feupdateround();
             auto &ctx = __term_state->ctx;
             return make_expr(
                 Z3_mk_fpa_to_fp_signed( ctx, ctx.fpa_rounding_mode(), a.get(), fpa_sort( w ) )
@@ -255,6 +275,7 @@ namespace __lava
         
         static term op_uitofp( tr a, bw w )
         {
+            feupdateround();
             auto &ctx = __term_state->ctx;
             return make_expr(
                 Z3_mk_fpa_to_fp_unsigned( ctx, ctx.fpa_rounding_mode(), a.get(), fpa_sort( w ) )
@@ -263,6 +284,7 @@ namespace __lava
         
         static term op_fpext( tr a, bw w )
         { 
+            feupdateround();
             auto &ctx = __term_state->ctx;
             return make_expr(
                 Z3_mk_fpa_to_fp_float( ctx, ctx.fpa_rounding_mode(), a.get(), fpa_sort( w ) )
@@ -271,6 +293,7 @@ namespace __lava
         
         static term op_fptosi( tr a, bw w ) 
         {
+            feupdateround();
             auto &ctx = __term_state->ctx;
             return make_expr(
                 Z3_mk_fpa_to_sbv( ctx, ctx.fpa_rounding_mode(), a.get(), w )
@@ -279,15 +302,51 @@ namespace __lava
         
         static term op_fptoui ( tr a, bw w )
         {
+            feupdateround();
             auto &ctx = __term_state->ctx;
             return make_expr(
                 Z3_mk_fpa_to_ubv( ctx, ctx.fpa_rounding_mode(), a.get(), w )
             );
         }
 
-        static term fn_fabs( tr a ) { return z3::abs( a.get() ); }
-        static term fn_fmax( tr a, tr b ) { return z3::max( a.get(), b.get() ); }
-        static term fn_fmin( tr a, tr b ) { return z3::min( a.get(), b.get() ); }
+        static term fn_fabs( tr a ) { return feupdateround(), z3::abs( a.get() ); }
+        static term fn_round( tr a )
+        {
+            feupdateround();
+            auto &ctx = __term_state->ctx;
+            return make_expr( 
+                Z3_mk_fpa_round_to_integral( ctx, Z3_mk_fpa_rna( ctx ), a.get() )
+            );
+        }
+
+        static term fn_rint( tr a )
+        {
+            feupdateround();
+            auto &ctx = __term_state->ctx;
+            return make_expr( 
+                Z3_mk_fpa_round_to_integral( ctx, ctx.fpa_rounding_mode(), a.get() )
+            );
+        }
+
+        static term fn_copysign( tr a, tr b )
+        {
+            feupdateround();
+            auto &ctx = __term_state->ctx;
+
+            auto sgn = Z3_fpa_get_numeral_sign_bv( ctx, b.get() );
+            
+            auto exp = Z3_fpa_get_numeral_exponent_bv( ctx, a.get(), false );
+            auto sig = Z3_fpa_get_numeral_significand_bv( ctx, a.get() );
+
+            return z3::ite(
+                is_nan(a) || is_nan(b),
+                a.get(),
+                make_expr( Z3_mk_fpa_fp( ctx, sgn, exp, sig ) )
+            );
+        }
+
+        static term fn_fmax( tr a, tr b ) { return feupdateround(), z3::max( a.get(), b.get() ); }
+        static term fn_fmin( tr a, tr b ) { return feupdateround(), z3::min( a.get(), b.get() ); }
 
         static void dump( tr t )
         {

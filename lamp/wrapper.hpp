@@ -291,6 +291,9 @@ extern "C"
     }
 
     __lamp_ptr __lamp_fn_fabs( __lamp_ptr a ) { return wrap( dom::fn_fabs, a );}
+    __lamp_ptr __lamp_fn_round( __lamp_ptr a ) { return wrap( dom::fn_round, a );}
+    __lamp_ptr __lamp_fn_rint( __lamp_ptr a ) { return wrap( dom::fn_rint, a );}
+    __lamp_ptr __lamp_fn_copysign( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::fn_copysign, a, b );}
 
     void __lamp_dump( void *twin )
     {
