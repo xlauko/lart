@@ -40,7 +40,7 @@ class compilation(object):
 
         # for backtrace
         cmd += ["-rdynamic"]
-        cmd += ["-Oz"]
+        # cmd += ["-Oz"]
         cmd += ["-o", self.res]
 
         return cmd
