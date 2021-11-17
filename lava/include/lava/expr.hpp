@@ -176,8 +176,6 @@ namespace __lava
         static ev op_fptosi ( er a, bw w ) { return cast( a->rpn, w, op::fp_tosbv ); }
         static ev op_fptoui ( er a, bw w ) { return cast( a->rpn, w, op::fp_toubv ); }
 
-        // static ev fn_fabs( er a ) {}
-
         static void dump( er ) { printf( "expr\n" ); }
         static std::string trace( er ) { return "expr"; }
         

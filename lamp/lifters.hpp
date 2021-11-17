@@ -16,10 +16,10 @@
 
 #include <cmath>
 #include <stdio.h>
+
 extern "C"
 {
-    __lamp_ptr __lamp_peek( void *addr );
-
+    // fabs
     double __lamp_lifter_fabs( double a )
     {
         if  ( __lart_test_taint( *reinterpret_cast< uint8_t* >( &a ) ) ) {
@@ -39,4 +39,22 @@ extern "C"
 
         return std::fabsf(a);
     }
+
+    // round
+
+    // sqrt - check __ieee754_sqrt
+    // log - check __ieee754_log
+    // log10 - check __ieee754_log10
+    
+    // asin - check __ieee754_asin
+
+    // rint    
+    // nearbyint
+
+    // sin
+    // cos
+    // floor
+    // ceil
+    // trunc
+    // copysign
 }

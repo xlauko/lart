@@ -120,6 +120,8 @@ namespace __lava
         static unit op_zfit( ur, bw ) { return {}; }
         
         static unit fn_fabs( ur ) { return {}; }
+        static unit fn_fmax( ur, ur ) { return {}; }
+        static unit fn_fmin( ur, ur ) { return {}; }
 
         static void dump( ur ) { printf( "unit\n" ); }
         static std::string trace( ur ) { return "unit"; }

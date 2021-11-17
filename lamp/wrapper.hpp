@@ -317,6 +317,7 @@ extern "C"
     }
 #endif
 
+#include "lifters.hpp"
 
 namespace lamp::detail
 {

@@ -125,6 +125,8 @@ namespace __lava
         static optag op_zfit  ( ref, bw ) { return tag::zfit; }
 
         static optag fn_fabs( ref ) { return tag::fabs; }
+        static optag fn_fmax( ref, ref ) { return tag::fmax; }
+        static optag fn_fmin( ref, ref ) { return tag::fmin; }
 
         static void dump( ref op ) { printf("%s\n", op::to_string(op->value).data()); }
         static std::string trace( ref op ) { return op::to_string(op->value); }

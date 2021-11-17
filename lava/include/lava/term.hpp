@@ -286,6 +286,8 @@ namespace __lava
         }
 
         static term fn_fabs( tr a ) { return z3::abs( a.get() ); }
+        static term fn_fmax( tr a, tr b ) { return z3::max( a.get(), b.get() ); }
+        static term fn_fmin( tr a, tr b ) { return z3::min( a.get(), b.get() ); }
 
         static void dump( tr t )
         {

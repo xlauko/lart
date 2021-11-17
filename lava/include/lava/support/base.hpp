@@ -234,6 +234,9 @@ namespace __lava
         static st op_fptoui ( sr, bw ) { return fail( "fptoui"  ); }
 
         static st fn_fabs( sr ) { return fail( "fabs"  ); }
+        static st fn_fmax( sr, sr ) { return fail( "fmax"  ); }
+        static st fn_fmin( sr, sr ) { return fail( "fmin"  ); }
+        static st fn_rint( sr ) { return fail( "rint"  ); }
 
         static st op_concat ( sr, sr ) { return fail( "concat" ); }
         static st op_extract( sr, bw, bw ) { return fail( "extract" ); }

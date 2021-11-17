@@ -60,7 +60,7 @@ namespace lart
                     if (concrete->getType() == fn.getType()) {
                         abstractable.emplace_back( &fn, concrete );
                     } else {
-                        spdlof::warn("mismatched type of abstractable function {}", suffix);
+                        spdlog::warn("mismatched type of abstractable function {}", suffix);
                     }
                 }
             }
@@ -113,8 +113,8 @@ namespace lart
         }
 
         spdlog::info("lartcc finished");
+        // module.getFunction("main")->print(llvm::errs());        
         verify(module);
-        
         return true;
     }
 
