@@ -1,6 +1,5 @@
 #include <lava/interval.hpp>
 #include <lamp/support/storage.hpp>
-#include <lava/support/relational.hpp>
 
 namespace __lamp
 {
