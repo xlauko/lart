@@ -67,7 +67,8 @@ namespace lart
         }
 
         for ( auto [abs, con] : abstractable ) {
-            for ( auto user : con->users() ) {
+            std::vector< llvm::User* > users( con->user_begin(), con->user_end() );
+            for ( auto user : users ) {
                 user->replaceUsesOfWith( con, abs );
             }
         }

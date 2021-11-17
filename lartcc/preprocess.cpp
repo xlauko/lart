@@ -324,6 +324,18 @@ namespace lart
         CI->eraseFromParent();
     }
 
+    static void replace_intrinsic_with_call(llvm::CallInst *call, const char *iname, const char *lname) 
+    {
+        auto ity = llvm::cast< llvm::IntegerType >( call->getArgOperand(0)->getType() );
+
+        switch (ity->getBitWidth()) {
+            default: llvm_unreachable("Invalid type in intrinsic");
+            case 32: replace_call_with(iname, call, call->arg_begin(), call->arg_end(), ity); break;
+            case 64: replace_call_with(lname, call, call->arg_begin(), call->arg_end(), ity); break;
+        }
+        call->eraseFromParent();
+    }
+
     bool preprocessor::lower_intrinsics( llvm::Function &fn )
     {
         bool change = false;
@@ -354,6 +366,8 @@ namespace lart
             if (keep(id)) continue;
             change = true;
             switch (id) {
+                case llvm::Intrinsic::abs:
+                    replace_intrinsic_with_call( intr, "abs", "labs" ); break;
                 case llvm::Intrinsic::fabs:
                     replace_fpintrinsic_with_call( intr, "fabsf", "fabs", "fabsl" ); break;
                 case llvm::Intrinsic::maxnum:
