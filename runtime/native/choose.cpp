@@ -27,10 +27,6 @@ namespace __lart::rt
 
     void check_terminate(int status = 0)
     {
-        if (status != 0) {
-            std::exit(status);
-        }
-
         if (config->error_found) {
             std::exit(EXIT_SUCCESS);
         }
