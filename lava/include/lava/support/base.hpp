@@ -233,12 +233,19 @@ namespace __lava
         static st op_fptosi ( sr, bw ) { return fail( "fptosi"  ); }
         static st op_fptoui ( sr, bw ) { return fail( "fptoui"  ); }
 
-        static st fn_fabs( sr ) { return fail( "fabs"  ); }
-        static st fn_round( sr ) { return fail( "fabs"  ); }
-        static st fn_rint( sr ) { return fail( "rint"  ); }
-        static st fn_copysign( sr, sr ) { return fail( "fabs"  ); }
-        static st fn_fmax( sr, sr ) { return fail( "fmax"  ); }
-        static st fn_fmin( sr, sr ) { return fail( "fmin"  ); }
+        static st fn_malloc( sr ) { return fail( "malloc" ); }
+        
+        static st fn_abs( sr )  { return fail( "abs" ); }
+        
+        static st fn_fabs( sr )  { return fail( "fabs" ); }
+        static st fn_round( sr ) { return fail( "round" ); }
+        static st fn_rint( sr )  { return fail( "rint" ); }
+        static st fn_ceil( sr )  { return fail( "ceil" ); }
+        static st fn_isnan( sr )  { return fail( "isnan" ); }
+        static st fn_isinf( sr )  { return fail( "isinf" ); }
+        static st fn_copysign( sr, sr ) { return fail( "copysign" ); }
+        static st fn_fmax( sr, sr ) { return fail( "fmax" ); }
+        static st fn_fmin( sr, sr ) { return fail( "fmin" ); }
 
         static st op_concat ( sr, sr ) { return fail( "concat" ); }
         static st op_extract( sr, bw, bw ) { return fail( "extract" ); }

@@ -173,6 +173,13 @@ __lamp_ptr __lamp_fpext  ( __lamp_ptr a, __lamp_bw  b );
 __lamp_ptr __lamp_fptosi ( __lamp_ptr a, __lamp_bw  b );
 __lamp_ptr __lamp_fptoui ( __lamp_ptr a, __lamp_bw  b );
 
+__lamp_ptr __lamp_fn_malloc( __lamp_ptr size );
+void* __lamp_lifter_malloc( unsigned size );
+
+__lamp_ptr __lamp_fn_abs( __lamp_ptr a );
+int __lamp_lifter_abs( int, bool );
+long __lamp_lifter_labs( long, bool );
+
 __lamp_ptr __lamp_fn_fabs( __lamp_ptr a );
 double __lamp_lifter_fabs( double );
 float __lamp_lifter_fabsf( float );
@@ -188,6 +195,18 @@ float __lamp_lifter_copysignf( float, float );
 __lamp_ptr __lamp_fn_rint( __lamp_ptr a );
 double __lamp_lifter_rint( double );
 float __lamp_lifter_rintf( float );
+
+__lamp_ptr __lamp_fn_ceil( __lamp_ptr a );
+double __lamp_lifter_ceil( double );
+float __lamp_lifter_ceilf( float );
+
+__lamp_ptr __lamp_fn_isnan( __lamp_ptr a );
+int __lamp_lifter_isnan( double );
+int __lamp_lifter_isnanf( float );
+
+__lamp_ptr __lamp_fn_isinf( __lamp_ptr a );
+int __lamp_lifter_isinf( double );
+int __lamp_lifter_isinff( float );
 
 void __lamp_store( __lamp_ptr a, __lamp_ptr b, __lamp_bw w );
 __lamp_ptr __lamp_load( __lamp_ptr a, __lamp_bw w );
@@ -340,6 +359,13 @@ void __lamp_stub()
     __lamp_assume( ptr, 0 );
     __lamp_extract( ptr, 0, 0 );
 
+    __lamp_fn_malloc( ptr );
+    __lamp_lifter_malloc( 0 );
+    
+    __lamp_fn_abs( ptr );
+    __lamp_lifter_abs( 0, false );
+    __lamp_lifter_labs( 0l, false );
+
     __lamp_fn_fabs( ptr );
     __lamp_lifter_fabs( 0.0 );
     __lamp_lifter_fabsf( 0.0f );
@@ -355,6 +381,18 @@ void __lamp_stub()
     __lamp_fn_copysing( ptr, ptr );
     __lamp_lifter_copysign( 0.0, 0.0 );
     __lamp_lifter_copysignf( 0.0f, 0.0f );
+
+    __lamp_fn_ceil( ptr );
+    __lamp_lifter_ceil( 0.0 );
+    __lamp_lifter_ceilf( 0.0f );
+
+    __lamp_fn_isnan( ptr );
+    __lamp_lifter_isnan( 0.0 );
+    __lamp_lifter_isnanf( 0.0f );
+
+    __lamp_fn_isinf( ptr );
+    __lamp_lifter_isinf( 0.0 );
+    __lamp_lifter_isinff( 0.0f );
 
     // __lamp_dealloca( __lamp_null, 0 );
 

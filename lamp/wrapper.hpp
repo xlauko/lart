@@ -290,11 +290,20 @@ extern "C"
         return { ref( p.ptr ).clone().disown() };
     }
 
-    __lamp_ptr __lamp_fn_fabs( __lamp_ptr a ) { return wrap( dom::fn_fabs, a );}
-    __lamp_ptr __lamp_fn_round( __lamp_ptr a ) { return wrap( dom::fn_round, a );}
-    __lamp_ptr __lamp_fn_rint( __lamp_ptr a ) { return wrap( dom::fn_rint, a );}
-    __lamp_ptr __lamp_fn_copysign( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::fn_copysign, a, b );}
+    __lamp_ptr __lamp_fn_malloc( __lamp_ptr size ) { return wrap( dom::fn_malloc, size ); }
 
+    __lamp_ptr __lamp_fn_abs( __lamp_ptr a ) { return wrap( dom::fn_abs, a ); }
+    
+    __lamp_ptr __lamp_fn_fabs( __lamp_ptr a ) { return wrap( dom::fn_fabs, a ); }
+    __lamp_ptr __lamp_fn_round( __lamp_ptr a ) { return wrap( dom::fn_round, a ); }
+    __lamp_ptr __lamp_fn_rint( __lamp_ptr a ) { return wrap( dom::fn_rint, a ); }
+    __lamp_ptr __lamp_fn_copysign( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::fn_copysign, a, b ); }
+    
+    __lamp_ptr __lamp_fn_ceil( __lamp_ptr a ) { return wrap( dom::fn_ceil, a ); }
+
+    __lamp_ptr __lamp_fn_isnan( __lamp_ptr a ) { return wrap( dom::fn_isnan, a ); }
+    __lamp_ptr __lamp_fn_isinf( __lamp_ptr a ) { return wrap( dom::fn_isinf, a ); }
+    
     void __lamp_dump( void *twin )
     {
         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {

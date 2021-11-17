@@ -124,9 +124,18 @@ namespace __lava
         static optag op_zext  ( ref, bw ) { return tag::zext; }
         static optag op_zfit  ( ref, bw ) { return tag::zfit; }
 
+        static optag fn_malloc( ref ) { return tag::malloc; }
+        
+        static optag fn_abs( ref ) { return tag::abs; }
+        
         static optag fn_fabs( ref ) { return tag::fabs; }
         static optag fn_round( ref ) { return tag::round; }
         static optag fn_rint( ref ) { return tag::rint; }
+        static optag fn_ceil( ref ) { return tag::ceil; }
+    
+        static optag fn_isnan( ref ) { return tag::isnan; }
+        static optag fn_isinf( ref ) { return tag::isinf; }
+    
         static optag fn_copysign( ref, ref ) { return tag::copysign; }
         static optag fn_fmax( ref, ref ) { return tag::fmax; }
         static optag fn_fmin( ref, ref ) { return tag::fmin; }

@@ -174,7 +174,41 @@ namespace __lava
             auto &ctx = __term_state->ctx;
             return make_expr( Z3_mk_fpa_is_nan( ctx, a.get() ) );
         }
+
+        static z3::expr is_inf( tr a )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr( Z3_mk_fpa_is_infinite( ctx, a.get() ) );
+        }
         
+        static z3::expr is_negative( tr a )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr( Z3_mk_fpa_is_negative( ctx, a.get() ) );
+        }
+
+        static z3::expr toi1( const z3::expr &e )
+        {
+            auto &ctx = __term_state->ctx;
+            return z3::ite( e, ctx.bv_val( 1, 1 ), ctx.bv_val( 0, 1 ) );
+        }
+
+        static z3::expr fptoui( tr a, bw w )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr(
+                Z3_mk_fpa_to_ubv( ctx, ctx.fpa_rounding_mode(), a.get(), w )
+            );
+        }
+        
+        static z3::expr fptosi( tr a, bw w )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr(
+                Z3_mk_fpa_to_sbv( ctx, ctx.fpa_rounding_mode(), a.get(), w )
+            );
+        }
+
         /* arithmetic operations */
         static term op_add ( tr a, tr b ) { return a.get() + b.get(); }
         static term op_sub ( tr a, tr b ) { return a.get() - b.get(); }
@@ -295,20 +329,30 @@ namespace __lava
         {
             feupdateround();
             auto &ctx = __term_state->ctx;
-            return make_expr(
-                Z3_mk_fpa_to_sbv( ctx, ctx.fpa_rounding_mode(), a.get(), w )
-            );
+            return fptosi(a, w);
         }
         
         static term op_fptoui ( tr a, bw w )
         {
             feupdateround();
             auto &ctx = __term_state->ctx;
-            return make_expr(
-                Z3_mk_fpa_to_ubv( ctx, ctx.fpa_rounding_mode(), a.get(), w )
-            );
+            return fptoui(a, w);
         }
+        
+        // static term fn_malloc( tr size )
+        // {
 
+        //     return feupdateround(), z3::abs( a.get() ); 
+        // }
+
+        static term fn_abs( tr a )
+        {
+            auto sort = a.get().get_sort();
+            auto zero = __term_state->ctx.bv_val( 0, sort.bv_size() );
+            auto res = z3::ite( a.get() >= zero, a.get(), -a.get() );
+            return res;
+        }
+        
         static term fn_fabs( tr a ) { return feupdateround(), z3::abs( a.get() ); }
         static term fn_round( tr a )
         {
@@ -343,6 +387,28 @@ namespace __lava
                 a.get(),
                 make_expr( Z3_mk_fpa_fp( ctx, sgn, exp, sig ) )
             );
+        }
+  
+        static term fn_ceil( tr a )
+        {
+            feupdateround();
+            auto &ctx = __term_state->ctx;
+            auto sort = a.get().get_sort();
+            bw w = sort.fpa_ebits() + sort.fpa_sbits();
+            return z3::ite(is_negative(a), fptosi(a, w), fptoui(a, w));
+        }
+        
+        static term fn_isnan( tr a )
+        {
+            feupdateround();
+            return z3::zext( toi1( is_nan(a) ), 31 );
+        }
+
+        static term fn_isinf( tr a ) 
+        {
+            feupdateround();
+            auto &ctx = __term_state->ctx;
+            return z3::zext( toi1( is_inf(a) ), 31 );
         }
 
         static term fn_fmax( tr a, tr b ) { return feupdateround(), z3::max( a.get(), b.get() ); }
@@ -389,7 +455,7 @@ namespace __lava
         for (unsigned i = 0; i < model.size(); i++) {
             const auto &v = model[i];
             auto interp = model.get_const_interp(v);
-            stream << "[term model] " << v.name() << " = " << Z3_ast_to_string( __term_state->ctx, interp ) << '\n';
+            stream << "[term model] " << v.name() << " = " << Z3_get_numeral_string( __term_state->ctx, interp ) << '\n';
         }
     }
 
@@ -415,7 +481,7 @@ namespace __lava
 
     [[gnu::destructor]] void term_cleanup()
     {
-        if ( __term_cfg->trace_model ) {
+        if ( __term_cfg->trace_model && __lart::rt::config->error_found ) {
             trace_model();
             // do not trace model multiple times
             __term_cfg->trace_model = false;

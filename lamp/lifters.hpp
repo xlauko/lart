@@ -15,6 +15,7 @@
  */
 
 #include <cmath>
+#include <cstdlib>
 #include <stdio.h>
 
 namespace lart
@@ -46,6 +47,40 @@ namespace lart
 
 extern "C"
 {
+    // malloc
+
+    void* __lamp_lifter_malloc( size_t size )
+    {
+        if  ( lart::tainted(&size) ) {
+            lart::stash( __lamp_fn_malloc( lart::arg() ) );
+            void *value = 0;
+            __lart_set_taint( &value, sizeof( value ) );
+            return value;
+        }
+        return std::malloc( size );
+    }
+    
+    // abs
+    int __lamp_lifter_abs( int a, bool /* poison */ )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_abs( lart::arg() ) );
+            return a;
+        }
+
+        return std::abs(a);
+    }
+
+    long __lamp_lifter_labs( long a, bool /* poison */ )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_abs( lart::arg() ) );
+            return a;
+        }
+
+        return std::labs(a);
+    }
+
     // fabs
     double __lamp_lifter_fabs( double a )
     {
@@ -130,6 +165,69 @@ extern "C"
         return std::rintf(a);
     }
 
+    double __lamp_lifter_ceil( double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_ceil( lart::arg() ) );
+            return a;
+        }
+
+        return std::ceil(a);
+    }
+
+    float __lamp_lifter_ceilf( float a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_ceil( lart::arg() ) );
+            return a;
+        }
+
+        return std::ceilf(a);
+    }
+
+    // isnan
+    int __lamp_lifter_isnan( double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isnan( lart::arg() ) );
+            return a;
+        }
+
+        return std::isnan(a);
+    }
+
+    int __lamp_lifter_isnanf( float a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isnan( lart::arg() ) );
+            return a;
+        }
+
+        return std::isnan(a);
+    }
+
+    // isinf
+    int __lamp_lifter_isinf( double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isinf( lart::arg() ) );
+            return a;
+        }
+
+        return std::isinf(a);
+    }
+
+    int __lamp_lifter_isinff( float a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isinf( lart::arg() ) );
+            return a;
+        }
+
+        return std::isinf(a);
+    }
+
+    // __lamp_lifter_uaddl_overflow
     // sqrt - check __ieee754_sqrt
     // log - check __ieee754_log
     // log10 - check __ieee754_log10

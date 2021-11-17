@@ -51,7 +51,10 @@ namespace __lava::op
 
         malloc, realloc, dealloca, free,
 
-        fabs, round, copysign, fmin, fmax, rint
+        abs,
+
+        fabs, round, copysign, fmin, fmax, rint,
+        ceil, isinf, isnan
     };
 
     std::string_view to_string(tag t)
@@ -144,9 +147,14 @@ namespace __lava::op
             
             case tag::dealloca: return "dealloca";
             case tag::free : return "free";
+            
+            case tag::abs: return "abs";
 
             case tag::fabs: return "fabs";
             case tag::round: return "round";
+            case tag::ceil: return "ceil";
+            case tag::isinf: return "isinf";
+            case tag::isnan: return "isnan";
             case tag::copysign: return "copysign";
             case tag::fmax: return "fmax";
             case tag::fmin: return "fmin";
@@ -248,10 +256,15 @@ namespace __lava::op
 
     static constexpr auto assume = []( const auto &a ) { return std::decay_t< decltype( a ) >::assume; };
     static constexpr auto to_tristate = []( const auto &a ) { return std::decay_t< decltype( a ) >::to_tristate; };
-
+    
+    static constexpr auto abs = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_abs; };
+    
     static constexpr auto fabs = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fabs; };
     static constexpr auto round = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_round; };
     static constexpr auto rint = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_rint; };
+    static constexpr auto ceil = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_ceil; };
+    static constexpr auto isnan = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_isnan; };
+    static constexpr auto isinf = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_isinf; };
     static constexpr auto copysign = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_copysign; };
     static constexpr auto fmax = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fmax; };
     static constexpr auto fmin = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fmin; };

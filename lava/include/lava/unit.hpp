@@ -119,9 +119,16 @@ namespace __lava
         static unit op_zext( ur, bw ) { return {}; }
         static unit op_zfit( ur, bw ) { return {}; }
         
+        static unit fn_malloc( ur ) { return {}; }
+        
+        static unit fn_abs( ur ) { return {}; }
+        
         static unit fn_fabs( ur ) { return {}; }
         static unit fn_round( ur ) { return {}; }
         static unit fn_rint( ur ) { return {}; }
+        static unit fn_ceil( ur ) { return {}; }
+        static unit fn_isnan( ur ) { return {}; }
+        static unit fn_isinf( ur ) { return {}; }
         static unit fn_copysign( ur, ur ) { return {}; }
         static unit fn_fmax( ur, ur ) { return {}; }
         static unit fn_fmin( ur, ur ) { return {}; }

@@ -186,6 +186,8 @@ namespace __lava
                 
                 case op::tag::dealloca: mixin::fail("unsupported dealloca bop");
                 case op::tag::free: mixin::fail("unsupported free bop");
+                
+                case op::tag::abs: mixin::fail("unsupported abs bop");
 
                 case op::tag::fabs: mixin::fail("unsupported fabs bop");
                 case op::tag::round: mixin::fail("unsupported round bop");
@@ -193,6 +195,9 @@ namespace __lava
                 case op::tag::fmax: mixin::fail("unsupported fmax bop");
                 case op::tag::fmin: mixin::fail("unsupported fmin bop");
                 case op::tag::rint: mixin::fail("unsupported rint bop");
+                case op::tag::ceil: mixin::fail("unsupported ceil bop");
+                case op::tag::isinf: mixin::fail("unsupported isinf bop");
+                case op::tag::isnan: mixin::fail("unsupported isnan bop");
             }
 
             for (const auto &ch : a.underlying()->children) {
