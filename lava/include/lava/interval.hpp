@@ -8,8 +8,6 @@
 
 #include <lamp/support/semilattice.hpp>
 
-#include <sstream>
-
 namespace __lava
 {
     using bound_t = sup::bound< int64_t >;
@@ -357,14 +355,14 @@ namespace __lava
 
         static void beq( ir r, ref a, ref b, bool negated = false )
         {
-            if ( r.get() == tristate( !negated ) ) beq_impl( a, b );
-            if ( r.get() == tristate(  negated ) ) bne_impl( a, b );
+            if ( r.get() == !negated ) beq_impl( a, b );
+            if ( r.get() ==  negated ) bne_impl( a, b );
         }
 
         static void bgt( ir r, ref a, ref b, bool negated = false )
         {
-            if ( r.get() == tristate( !negated ) ) bgt_( a, b );
-            if ( r.get() == tristate( negated ) ) bgt_( b, a, false /* non-strict */ );
+            if ( r.get() == !negated ) bgt_( a, b );
+            if ( r.get() ==  negated ) bgt_( b, a, false /* non-strict */ );
         }
 
         static void bop_eq( ir r, ir a, ir b ) { beq( r, a, b ); }
@@ -387,20 +385,74 @@ namespace __lava
 
         static void dump( ir i )
         {
-            printf( "%s\n", trace(i).c_str() );
+            printf( "[" );
+            if ( i->low == minus_infinity() )
+                printf( "-∞" );
+            else if ( i->low == plus_infinity() )
+                printf( "∞" );
+            else
+                printf( "%ld", static_cast<long>(i->low) );
+
+            printf( " ," );
+
+            if ( i->high == minus_infinity() )
+                printf( "-∞" );
+            else if ( i->high == plus_infinity() )
+                printf( "∞" );
+            else
+                printf( "%ld", static_cast<long>(i->high) );
+
+            printf( " ] \n" );
         }
 
         static std::string trace( ir i )
         {
+            /*
             std::stringstream ss;
-            ss << '[' << i->low << ", " << i->high << ']';
+            ss << "[";
+            if ( i->low == minus_infinity() )
+                ss << "-∞";
+            else if ( i->low == plus_infinity() )
+                ss << "∞";
+            else
+                ss << i->low;
+
+            ss << " ,";
+
+            if ( i->high() == minus_infinity() )
+                 ss << "-∞";
+            else if ( i->high() == plus_infinity() )
+                 ss << "∞";
+            else
+                 ss << i->high();
+
             return ss.str();
+            */
+            return "N/A";
         }
 
         template< typename stream >
         friend stream& operator<<( stream &os, ir i )
         {
-            return os << trace(i);
+            os << "[";
+            if ( i->low == minus_infinity() )
+                os << "-∞";
+            else if ( i->low == plus_infinity() )
+                os << "∞";
+            else
+                os << i->low;
+
+            os << " ,";
+
+            if ( i->high == minus_infinity() )
+                 os << "-∞";
+            else if ( i->high == plus_infinity() )
+                 os << "∞";
+            else
+                 os << i->high;
+
+            os << " ] \n";
+            return os;
         }
     };
 }
