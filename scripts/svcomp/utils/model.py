@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import ctypes
+from codecs import decode
+import struct
 from . log import logger
 
 class ModelVar:
@@ -43,11 +45,21 @@ class Model:
         name = line.lstrip("[lamp any]").strip()
         parsed = name.split(":")
         return parsed
-
+    
     def parse_term_var(self, line):
         line = line.lstrip("[term model]")
         parts = line.split(" = ")
-        return parts[0].strip(), parts[1].strip()
+        value = parts[1].strip()
+        if "NaN" in value:
+            value = "nan"
+        elif "-oo" in value:
+            value = "-inf" 
+        elif "+oo" in value:
+            value = "inf"
+        elif "fp" in value:
+            # TODO
+            value = "0.0" 
+        return parts[0].strip(), value
 
     def parse_value(self, nondet, parsed):
         if "pointer" in nondet:
