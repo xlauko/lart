@@ -96,6 +96,12 @@ def argument_parser():
                         help="lamp domain",
                         dest="lamp",
                         default="term")
+    parser.add_argument('--cause', '-c',
+                        help="print cause of result",
+                        action="store_const",
+                        dest="print_cause",
+                        const=True,
+                        default=False)
     parser.add_argument('--no-correctness-witness',
                         help="do not generate correctness witness",
                         action="store_const",
@@ -144,6 +150,7 @@ def parse_config() -> config:
     log.info(f"lamp: {lamp}")
 
     cfg = config(lartcc, benchmark, properties, strings, architecture, lamp, workdir)
+    cfg.print_cause = opts.print_cause
 
     report = opts.report
     if report:
@@ -161,7 +168,14 @@ def verify(cfg):
     log = logger()
     log.info(f"run verification")
     analysis = runner(cfg)
-    result = analysis.run()
+
+    abstracted = analysis.compile()
+
+    if not abstracted:
+        result = analysis.empty_result()
+    else:
+        result = analysis.run(abstracted)
+
     if cfg.witness and result.can_generate_witness():
         result.generate_witness(cfg.workdir)
     result.dump()
