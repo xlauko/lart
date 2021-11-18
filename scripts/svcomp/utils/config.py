@@ -42,6 +42,8 @@ class config:
         
         # compiler options
         self.libm       : bool = False
+
+        self.print_cause : bool = False
         
         # file offset for line debug info
         self.file_offset = 0

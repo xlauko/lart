@@ -53,6 +53,27 @@ class result(Enum):
             error("unknown result type")
 
 
+class result_cause(Enum):
+    compilation_failed = 'compilation failed'
+    bound_reached = 'bound reached'
+    unknown_fault = 'unknown fault'
+    unsupported  = 'unsupported instruction'
+    enviroment_error = 'environment error'
+    missing_report = 'missing report'
+    dataflow_error = 'dataflow error'
+    none = 'none'
+
+    def __str__(self):
+        return self.value
+
+    @staticmethod
+    def from_string(s):
+        try:
+            return result[s]
+        except KeyError:
+            error("unknown cause type")
+
+
 class result_class(Enum):
     """
     clasification of results
@@ -104,7 +125,15 @@ class analysis_result:
         self.cfg = cfg
         self.model = Model()
 
-        self.verification_result = self.process_report(report) if report else result.unknown
+        if report:
+            res, cause, msg =  self.process_report(report)
+            self.verification_result = res
+            self.cause = cause
+            self.cause_msg = msg
+        else:
+            self.verification_result = result.unknown
+            self.cause = result_cause.missing_report
+            self.cause_msg = ""
 
         if not self.valid_result():
             logger().info(f"invalid result: {self.verification_result}")
@@ -127,32 +156,36 @@ class analysis_result:
                 return True
         return False
 
-    def ignore_result(self, line):
-        return False
-
     def process_lines(self, report):
         bounded, fatal, unsupported, unknown, verified = False, False, False, False, False
+        cause = result_cause.none
+        msg = ""
         for line in report:
             logger().info(f"report line: {line}")
-            if self.ignore_result(line):
-                return result.unknown
             if line.startswith("[lart fault]"):
                 if "reach_error" in line:
-                    return result.false_reach
+                    return result.false_reach, cause.none, msg
                 unknown = True
+                cause = result_cause.unknown_fault
+                msg = line
             if line.startswith("[lart status]"):
                 if "bounded exit" in line:
                     bounded = True
+                    cause = result_cause.bound_reached
+                    msg = line
                 if "verified" in line:
                     verified = True
             if line.startswith("[lamp fail]"):
                 if "unsupported" in line:
                     unsupported = True
+                    cause = result_cause.unsupported
+                    msg = line
             if "FATAL: DataFlowSanitizer" in line:
                 fatal = True
+                cause = result_cause.dataflow_error
         if bounded or fatal or unsupported or unknown or not verified:
-            return result.unknown
-        return result.true
+            return result.unknown, cause, msg
+        return result.true, cause, msg
 
     def process_report(self, report_path):
         logger().info(f"processing report: {report_path}")
@@ -161,7 +194,7 @@ class analysis_result:
             with open(report_path, "r") as report:
                 return self.process_lines(report)
         except EnvironmentError:
-            return result.unknown
+            return result.unknown, result_cause.enviroment_error, ""
 
     # def parse_backtrace(self, report_path):
     #     logger().info(f"parsing backtrace: {report_path}")
@@ -205,4 +238,8 @@ class analysis_result:
 
     def dump(self):
         result = get_result_class(self.verification_result)
-        print(f"result: {result}")
+        if result is result_class.unknown and self.cfg.print_cause:
+            print(f"result: {result} : {self.cause} : {self.cause_msg}")
+        else:
+            print(f"result: {result}")
+

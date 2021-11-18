@@ -13,7 +13,7 @@ from typing import List
 
 from . log import logger
 from . config import config
-from . result import analysis_result, get_result_class, result_class
+from . result import analysis_result, get_result_class, result_class, result_cause
 
 
 class approximation(Enum):
@@ -132,7 +132,7 @@ class runner(object):
         if "__VERIFIER_nondet" in line:
             if "extern" in line or "=" not in line:
                 return "\n"
-        
+
         line.replace("__isnanl", "isnan")
         line.replace("__isinfl", "isinfl")
 
@@ -144,13 +144,7 @@ class runner(object):
         
         return line
 
-    def run(self):
-        os.environ['DFSAN_OPTIONS'] = 'warn_unimplemented=0'
-        os.environ['LART_ERROR_BACKTRACE'] = 'OFF'
-        os.environ['TERM_TRACE_MODEL'] = 'ON'
-        
-        os.environ['LART_CHOOSE_BOUND'] = '100'
-        
+    def compile(self):
         self.preprocess()
 
         cc = compilation(self.cfg, self.preprocesed)
@@ -164,15 +158,35 @@ class runner(object):
             print("error:")
             with open(ccerr, 'r') as err:
                 print(err.read())
-            return analysis_result(None, self.cfg)
+            return None
+        return abstracted
 
-        # FIXME: if error empty
 
+    def empty_result(self):
+        return analysis_result(None, self.cfg)
+
+
+    def run_to_depth(self, abstracted, bound):
+        os.environ['DFSAN_OPTIONS'] = 'warn_unimplemented=0'
+        os.environ['LART_ERROR_BACKTRACE'] = 'OFF'
+        os.environ['TERM_TRACE_MODEL'] = 'ON'
+        
+        os.environ['LART_CHOOSE_BOUND'] = f"{bound}"
+        
         ver = verifier(self.cfg, abstracted)
         vout, verr, status = ver.run()
-
-        # if status:
-        #     return analysis_result(None, self.cfg) 
-
-        # TODO: check return code of
         return analysis_result(verr, self.cfg)
+
+
+    def run(self, abstracted):
+        bound = 10
+        cause = result_cause.bound_reached
+
+        result = None
+        while cause is result_cause.bound_reached:
+            result = self.run_to_depth(abstracted, bound)
+            cause = result.cause
+            bound += 50
+        return result
+
+
