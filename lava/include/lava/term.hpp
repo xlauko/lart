@@ -274,7 +274,9 @@ namespace __lava
             };
         }
 
-        static term op_foeq( tr a, tr b ) { return feupdateround(), make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_foeq( tr a, tr b ) {
+            return feupdateround(), make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); 
+        }
         static term op_fogt( tr a, tr b ) { return feupdateround(), a.get() > b.get(); }
         static term op_foge( tr a, tr b ) { return feupdateround(), make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
         static term op_folt( tr a, tr b ) { return feupdateround(), a.get() < b.get(); }
@@ -391,11 +393,10 @@ namespace __lava
   
         static term fn_ceil( tr a )
         {
-            feupdateround();
             auto &ctx = __term_state->ctx;
-            auto sort = a.get().get_sort();
-            bw w = sort.fpa_ebits() + sort.fpa_sbits();
-            return z3::ite(is_negative(a), fptosi(a, w), fptoui(a, w));
+            return make_expr( 
+                Z3_mk_fpa_round_to_integral( ctx, Z3_mk_fpa_round_toward_positive(ctx), a.get() )
+            ); 
         }
         
         static term fn_isnan( tr a )
