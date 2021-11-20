@@ -28,7 +28,7 @@ if [ -z $domain ]; then
      exit 1
 fi
 
-if [[ "term" == *${domain}* ]]; then
+if [[ ${domain} == *"term"* ]]; then
      LINK_SOLVER="-lz3"
 fi
 
