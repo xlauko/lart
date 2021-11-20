@@ -24,6 +24,7 @@
 #include <svf/Graphs/PAG.h>
 #include <svf/WPA/Andersen.h>
 
+
 #include <sc/generator.hpp>
 
 namespace lart::aa
@@ -40,12 +41,19 @@ namespace lart::aa
             return pta->getPAG()->getValueNode(value);
         }
 
+        inline bool has_node( const llvm::Value *value )
+        {
+            return pta->getPAG()->hasValueNode(value);
+        }
+
         inline sc::generator< llvm::Value * > pointsto( llvm::Value *value )
         {
-            for (auto pts : pta->getPts( node( value ) ) ) {
-                auto target = pta->getPAG()->getPAGNode(pts);
-                if ( target->hasValue() )
-                    co_yield const_cast< llvm::Value * >( target->getValue() );
+            if ( has_node(value) ) {
+                for (auto pts : pta->getPts( node( value ) ) ) {
+                    auto target = pta->getPAG()->getPAGNode(pts);
+                    if ( target->hasValue() )
+                        co_yield const_cast< llvm::Value * >( target->getValue() );
+                }
             }
         }
 
