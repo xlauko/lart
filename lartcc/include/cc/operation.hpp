@@ -163,6 +163,24 @@ namespace lart::op
         }
     };
 
+    struct unary : with_taints_base
+    {
+        std::string name() const
+        {
+            auto un = llvm::cast< llvm::UnaryOperator >( _what );
+            return std::string( un->getOpcodeName() );
+        }
+        std::string impl() const { return "__lamp_" + name(); }
+
+        args_t arguments() const
+        {
+            auto un = llvm::cast< llvm::UnaryOperator >( _what );
+            return {
+                { un->getOperand( 0 ), argtype::lift },
+            };
+        }
+    };
+
     struct binary : with_taints_base
     {
         std::string name() const
@@ -379,7 +397,7 @@ namespace lart::op
 
     using operation = std::variant<
         melt, freeze,
-        binary, cast, cmp,
+        unary, binary, cast, cmp,
         tobool, assume,
         alloc, store, load,
         stash, unstash, identity, phi >;

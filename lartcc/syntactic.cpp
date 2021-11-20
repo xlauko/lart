@@ -97,6 +97,10 @@ namespace lart
                     result = op::freeze{ val };
                 }
             },
+            [&] ( llvm::UnaryOperator *un ) {
+                if ( abstract_operand( un, 0 ) )
+                    result = op::unary{ val };
+            },
             [&] ( llvm::BinaryOperator *bin ) {
                 if ( abstract_operand( bin, 0 ) || abstract_operand( bin, 1 ) )
                     result = op::binary{ val };

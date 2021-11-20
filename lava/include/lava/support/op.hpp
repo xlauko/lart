@@ -136,8 +136,10 @@ namespace __lava
     
         static optag fn_isnan( ref ) { return tag::isnan; }
         static optag fn_isinf( ref ) { return tag::isinf; }
+        static optag fn_isfinite( ref ) { return tag::isfinite; }
     
         static optag fn_copysign( ref, ref ) { return tag::copysign; }
+        static optag fn_fmod( ref, ref ) { return tag::fmod; }
         static optag fn_fmax( ref, ref ) { return tag::fmax; }
         static optag fn_fmin( ref, ref ) { return tag::fmin; }
 

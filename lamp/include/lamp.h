@@ -112,6 +112,8 @@ __lamp_ptr __lamp_melt( void *addr, __lamp_bw bytes );
 __lamp_ptr __lamp_join( __lamp_ptr a, __lamp_ptr b );
 __lamp_ptr __lamp_meet( __lamp_ptr a, __lamp_ptr b );
 
+__lamp_ptr __lamp_fneg ( __lamp_ptr a );
+
 __lamp_ptr __lamp_add ( __lamp_ptr a, __lamp_ptr b );
 __lamp_ptr __lamp_sub ( __lamp_ptr a, __lamp_ptr b );
 __lamp_ptr __lamp_mul ( __lamp_ptr a, __lamp_ptr b );
@@ -192,6 +194,10 @@ __lamp_ptr __lamp_fn_copysing( __lamp_ptr a, __lamp_ptr b );
 double __lamp_lifter_copysign( double, double );
 float __lamp_lifter_copysignf( float, float );
 
+__lamp_ptr __lamp_fn_fmod( __lamp_ptr a, __lamp_ptr b );
+double __lamp_lifter_fmod( double, double );
+float __lamp_lifter_fmodf( float, float );
+
 __lamp_ptr __lamp_fn_rint( __lamp_ptr a );
 double __lamp_lifter_rint( double );
 float __lamp_lifter_rintf( float );
@@ -207,10 +213,20 @@ float __lamp_lifter_truncf( float );
 __lamp_ptr __lamp_fn_isnan( __lamp_ptr a );
 int __lamp_lifter_isnan( double );
 int __lamp_lifter_isnanf( float );
+int __lamp_lifter_isnanl( long double );
 
 __lamp_ptr __lamp_fn_isinf( __lamp_ptr a );
 int __lamp_lifter_isinf( double );
 int __lamp_lifter_isinff( float );
+int __lamp_lifter_isinfl( long double );
+
+__lamp_ptr __lamp_fn_isfinite( __lamp_ptr a );
+int __lamp_lifter_finite( double );
+int __lamp_lifter_finitef( float );
+int __lamp_lifter_finitel( long double );
+int __lamp_lifter_isfinite( double );
+int __lamp_lifter_isfinitef( float );
+int __lamp_lifter_isfinitel( long double );
 
 void __lamp_store( __lamp_ptr a, __lamp_ptr b, __lamp_bw w );
 __lamp_ptr __lamp_load( __lamp_ptr a, __lamp_bw w );
@@ -292,6 +308,8 @@ void __lamp_stub()
 
     __lamp_join( ptr, ptr );
     __lamp_meet( ptr, ptr );
+
+    __lamp_fneg( ptr );
 
     __lamp_add ( ptr, ptr );
     __lamp_sub ( ptr, ptr );
@@ -386,6 +404,10 @@ void __lamp_stub()
     __lamp_lifter_copysign( 0.0, 0.0 );
     __lamp_lifter_copysignf( 0.0f, 0.0f );
 
+    __lamp_fn_fmod( ptr, ptr );
+    __lamp_lifter_fmod( 0.0, 0.0 );
+    __lamp_lifter_fmodf( 0.0f, 0.0f );
+
     __lamp_fn_ceil( ptr );
     __lamp_lifter_ceil( 0.0 );
     __lamp_lifter_ceilf( 0.0f );
@@ -397,10 +419,20 @@ void __lamp_stub()
     __lamp_fn_isnan( ptr );
     __lamp_lifter_isnan( 0.0 );
     __lamp_lifter_isnanf( 0.0f );
+    __lamp_lifter_isnanl( 0.0 );
 
     __lamp_fn_isinf( ptr );
     __lamp_lifter_isinf( 0.0 );
     __lamp_lifter_isinff( 0.0f );
+    __lamp_lifter_isinfl( 0.0 );
+
+    __lamp_fn_isfinite( ptr );
+    __lamp_lifter_finite( 0.0 );
+    __lamp_lifter_finitef( 0.0f );
+    __lamp_lifter_finitel( 0.0 );
+    __lamp_lifter_isfinite( 0.0 );
+    __lamp_lifter_isfinitef( 0.0f );
+    __lamp_lifter_isfinitel( 0.0 );
 
     // __lamp_dealloca( __lamp_null, 0 );
 

@@ -199,6 +199,7 @@ namespace __lava
                 case op::tag::fntrunc: mixin::fail("unsupported fntrunc bop");
                 case op::tag::isinf: mixin::fail("unsupported isinf bop");
                 case op::tag::isnan: mixin::fail("unsupported isnan bop");
+                case op::tag::isfinite: mixin::fail("unsupported isfinite bop");
             }
 
             for (const auto &ch : a.underlying()->children) {
@@ -211,6 +212,8 @@ namespace __lava
         {
             return base::to_tristate( a );
         }
+
+        static self op_fneg ( sref a ) { return base::op_fneg( a ); }
 
         /* arithmetic operations */
         static self op_add ( sref a, sref b ) { return base::op_add( a, b ); }

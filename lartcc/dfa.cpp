@@ -174,6 +174,7 @@ namespace lart::dfa::detail
             [&] ( llvm::AllocaInst * )        { push( unif_edge( lhs, rhs ) ); },
             [&] ( llvm::CmpInst * )           { push( unif_edge( lhs, rhs ) ); },
             [&] ( llvm::BinaryOperator * )    { push( unif_edge( lhs, rhs ) ); },
+            [&] ( llvm::UnaryOperator * )     { push( unif_edge( lhs, rhs ) ); },
             [&] ( llvm::GetElementPtrInst * ) { push( unif_edge( lhs, rhs ) ); },
             [&] ( llvm::PHINode * )           { push( unif_edge( lhs, rhs ) ); },
             [&] ( llvm::CastInst * )          { push( unif_edge( lhs, rhs ) ); },

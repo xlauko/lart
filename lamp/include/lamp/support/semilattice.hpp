@@ -283,6 +283,8 @@ namespace __lamp
         static self op_join( sref a, sref b ) { return op( wrap( op::join ), a, b ); }
         static self op_meet( sref a, sref b ) { return op( wrap( op::meet ), a, b ); }
 
+        static self op_fneg( sref a ) { return op( wrap( op::fneg ), a ); }
+
         static self op_add( sref a, sref b ) { return op( wrap( op::add ), a, b ); }
         static self op_sub( sref a, sref b ) { return op( wrap( op::sub ), a, b ); }
         static self op_mul( sref a, sref b ) { return op( wrap( op::mul ), a, b ); }

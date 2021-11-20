@@ -194,6 +194,8 @@ extern "C"
 
     __lamp_ptr __lamp_join( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::op_join, a, b ); }
     __lamp_ptr __lamp_meet( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::op_meet, a, b ); }
+    
+    __lamp_ptr __lamp_fneg ( __lamp_ptr a ) { return wrap( dom::op_fneg, a ); }
 
     __lamp_ptr __lamp_add ( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::op_add, a, b ); }
     __lamp_ptr __lamp_sub ( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::op_sub, a, b ); }
@@ -298,12 +300,14 @@ extern "C"
     __lamp_ptr __lamp_fn_round( __lamp_ptr a ) { return wrap( dom::fn_round, a ); }
     __lamp_ptr __lamp_fn_rint( __lamp_ptr a ) { return wrap( dom::fn_rint, a ); }
     __lamp_ptr __lamp_fn_copysign( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::fn_copysign, a, b ); }
+    __lamp_ptr __lamp_fn_fmod( __lamp_ptr a, __lamp_ptr b ) { return wrap( dom::fn_fmod, a, b ); }
     
     __lamp_ptr __lamp_fn_ceil( __lamp_ptr a )  { return wrap( dom::fn_ceil, a ); }
     __lamp_ptr __lamp_fn_trunc( __lamp_ptr a ) { return wrap( dom::fn_trunc, a ); }
 
     __lamp_ptr __lamp_fn_isnan( __lamp_ptr a ) { return wrap( dom::fn_isnan, a ); }
     __lamp_ptr __lamp_fn_isinf( __lamp_ptr a ) { return wrap( dom::fn_isinf, a ); }
+    __lamp_ptr __lamp_fn_isfinite( __lamp_ptr a ) { return wrap( dom::fn_isfinite, a ); }
     
     void __lamp_dump( void *twin )
     {

@@ -53,8 +53,8 @@ namespace __lava::op
 
         abs,
 
-        fabs, round, copysign, fmin, fmax, rint,
-        ceil, isinf, isnan, fntrunc
+        fabs, round, copysign, fmin, fmax, rint, fmod,
+        ceil, isinf, isnan, isfinite, fntrunc
     };
 
     std::string_view to_string(tag t)
@@ -154,9 +154,11 @@ namespace __lava::op
             case tag::round: return "round";
             case tag::ceil: return "ceil";
             case tag::fntrunc: return "fntrunc";
-            case tag::isinf: return "isinf";
             case tag::isnan: return "isnan";
+            case tag::isinf: return "isinf";
+            case tag::isfinite: return "isfinite";
             case tag::copysign: return "copysign";
+            case tag::fmod: return "fmod";
             case tag::fmax: return "fmax";
             case tag::fmin: return "fmin";
             case tag::rint: return "rint";
@@ -174,6 +176,8 @@ namespace __lava::op
 
     static constexpr auto join = []( const auto &a ) { return std::decay_t< decltype( a ) >::op_join; };
     static constexpr auto meet = []( const auto &a ) { return std::decay_t< decltype( a ) >::op_meet; };
+
+    static constexpr auto fneg = []( const auto &a ) { return std::decay_t< decltype( a ) >::op_fneg; };
 
     static constexpr auto add = []( const auto &a ) { return std::decay_t< decltype( a ) >::op_add; };
     static constexpr auto sub = []( const auto &a ) { return std::decay_t< decltype( a ) >::op_sub; };
@@ -267,7 +271,9 @@ namespace __lava::op
     static constexpr auto fntrunc = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_trunc; };
     static constexpr auto isnan = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_isnan; };
     static constexpr auto isinf = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_isinf; };
+    static constexpr auto isfinite = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_isfinite; };
     static constexpr auto copysign = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_copysign; };
+    static constexpr auto fmod = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fmod; };
     static constexpr auto fmax = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fmax; };
     static constexpr auto fmin = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_fmin; };
 

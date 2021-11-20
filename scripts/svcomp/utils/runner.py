@@ -133,15 +133,12 @@ class runner(object):
             if "extern" in line or "=" not in line:
                 return "\n"
 
-        line.replace("__isnanl", "isnan")
-        line.replace("__isinfl", "isinfl")
-
-        line.replace("__isinf", "isinf")
-        line.replace("__isnan", "isnan")
+        line = line.replace("__isinf", "isinf")
+        line = line.replace("__isnan", "isnan")
+        line = line.replace("__finite", "finite")
 
         # line.replace("__builtin_uaddl_overflow", "__lamp_lifter_uaddl_overflow"):
         # line.replace("__builtin_umull_overflow", "__lamp_lifter_umull_overflow"):
-        
         return line
 
     def compile(self):

@@ -144,6 +144,28 @@ extern "C"
         return std::copysignf(a, b);
     }
 
+    // fmod
+    double __lamp_lifter_fmod( double a, double b )
+    {
+        if  ( lart::tainted(&a) || lart::tainted(&b) ) {
+            lart::stash( __lamp_fn_fmod( lart::arg_wrap(a), lart::arg_wrap(b) ) );
+            return a;
+        }
+
+        return std::fmod(a, b);
+    }
+
+    float __lamp_lifter_fmodf( float a, float b )
+    {
+        if  ( lart::tainted(&a) || lart::tainted(&b) ) {
+            lart::stash( __lamp_fn_fmod( lart::arg_wrap(a), lart::arg_wrap(b) ) );
+            return a;
+        }
+
+        return std::fmodf(a, b);
+    }
+
+
     // rint
     double __lamp_lifter_rint( double a )
     {
@@ -228,6 +250,17 @@ extern "C"
         return std::isnan(a);
     }
 
+    int __lamp_lifter_isnanl( long double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isnan( lart::arg() ) );
+            return a;
+        }
+
+        return std::isnan(a);
+    }
+
+
     // isinf
     int __lamp_lifter_isinf( double a )
     {
@@ -249,20 +282,75 @@ extern "C"
         return std::isinf(a);
     }
 
-    // __lamp_lifter_uaddl_overflow
-    // sqrt - check __ieee754_sqrt
-    // log - check __ieee754_log
-    // log10 - check __ieee754_log10
+    int __lamp_lifter_isinfl( long double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isinf( lart::arg() ) );
+            return a;
+        }
+
+        return std::isinf(a);
+    }
     
-    // asin - check __ieee754_asin
+    // isfinite
+    int __lamp_lifter_finite( double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isfinite( lart::arg() ) );
+            return a;
+        }
 
-    // rint    
-    // nearbyint
+        return std::isfinite(a);
+    }
 
-    // sin
-    // cos
-    // floor
-    // ceil
-    // trunc
-    // copysign
+    int __lamp_lifter_finitef( float a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isfinite( lart::arg() ) );
+            return a;
+        }
+
+        return std::isfinite(a);
+    }
+
+    int __lamp_lifter_finitel( long double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isfinite( lart::arg() ) );
+            return a;
+        }
+
+        return std::isfinite(a);
+    }
+
+    int __lamp_lifter_isfinite( double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isfinite( lart::arg() ) );
+            return a;
+        }
+
+        return std::isfinite(a);
+    }
+
+    int __lamp_lifter_isfinitef( float a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isfinite( lart::arg() ) );
+            return a;
+        }
+
+        return std::isfinite(a);
+    }
+
+    int __lamp_lifter_isfinitel( long double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_isfinite( lart::arg() ) );
+            return a;
+        }
+
+        return std::isfinite(a);
+    }
+
 }

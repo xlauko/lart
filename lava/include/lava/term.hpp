@@ -180,6 +180,11 @@ namespace __lava
             auto &ctx = __term_state->ctx;
             return make_expr( Z3_mk_fpa_is_infinite( ctx, a.get() ) );
         }
+
+        static z3::expr is_finite( tr a )
+        {
+            return !is_inf(a);
+        }
         
         static z3::expr is_negative( tr a )
         {
@@ -208,6 +213,8 @@ namespace __lava
                 Z3_mk_fpa_to_sbv( ctx, ctx.fpa_rounding_mode(), a.get(), w )
             );
         }
+
+        static term op_fneg( tr a ) { return -a.get(); }
 
         /* arithmetic operations */
         static term op_add ( tr a, tr b ) { return a.get() + b.get(); }
@@ -267,7 +274,7 @@ namespace __lava
         {
             auto &ctx = __term_state->ctx;
             switch (fegetround()) {
-                case FE_TONEAREST:  ctx.set_rounding_mode(z3::rounding_mode::RNA); break;
+                case FE_TONEAREST:  ctx.set_rounding_mode(z3::rounding_mode::RNE); break;
                 case FE_DOWNWARD:   ctx.set_rounding_mode(z3::rounding_mode::RTN); break;
                 case FE_UPWARD:     ctx.set_rounding_mode(z3::rounding_mode::RTP); break;
                 case FE_TOWARDZERO: ctx.set_rounding_mode(z3::rounding_mode::RTZ); break;
@@ -390,6 +397,11 @@ namespace __lava
                 make_expr( Z3_mk_fpa_fp( ctx, sgn, exp, sig ) )
             );
         }
+
+        static term fn_fmod( tr a, tr b )
+        {
+            return feupdateround(), z3::mod( a.get(), b.get() );
+        }
   
         static term fn_ceil( tr a )
         {
@@ -418,6 +430,12 @@ namespace __lava
             feupdateround();
             auto &ctx = __term_state->ctx;
             return z3::zext( toi1( is_inf(a) ), 31 );
+        }
+
+        static term fn_isfinite( tr a )
+        {
+            feupdateround();
+            return z3::zext( toi1( is_finite(a) ), 31 );
         }
 
         static term fn_fmax( tr a, tr b ) { return feupdateround(), z3::max( a.get(), b.get() ); }

@@ -171,6 +171,8 @@ namespace __lava
 
         static st op_not ( sr ) { return fail( "not" ); }
         static st op_neg ( sr ) { return fail( "neg" ); }
+        
+        static st op_fneg ( sr ) { return fail( "fneg" ); }
 
         static st op_add ( sr, sr ) { return fail( "add" ); }
         static st op_sub ( sr, sr ) { return fail( "sub" ); }
@@ -244,7 +246,9 @@ namespace __lava
         static st fn_trunc( sr )  { return fail( "fntrunc" ); }
         static st fn_isnan( sr )  { return fail( "isnan" ); }
         static st fn_isinf( sr )  { return fail( "isinf" ); }
+        static st fn_isfinite( sr )  { return fail( "isfinite" ); }
         static st fn_copysign( sr, sr ) { return fail( "copysign" ); }
+        static st fn_fmod( sr, sr ) { return fail( "fmod" ); }
         static st fn_fmax( sr, sr ) { return fail( "fmax" ); }
         static st fn_fmin( sr, sr ) { return fail( "fmin" ); }
 
@@ -268,6 +272,7 @@ namespace __lava
         // backward operations
         static void bop_not ( sr, sr ) { report( "not" ); }
         static void bop_neg ( sr, sr ) { report( "neg" ); }
+        static void bop_fneg ( sr, sr ) { report( "fneg" ); }
 
         static void bop_add ( sr, sr, sr ) { report( "add" ); }
         static void bop_sub ( sr, sr, sr ) { report( "sub" ); }
