@@ -27,8 +27,9 @@ class Model:
                 nondet_calls.append(self.parse_nondet_call(line))    
             if line.startswith("[term model]"):
                 name, value = self.parse_term_var(line)
-                index = self.parse_index(name) - 1
-                model[index] = value
+                if name.startswith("var"):
+                    index = self.parse_index(name) - 1
+                    model[index] = value
 
         for idx, call in enumerate(nondet_calls):
             value = self.parse_value(call[0], model.get(idx, "0"))
