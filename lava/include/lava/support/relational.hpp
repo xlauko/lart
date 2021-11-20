@@ -190,6 +190,7 @@ namespace __lava
                 case op::tag::abs: mixin::fail("unsupported abs bop");
 
                 case op::tag::fabs: mixin::fail("unsupported fabs bop");
+                case op::tag::fmod: mixin::fail("unsupported fmod bop");
                 case op::tag::round: mixin::fail("unsupported round bop");
                 case op::tag::copysign: mixin::fail("unsupported copysign bop");
                 case op::tag::fmax: mixin::fail("unsupported fmax bop");
