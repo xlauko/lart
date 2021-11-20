@@ -28,15 +28,9 @@ extern "C" {
 
 typedef struct { void *ptr; } __lamp_ptr;
 
-#ifndef __cplusplus
-#define bool        _Bool
-#define true        1
-#define false       0
-#endif
-
 #define __lamp_null 0
 
-#define __lamp_bool bool
+#define __lamp_bool _Bool
 
 typedef unsigned char      __lamp_i8;
 typedef unsigned short     __lamp_i16;
@@ -179,8 +173,8 @@ __lamp_ptr __lamp_fn_malloc( __lamp_ptr size );
 void* __lamp_lifter_malloc( unsigned size );
 
 __lamp_ptr __lamp_fn_abs( __lamp_ptr a );
-int __lamp_lifter_abs( int, bool );
-long __lamp_lifter_labs( long, bool );
+int __lamp_lifter_abs( int, __lamp_bool );
+long __lamp_lifter_labs( long, __lamp_bool );
 
 __lamp_ptr __lamp_fn_fabs( __lamp_ptr a );
 double __lamp_lifter_fabs( double );
@@ -385,8 +379,8 @@ void __lamp_stub()
     __lamp_lifter_malloc( 0 );
     
     __lamp_fn_abs( ptr );
-    __lamp_lifter_abs( 0, false );
-    __lamp_lifter_labs( 0l, false );
+    __lamp_lifter_abs( 0, 0 );
+    __lamp_lifter_labs( 0l, 0 );
 
     __lamp_fn_fabs( ptr );
     __lamp_lifter_fabs( 0.0 );
