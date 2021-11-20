@@ -32,8 +32,8 @@ class compilation(object):
 
     def get_instance(self):
         cc = os.path.abspath(self.cfg.lartcc)
-
-        cmd = [cc, self.cfg.lamp, self.preprocesed]
+        lamp = self.cfg.lamp if self.cfg.symbolic else "concrete"
+        cmd = [cc, lamp, self.preprocesed]
         # TODO: usupported by dataflow sanitizer
         # if self.cfg.architecture == 32:
         #     cmd.append("-m32")
@@ -85,12 +85,16 @@ class runner(object):
 
     def preprocess(self):
         with open(self.preprocesed, "w") as out, open(self.cfg.benchmark, "r") as bench:
-            out.write("#include <svcomp.h>\n")
-            self.cfg.file_offset += 1
-            for line in bench:
+            lines = bench.readlines()
+            for line in lines:
+                self.update_config(line)
+            if self.cfg.symbolic:
+                out.write("#include <svcomp.h>\n")
+                self.cfg.file_offset += 1
+            for line in lines:
                 out.write(self.preprocess_line(line))
 
-    def preprocess_line(self, line):
+    def update_config(self, line):
         def match_nondet():
             return "__VERIFIER_nondet_" in line
 
@@ -108,36 +112,26 @@ class runner(object):
         def match_pthread() -> bool:
             return "pthread_" in line
 
-        # def match_globals() -> bool:
-        #     extern = re.compile("extern[^(]*;")
-        #     return extern.match(line) is not None
-
-        def match_libm() -> bool:
-            return '<math.h>' in line
-
         self.cfg.symbolic |= match_nondet()
 
-        self.cfg.libm |= match_libm()
-
-        if self.cfg.symbolic:
-            self.cfg.floats |= match_nondet_float()
-            self.cfg.pointer |= match_pointer()
-
         self.cfg.sequential &= not match_pthread()
+            
+        self.cfg.floats |= match_nondet_float()
+        self.cfg.pointer |= match_pointer()
 
-        # if match_globals():
-        #     assert False, "unimplemented"
 
-        # remove extern __VERIFIER_nondet lines
-        if "__VERIFIER_nondet" in line:
-            if "extern" in line:
-                return "\n"
-            if all(key not in line for key in ["if", "switch", "return", "="]):
-                return "\n"
+    def preprocess_line(self, line):
+        if self.cfg.symbolic:
+            # remove extern __VERIFIER_nondet lines
+            if "__VERIFIER_nondet" in line:
+                if "extern" in line:
+                    return "\n"
+                if all(key not in line for key in ["if", "switch", "return", "="]):
+                    return "\n"
 
-        line = line.replace("__isinf", "isinf")
-        line = line.replace("__isnan", "isnan")
-        line = line.replace("__finite", "finite")
+            line = line.replace("__isinf", "isinf")
+            line = line.replace("__isnan", "isnan")
+            line = line.replace("__finite", "finite")
 
         # line.replace("__builtin_uaddl_overflow", "__lamp_lifter_uaddl_overflow"):
         # line.replace("__builtin_umull_overflow", "__lamp_lifter_umull_overflow"):
