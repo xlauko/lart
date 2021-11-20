@@ -36,6 +36,9 @@ extern "C" {
     #define __VERIFIER_nondet_char() \
         __lamp_any_i8_traced(__FILE__, __LINE__, "__VERIFIER_nondet_char")
     
+    #define __VERIFIER_nondet_unsigned_char() \
+        __lamp_any_i8_traced(__FILE__, __LINE__, "__VERIFIER_nondet_unsigned_char")
+    
     #define __VERIFIER_nondet_uchar() \
         __lamp_any_i8_traced(__FILE__, __LINE__, "__VERIFIER_nondet_uchar")
     
