@@ -241,6 +241,7 @@ namespace __lava
         static st fn_round( sr ) { return fail( "round" ); }
         static st fn_rint( sr )  { return fail( "rint" ); }
         static st fn_ceil( sr )  { return fail( "ceil" ); }
+        static st fn_trunc( sr )  { return fail( "fntrunc" ); }
         static st fn_isnan( sr )  { return fail( "isnan" ); }
         static st fn_isinf( sr )  { return fail( "isinf" ); }
         static st fn_copysign( sr, sr ) { return fail( "copysign" ); }

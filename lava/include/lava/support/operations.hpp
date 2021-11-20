@@ -54,7 +54,7 @@ namespace __lava::op
         abs,
 
         fabs, round, copysign, fmin, fmax, rint,
-        ceil, isinf, isnan
+        ceil, isinf, isnan, fntrunc
     };
 
     std::string_view to_string(tag t)
@@ -153,6 +153,7 @@ namespace __lava::op
             case tag::fabs: return "fabs";
             case tag::round: return "round";
             case tag::ceil: return "ceil";
+            case tag::fntrunc: return "fntrunc";
             case tag::isinf: return "isinf";
             case tag::isnan: return "isnan";
             case tag::copysign: return "copysign";
@@ -263,6 +264,7 @@ namespace __lava::op
     static constexpr auto round = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_round; };
     static constexpr auto rint = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_rint; };
     static constexpr auto ceil = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_ceil; };
+    static constexpr auto fntrunc = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_trunc; };
     static constexpr auto isnan = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_isnan; };
     static constexpr auto isinf = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_isinf; };
     static constexpr auto copysign = []( const auto &a ) { return std::decay_t< decltype( a ) >::fn_copysign; };

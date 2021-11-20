@@ -128,10 +128,11 @@ namespace __lava
         
         static optag fn_abs( ref ) { return tag::abs; }
         
-        static optag fn_fabs( ref ) { return tag::fabs; }
+        static optag fn_fabs( ref )  { return tag::fabs; }
         static optag fn_round( ref ) { return tag::round; }
-        static optag fn_rint( ref ) { return tag::rint; }
-        static optag fn_ceil( ref ) { return tag::ceil; }
+        static optag fn_rint( ref )  { return tag::rint; }
+        static optag fn_ceil( ref )  { return tag::ceil; }
+        static optag fn_trunc( ref ) { return tag::fntrunc; }
     
         static optag fn_isnan( ref ) { return tag::isnan; }
         static optag fn_isinf( ref ) { return tag::isinf; }

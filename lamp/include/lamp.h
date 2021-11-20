@@ -200,6 +200,10 @@ __lamp_ptr __lamp_fn_ceil( __lamp_ptr a );
 double __lamp_lifter_ceil( double );
 float __lamp_lifter_ceilf( float );
 
+__lamp_ptr __lamp_fn_trunc( __lamp_ptr a );
+double __lamp_lifter_trunc( double );
+float __lamp_lifter_truncf( float );
+
 __lamp_ptr __lamp_fn_isnan( __lamp_ptr a );
 int __lamp_lifter_isnan( double );
 int __lamp_lifter_isnanf( float );
@@ -385,6 +389,10 @@ void __lamp_stub()
     __lamp_fn_ceil( ptr );
     __lamp_lifter_ceil( 0.0 );
     __lamp_lifter_ceilf( 0.0f );
+
+    __lamp_fn_trunc( ptr );
+    __lamp_lifter_trunc( 0.0 );
+    __lamp_lifter_truncf( 0.0f );
 
     __lamp_fn_isnan( ptr );
     __lamp_lifter_isnan( 0.0 );

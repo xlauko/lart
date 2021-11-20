@@ -399,6 +399,14 @@ namespace __lava
             ); 
         }
         
+        static term fn_trunc( tr a )
+        {
+            auto &ctx = __term_state->ctx;
+            return make_expr( 
+                Z3_mk_fpa_round_to_integral( ctx, Z3_mk_fpa_round_toward_zero(ctx), a.get() )
+            ); 
+        }
+        
         static term fn_isnan( tr a )
         {
             feupdateround();

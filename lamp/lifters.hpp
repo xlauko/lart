@@ -165,6 +165,7 @@ extern "C"
         return std::rintf(a);
     }
 
+    // ceil
     double __lamp_lifter_ceil( double a )
     {
         if  ( lart::tainted(&a) ) {
@@ -183,6 +184,27 @@ extern "C"
         }
 
         return std::ceilf(a);
+    }
+    
+    // trunc
+    double __lamp_lifter_trunc( double a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_trunc( lart::arg() ) );
+            return a;
+        }
+
+        return std::trunc(a);
+    }
+
+    float __lamp_lifter_truncf( float a )
+    {
+        if  ( lart::tainted(&a) ) {
+            lart::stash( __lamp_fn_trunc( lart::arg() ) );
+            return a;
+        }
+
+        return std::truncf(a);
     }
 
     // isnan

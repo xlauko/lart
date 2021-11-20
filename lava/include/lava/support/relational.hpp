@@ -196,6 +196,7 @@ namespace __lava
                 case op::tag::fmin: mixin::fail("unsupported fmin bop");
                 case op::tag::rint: mixin::fail("unsupported rint bop");
                 case op::tag::ceil: mixin::fail("unsupported ceil bop");
+                case op::tag::fntrunc: mixin::fail("unsupported fntrunc bop");
                 case op::tag::isinf: mixin::fail("unsupported isinf bop");
                 case op::tag::isnan: mixin::fail("unsupported isnan bop");
             }

@@ -127,6 +127,7 @@ namespace __lava
         static unit fn_round( ur ) { return {}; }
         static unit fn_rint( ur ) { return {}; }
         static unit fn_ceil( ur ) { return {}; }
+        static unit fn_trunc( ur ) { return {}; }
         static unit fn_isnan( ur ) { return {}; }
         static unit fn_isinf( ur ) { return {}; }
         static unit fn_copysign( ur, ur ) { return {}; }
