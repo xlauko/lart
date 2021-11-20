@@ -18,6 +18,7 @@
 
 #include <string_view>
 #include <array>
+#include <cstdio>
 
 namespace __lart::rt
 {

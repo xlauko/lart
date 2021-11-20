@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <cstdio>
+
 namespace __lart::rt
 {   
     struct file_stream

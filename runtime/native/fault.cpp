@@ -24,6 +24,7 @@
 
 #include <csignal>
 #include <cstdio>
+#include <algorithm>
 
 #include "utils.hpp"
 

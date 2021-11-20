@@ -17,6 +17,8 @@
 #pragma once
 
 #include <string_view>
+#include <unistd.h>
+#include <cstdio>
 
 namespace __lart::rt
 {
