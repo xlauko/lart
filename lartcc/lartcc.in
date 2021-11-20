@@ -11,6 +11,7 @@ SCRIPT=`realpath $0`
 SCRIPTPATH=`dirname $SCRIPT`
 
 RUNTIME="${SCRIPTPATH}/../lib/libnative.a"
+CONCRETE_RUNTIME="${SCRIPTPATH}/../lib/libnative-concrete.a"
 DOMAIN="${SCRIPTPATH}/../lib/lib$domain.a"
 PASS="${SCRIPTPATH}/../lib/liblartcc.so"
 LIBCXX="${LIBCXX_DATAFLOW_DIR}"
@@ -32,14 +33,23 @@ if [[ ${domain} == *"term"* ]]; then
      LINK_SOLVER="-lz3"
 fi
 
-exec @CLANG_BINARY@                             \
-     -Xclang -load -Xclang "$PASS"              \
-     -fsanitize=dataflow                        \
-     ${CFLAGS}                                  \
-     ${LINK_SOLVER}                             \
-     ${@:2}                                     \
-     ${LDFLAGS}                                 \
-     ${RUNTIME}                                 \
-     ${DOMAIN}                                  \
-     -I${LART_INTERFACE}                        \
-     -Qunused-arguments
+if [[ ${domain} == "concrete" ]]; then
+     exec @CLANG_BINARY@                             \
+          ${CFLAGS}                                  \
+          ${@:2}                                     \
+          ${LDFLAGS}                                 \
+          ${CONCRETE_RUNTIME}                        \
+          -Qunused-arguments
+else
+     exec @CLANG_BINARY@                             \
+          -Xclang -load -Xclang "$PASS"              \
+          -fsanitize=dataflow                        \
+          ${CFLAGS}                                  \
+          ${LINK_SOLVER}                             \
+          ${@:2}                                     \
+          ${LDFLAGS}                                 \
+          ${RUNTIME}                                 \
+          ${DOMAIN}                                  \
+          -I${LART_INTERFACE}                        \
+          -Qunused-arguments
+fi
