@@ -33,7 +33,7 @@ namespace lart::dfa::detail
 {
     bool ignore_function( llvm::Function *fn )
     {
-        if ( fn->getName().startswith( "__lamp" ) )
+        if ( fn->hasName() && fn->getName().startswith( "__lamp" ) )
             return true;
         return false;
     }
@@ -41,10 +41,13 @@ namespace lart::dfa::detail
     // returns lamp version of a function if it exists
     llvm::Function * abstract_function( llvm::Function *fn )
     {
-        assert( fn->hasName() );
-        auto mod  = fn->getParent();
-        auto name = "__lamp_fn_" + fn->getName();
-        return mod->getFunction( name.str() );
+        if ( fn->hasName() ) {
+            auto mod  = fn->getParent();
+            auto name = "__lamp_fn_" + fn->getName();
+            return mod->getFunction( name.str() );
+        } else {
+            return nullptr;
+        }
     }
 
     void dataflow_analysis::push( edge &&e ) noexcept
@@ -72,8 +75,15 @@ namespace lart::dfa::detail
 
     sc::generator< llvm::Function * > dataflow_analysis::destinations( llvm::CallBase *call )
     {
-        assert( !call->isIndirectCall() );
-        co_yield call->getCalledFunction();
+        if ( call->isIndirectCall() ) {
+            auto callee = call->getCalledOperand ();
+            for ( auto ptr : aliases.pointsto( callee ) ) {
+                if ( auto fn = llvm::dyn_cast< llvm::Function >(ptr) )
+                    co_yield fn;
+            }
+        } else {
+            co_yield call->getCalledFunction();
+        }
     }
 
     edges_t dataflow_analysis::edges( llvm::Value *v )
