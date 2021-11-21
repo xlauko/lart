@@ -77,7 +77,10 @@ extern "C" {
 
     #define __VERIFIER_nondet_const_char_pointer() \
         __lamp_any_ptr_traced(__FILE__, __LINE__, "__VERIFIER_nondet_const_char_pointer")
-    
+
+    #define __VERIFIER_nondet_charp() \
+        __lamp_any_ptr_traced(__FILE__, __LINE__, "__VERIFIER_nondet_charp")
+
     #define __VERIFIER_nondet_float() \
         __lamp_any_float_traced(__FILE__, __LINE__, "__VERIFIER_nondet_float")
     
