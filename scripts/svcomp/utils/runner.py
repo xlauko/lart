@@ -147,6 +147,10 @@ class runner(object):
 
         if not self.cfg.floats:
             os.environ['LART_STUB'] = 'ON'
+        
+        if self.cfg.symbolic:
+            os.environ['LART_FIX_GLOBALS'] = 'ON'
+
         cc = compilation(self.cfg, self.preprocesed)
         ccout, ccerr, abstracted = cc.run()
 
