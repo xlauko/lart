@@ -271,7 +271,19 @@ namespace lart::op
     {
         std::string name() const { return "alloca"; }
         std::string impl() const { return "__lamp_alloca"; }
-        args_t arguments() const { return {}; }
+        args_t arguments() const {
+            auto what = llvm::cast< llvm::AllocaInst >( _what );
+            auto size = what->getArraySize();
+            return {
+                { size, argtype::lift },
+                { sc::i8( 8 ), argtype::concrete }
+            }; 
+        }
+
+        std::optional< default_wrapper > default_value() const
+        {
+            return std::nullopt;
+        }
     };
 
     struct store : with_taints_base
