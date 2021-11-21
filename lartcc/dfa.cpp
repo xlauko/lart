@@ -99,7 +99,9 @@ namespace lart::dfa::detail
         auto arguse = [&] (const llvm::Use &use) {
             auto call = llvm::cast< llvm::CallBase >( use.getUser() );
             for ( auto fn : destinations(call) ) {
-                if ( ignore_function(fn)) 
+                if (!fn)
+                    continue;
+                if ( ignore_function(fn) ) 
                     continue;
                 // FIXME transform function even if abstract version exists (perform copy)
                 if ( abstract_function(fn) ) {
@@ -108,6 +110,20 @@ namespace lart::dfa::detail
                     /* TODO deal with different return values */
                     forward_use( use.get(), use.getUser() );
                 } else {
+                    auto name = fn->getName();
+                    if ( name == "printk" )
+                        continue;
+                    if ( name == "__dynamic_dev_dbg" )
+                        continue;
+                    if ( name == "snprintf" )
+                        continue;
+                    if ( name == "dev_err" )
+                        continue;
+                    if ( name == "_dev_info" )
+                        continue;
+                    if (fn->isVarArg()) {
+                        spdlog::warn( "variadic function {}", name );
+                    }
                     assert( !fn->isVarArg() && "abstract varargs are not yet supported" );
                     // unify call argument and function argument abstraction
                     forward_use( use.get(), fn->getArg( use.getOperandNo() ) );
