@@ -162,6 +162,7 @@ namespace lart::dfa::detail
                 [&] ( llvm::Instruction  * inst ) { forward_use( v, inst ); },
                 [&] ( llvm::ConstantExpr * expr ) { forward_use( v, expr ); },
                 [&] ( llvm::GlobalVariable * gv ) { forward_use( v, gv ); },
+                [&] ( llvm::Constant * ) { /* noop */ },
                 []  ( llvm::Value *val ) {
                     std::string msg = "unsupported edge"s + sc::fmt::llvm_to_string( val );
                     llvm_unreachable( msg.c_str() );
