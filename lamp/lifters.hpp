@@ -17,6 +17,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <stdio.h>
+#include <limits>
 
 namespace lart
 {
@@ -30,9 +31,10 @@ namespace lart
         __lart_stash( ptr.ptr );
     }
 
-    __lamp_ptr wrap( float v ) { return __lamp_wrap_float(v); }
+    __lamp_ptr wrap( unsigned long v ) { return (sizeof(unsigned long) == 32) ? __lamp_wrap_i32(v) :  __lamp_wrap_i64(v); }
     
-    __lamp_ptr lift( double v ) { return __lamp_wrap_double(v); }
+    __lamp_ptr wrap( float v ) { return __lamp_wrap_float(v); }
+    __lamp_ptr wrap( double v ) { return __lamp_wrap_double(v); }
 
     template< typename T >
     __lamp_ptr arg_wrap( T v )
@@ -49,22 +51,63 @@ extern "C"
 {
     extern void __lart_stub_fault(const char *msg);
 
-    bool __lamp_lifter_umull_overflow(unsigned long a, unsigned long b) {
+    bool __lamp_lifter_umull_overflow(unsigned long a, unsigned long b, unsigned long *c) {
         if  ( lart::tainted(&a) || lart::tainted(&b) ) {
-            __lart_stub_fault("not implemented umull_overflow");
+            auto lhs = lart::arg_wrap(a);
+            auto rhs = lart::arg_wrap(b);
+
+            auto cmax = std::numeric_limits< unsigned long >::max();
+            auto amax = (sizeof(unsigned long) == 32) ? __lamp_wrap_i32(cmax) :  __lamp_wrap_i64(cmax);
+            auto zero = (sizeof(unsigned long) == 32) ? __lamp_wrap_i32(0) :  __lamp_wrap_i64(0);
+            
+            // if (lhs != 0 && max / lhs < rhs)
+            auto iszero = __lamp_ne( lhs, zero );
+            auto div    = __lamp_udiv( amax, lhs );
+            auto fits   = __lamp_ult( div, rhs );
+            auto cmp    = __lamp_and( iszero, fits );
+            bool overflows = __lamp_to_bool(cmp);
+
+            if ( overflows ) {
+                __lamp_assume( cmp, true );
+            } else {
+                __lamp_assume( cmp, false );
+                auto res = __lamp_mul( lhs, rhs );            
+                __lamp_freeze( res, c, sizeof(unsigned long) );
+            } 
+
+            lart::stash( { nullptr } );
+            return overflows;
         }
 
-        unsigned long c;
-        return __builtin_umull_overflow(a, b, &c);
+        return __builtin_umull_overflow(a, b, c);
     }
 
-    bool __lamp_lifter_uaddl_overflow(unsigned long a, unsigned long b) {
+    bool __lamp_lifter_uaddl_overflow(unsigned long a, unsigned long b, unsigned long *c) {
         if  ( lart::tainted(&a) || lart::tainted(&b) ) {
-            __lart_stub_fault("not implemented umull_overflow");
+            auto lhs = lart::arg_wrap(a);
+            auto rhs = lart::arg_wrap(b);
+
+            auto cmax = std::numeric_limits< unsigned long >::max();
+            auto amax = (sizeof(unsigned long) == 32) ? __lamp_wrap_i32(cmax) :  __lamp_wrap_i64(cmax);
+
+            // if (max - lhs < rhs)
+            auto sub = __lamp_sub( amax, lhs );
+            auto cmp = __lamp_ult( sub, rhs );
+            auto overflows = __lamp_to_bool(cmp);
+            
+            if ( overflows ) {
+                __lamp_assume( cmp, true );
+            } else {
+                __lamp_assume( cmp, false );
+                auto res = __lamp_add( lhs, rhs );            
+                __lamp_freeze( res, c, sizeof(unsigned long) );
+            }
+
+            lart::stash( { nullptr } );
+            return overflows;
         }
 
-        unsigned long c;
-        return __builtin_uaddl_overflow(a, b, &c);
+        return __builtin_uaddl_overflow(a, b, c);
     }
 
     // malloc
