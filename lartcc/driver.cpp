@@ -178,8 +178,17 @@ namespace lart
                 auto name = fn.getName();
 
                 auto list = {
-                    "__lamp", "__lart", "__assert_fail", "abort", "malloc", "calloc", "realloc", "free",
-                    "fprintf", "printf", "puts", "memcpy", "memset", "alloca"
+                    "__lamp", "__lart", "__assert_fail",
+                    "abort", "atoi", "clearerr", "close", "ctime", "fclose", "ferror", "fflush", "fgetc",
+                    "fopen", "fputs", "fread", "fseek", "getenv", "longjmp", "memcmp", "memmove",
+                    "putchar", "qsort", "setbuf", "setjmp", "sscanf", "strchr", "strcmp", "strcat", "strncat"
+                    "strcpy", "strcspn", "strerror", "strlen", "strncmp", "strncpy", "strrchr",
+                    "strstr", "strtod", "strtok", "strtol", "strtoll", "strtoul", "strtoull",
+                    "time",
+                    "vsnprintf", "fprintf", "printf", "snprintf", "sprintf",
+                    "malloc", "calloc", "realloc", "free",
+                    "puts", "memcpy", "memset", "alloca", "memchr"
+                    "exit"
                 };
                 
                 for (auto pref : list) {

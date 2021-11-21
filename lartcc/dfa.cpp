@@ -99,18 +99,20 @@ namespace lart::dfa::detail
         auto arguse = [&] (const llvm::Use &use) {
             auto call = llvm::cast< llvm::CallBase >( use.getUser() );
 
-            auto ignore_list = {
-                "fprintf", "printf", "snprintf", "printk", "__dynamic_dev_dbg", "dev_err", "_dev_info",
-            };
+            // auto ignore_list = {
+            //     "vsnprintf", "fprintf", "printf", "snprintf", "sprintf", "printk",
+            //     "__dynamic_dev_dbg", "__dynamic_dev_dbg", "__dynamic_pr_debug", "dev_err", "_dev_info",
+            //     "ath6kl_dbg", "ath6kl_printk", "dev_printk", "dev_warn", "kasprintf", "netdev_err", "seq_printf"
+            // };
             
-            auto ignore = [&] (auto fn) {
-                auto name = fn->getName();
-                for (auto ignore_name : ignore_list) {
-                    if (name == ignore_name)
-                        return true;
-                }
-                return false;
-            };
+            // auto ignore = [&] (auto fn) {
+            //     auto name = fn->getName();
+            //     for (auto ignore_name : ignore_list) {
+            //         if (name == ignore_name):
+            //             return true;
+            //     }
+            //     return false;
+            // };
 
             for ( auto fn : destinations(call) ) {
                 if (!fn)
@@ -124,11 +126,18 @@ namespace lart::dfa::detail
                     /* TODO deal with different return values */
                     forward_use( use.get(), use.getUser() );
                 } else {
-                    if (ignore(fn))
-                        continue;
+                    // if (ignore(fn))
+                    //     continue;
                     if (fn->isVarArg()) {
-                        spdlog::warn( "variadic function {}", fn->getName() );
+                        spdlog::warn( "ignoring variadic function {}", fn->getName() );
+                        continue;
                     }
+
+                    if ( fn->getFunctionType() != call->getFunctionType() ) {
+                        spdlog::warn( "mismatched type of called function {}", sc::fmt::llvm_to_string(call) );
+                        continue;
+                    }
+
                     assert( !fn->isVarArg() && "abstract varargs are not yet supported" );
                     // unify call argument and function argument abstraction
                     forward_use( use.get(), fn->getArg( use.getOperandNo() ) );
