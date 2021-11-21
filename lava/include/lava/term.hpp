@@ -281,22 +281,22 @@ namespace __lava
             };
         }
 
-        static term op_foeq( tr a, tr b ) {
-            return feupdateround(), make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); 
-        }
-        static term op_fogt( tr a, tr b ) { return feupdateround(), a.get() > b.get(); }
-        static term op_foge( tr a, tr b ) { return feupdateround(), make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
-        static term op_folt( tr a, tr b ) { return feupdateround(), a.get() < b.get(); }
-        static term op_fole( tr a, tr b ) { return feupdateround(), a.get() <= b.get(); }
-        static term op_fone( tr a, tr b ) { return feupdateround(), a.get() != b.get(); }
+        static z3::expr fp_eq( tr a, tr b ) { return make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); }
+
+        static term op_foeq( tr a, tr b ) { return feupdateround(), !unordered(a, b) && fp_eq(a, b); }
+        static term op_fogt( tr a, tr b ) { return feupdateround(), !unordered(a, b) && make_expr( Z3_mk_fpa_gt( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_foge( tr a, tr b ) { return feupdateround(), !unordered(a, b) && make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_folt( tr a, tr b ) { return feupdateround(), !unordered(a, b) && make_expr( Z3_mk_fpa_lt( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fole( tr a, tr b ) { return feupdateround(), !unordered(a, b) && make_expr( Z3_mk_fpa_leq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fone( tr a, tr b ) { return feupdateround(), !unordered(a, b) && !( fp_eq(a, b) ); }
         static term op_ford( tr a, tr b ) { return feupdateround(), !unordered(a, b); }
         static term op_funo( tr a, tr b ) { return feupdateround(), unordered(a, b); }
         static term op_fueq( tr a, tr b ) { return feupdateround(), unordered(a, b) || make_expr( Z3_mk_fpa_eq( __term_state->ctx, a.get(), b.get() ) ); }
-        static term op_fugt( tr a, tr b ) { return feupdateround(), unordered(a, b) || (a.get() > b.get()); }
+        static term op_fugt( tr a, tr b ) { return feupdateround(), unordered(a, b) || make_expr( Z3_mk_fpa_gt( __term_state->ctx, a.get(), b.get() ) ); }
         static term op_fuge( tr a, tr b ) { return feupdateround(), unordered(a, b) || make_expr( Z3_mk_fpa_geq( __term_state->ctx, a.get(), b.get() ) ); }
-        static term op_fult( tr a, tr b ) { return feupdateround(), unordered(a, b) || (a.get() < b.get()); }
-        static term op_fule( tr a, tr b ) { return feupdateround(), unordered(a, b) || (a.get() <= b.get()); }
-        static term op_fune( tr a, tr b ) { return feupdateround(), unordered(a, b) || (a.get() != b.get()); }
+        static term op_fult( tr a, tr b ) { return feupdateround(), unordered(a, b) || make_expr( Z3_mk_fpa_lt( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fule( tr a, tr b ) { return feupdateround(), unordered(a, b) || make_expr( Z3_mk_fpa_leq( __term_state->ctx, a.get(), b.get() ) ); }
+        static term op_fune( tr a, tr b ) { return feupdateround(), unordered(a, b) || !( fp_eq(a, b) ); }
 
         static term op_fptrunc( tr a, bw w )
         {
