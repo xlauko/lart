@@ -11,12 +11,17 @@ SCRIPT=`realpath $0`
 SCRIPTPATH=`dirname $SCRIPT`
 
 RUNTIME="${SCRIPTPATH}/../lib/libnative.a"
-CONCRETE_RUNTIME="${SCRIPTPATH}/../lib/libnative-concrete.a"
 DOMAIN="${SCRIPTPATH}/../lib/lib$domain.a"
 PASS="${SCRIPTPATH}/../lib/liblartcc.so"
 LIBCXX="${LIBCXX_DATAFLOW_DIR}"
 
 LART_INTERFACE="${SCRIPTPATH}/../include/"
+
+if [[ ${@:2} == *"-m32"* ]]; then
+     CONCRETE_RUNTIME="${SCRIPTPATH}/../lib/libnative-concrete-i386.a"
+else
+     CONCRETE_RUNTIME="${SCRIPTPATH}/../lib/libnative-concrete.a"
+fi
 
 RED='\033[0;31m'
 NC='\033[0m' # No Color
