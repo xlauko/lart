@@ -103,7 +103,7 @@ class runner(object):
             return any(nondet in line for nondet in nondets)
 
         def match_float() -> bool:
-            floats = ["float", "double"]
+            floats = ["float_t", "double_t"]
             return any(float_ in line for float_ in floats)
 
         def match_pointer() -> bool:
@@ -117,6 +117,7 @@ class runner(object):
         self.cfg.sequential &= not match_pthread()
             
         self.cfg.floats |= match_nondet_float()
+        self.cfg.floats |= match_float()
         self.cfg.pointer |= match_pointer()
 
 
