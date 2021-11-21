@@ -353,6 +353,7 @@ namespace lart
                 case llvm::Intrinsic::dbg_value:
                 case llvm::Intrinsic::lifetime_start:
                 case llvm::Intrinsic::lifetime_end:
+                case llvm::Intrinsic::objectsize:
                     return true;
             }
             return false;
