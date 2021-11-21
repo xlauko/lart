@@ -141,6 +141,8 @@ class runner(object):
     def compile(self):
         self.preprocess()
 
+        if not self.cfg.floats:
+            os.environ['LART_STUB'] = 'ON'
         cc = compilation(self.cfg, self.preprocesed)
         ccout, ccerr, abstracted = cc.run()
 
