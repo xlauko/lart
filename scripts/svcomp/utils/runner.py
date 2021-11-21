@@ -129,6 +129,10 @@ class runner(object):
                     return "\n"
                 if all(key not in line for key in ["if", "switch", "return", "while", "="]):
                     return "\n"
+            
+            if self.cfg.architecture == 32:
+                if "long long int" not in line:
+                    line = line.replace("long int", "int")
 
             line = line.replace("__isinf", "isinf")
             line = line.replace("__isnan", "isnan")
