@@ -40,9 +40,6 @@ class config:
         self.report     : Optional[str] = None
         self.lamp       : str = lamp
         
-        # compiler options
-        self.libm       : bool = False
-
         self.print_cause : bool = False
         
         # file offset for line debug info
