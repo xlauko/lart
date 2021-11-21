@@ -33,6 +33,8 @@
 #include <queue>
 #include <vector>
 #include <iostream>
+#include <cstdlib>
+#include <string_view>
 
 namespace lart
 {
@@ -74,10 +76,158 @@ namespace lart
         }
     }
 
+
+    struct FixGlobals {
+
+        llvm::Function *getNondet( llvm::Type *t, llvm::Module &m )
+        {
+            if ( auto it = _nondet_map.find( t ); it != _nondet_map.end() )
+                return it->second;
+            auto sz = t->isPointerTy() ? 64 : t->getScalarSizeInBits();
+            sz = sz < 8 ? 8 : sz;
+            return _nondet_map.emplace( t, m.getFunction( "__lamp_any_i"
+                                            + std::to_string( sz ) ) )
+                                    .first->second;
+        }
+
+        void initializeGlobal( llvm::Value *g, llvm::IRBuilder<> &irb, llvm::Module &m )
+        {
+            auto *t = llvm::cast< llvm::PointerType >( g->getType() )->getElementType();
+
+            if ( auto *comp = llvm::dyn_cast< llvm::StructType >( t ) ) {
+                for ( uint64_t i = 0, end = comp->getNumElements(); i < end; ++i )
+                    initializeGlobal( irb.CreateStructGEP( comp, g, unsigned(i) ), irb, m );
+            }
+            else if ( auto *arr = llvm::dyn_cast< llvm::ArrayType >( t ) ) {
+                for ( uint64_t i = 0, end = arr->getNumElements(); i < end; ++i )
+                    initializeGlobal( irb.CreateConstInBoundsGEP2_64( g, 0, unsigned(i) ), irb, m );
+            }
+            else {
+                auto v = irb.CreateCall( getNondet( t, m ), { } );
+                irb.CreateStore( irb.CreateBitOrPointerCast( v, t ), g );
+            }
+        }
+
+        void run( llvm::Module &m )
+        {
+            auto &ctx = m.getContext();
+
+            auto *init = llvm::cast< llvm::Function >(
+                            m.getOrInsertFunction( "__lart_svc_fixglobals_init",
+                                llvm::FunctionType::get( llvm::Type::getVoidTy( ctx ), false ) ).getCallee() );
+            auto *initBB = llvm::BasicBlock::Create( ctx, "", init );
+            llvm::IRBuilder<> irb( initBB, initBB->getFirstInsertionPt() );
+
+            for ( auto &g : m.globals() ) {
+                if ( (g.hasExternalLinkage() || g.hasExternalWeakLinkage())
+                    && g.isDeclaration() && !g.isConstant() && !g.getName().startswith( "__md_" ) )
+                {
+                    g.setLinkage( llvm::GlobalValue::InternalLinkage );
+                    initializeGlobal( &g, irb, m );
+                    g.setInitializer( llvm::UndefValue::get( g.getType()->getElementType() ) );
+                }
+            }
+            irb.CreateRetVoid();
+
+            auto *mainBB = &*m.getFunction( "main" )->begin();
+            irb.SetInsertPoint( mainBB, mainBB->getFirstInsertionPt() );
+            irb.CreateCall( init, { } );
+        }
+
+    private:
+        std::map< llvm::Type *, llvm::Function * > _nondet_map;
+    };
+
+
+    struct DropEmptyDecls {
+        void run( llvm::Module &m ) {
+            std::vector< llvm::Function * > toDrop;
+            long all = 0;
+            for ( auto &fn : m ) {
+                if ( fn.isDeclaration() ) {
+                    ++all;
+                    if ( fn.user_empty() )
+                        toDrop.push_back( &fn );
+                }
+            }
+            for ( auto f : toDrop )
+                f->eraseFromParent();
+            if ( toDrop.size() )
+                spdlog::info("erased: {} empty declarations out of {}", toDrop.size(), all);
+        }
+    };
+
+
+
+    struct StubDecls {
+        void run( llvm::Module &m ) {
+            auto &ctx = m.getContext();
+            auto ptr = llvm::Type::getInt8PtrTy( ctx );
+            auto vty = llvm::Type::getVoidTy( ctx );
+            auto fty = llvm::FunctionType::get( vty, { ptr }, false );
+            auto problem = m.getOrInsertFunction( "__lart_stub_fault", fty );
+
+            const auto undefstr = "lart.stubs: Function stub called.";
+            auto undefInit = llvm::ConstantDataArray::getString( ctx, undefstr );
+            auto undef = llvm::cast< llvm::GlobalVariable >(
+                    m.getOrInsertGlobal( "lart.stubs.undefined.str", undefInit->getType() ) );
+            undef->setConstant( true );
+            undef->setInitializer( undefInit );
+
+            auto skip = [] (auto &fn) {
+                auto name = fn.getName();
+
+                auto list = {
+                    "__lamp", "__lart", "__assert_fail", "abort", "malloc", "calloc", "realloc", "free",
+                    "printf", "puts", "memcpy", "memset", "alloca"
+                };
+                
+                for (auto pref : list) {
+                    if (name.startswith(pref))
+                        return true;
+                }
+                
+                return false;
+            };
+
+            long all = 0;
+            for ( auto &fn : m ) {
+                if ( fn.isDeclaration() && !fn.isIntrinsic() && !skip(fn) ) {
+                    spdlog::info("stubbing: {}", fn.getName());
+
+                    ++all;
+                    auto bb = llvm::BasicBlock::Create( ctx, "", &fn );
+                    llvm::IRBuilder<> irb( bb );
+                    auto undefPt = irb.CreateBitCast( undef, ptr );
+                    irb.CreateCall( problem, { undefPt } );
+                    irb.CreateUnreachable();
+                }
+            }
+            if ( all )
+                spdlog::info("stubbed: {} declarations", all);
+        }
+    };
+
+    inline bool option( std::string_view option, std::string_view msg )
+    {
+        auto is_set = [] ( auto opt ) { return opt && strcmp( opt, "ON" ) == 0; };
+        if ( auto opt = std::getenv( option.data() ); is_set( opt ) ) {
+            spdlog::info( "[lart config] {}\n", msg );
+            return  true;
+        }
+        return false;
+    }
+
     bool driver::run()
     {
         spdlog::cfg::load_env_levels();
         spdlog::info("lartcc started");
+
+        FixGlobals fixglobals;
+        fixglobals.run(module);
+
+        DropEmptyDecls dropEmpty;
+        dropEmpty.run(module);
 
         preprocessor prep(module);
         for (auto &fn : module) {
@@ -85,6 +235,11 @@ namespace lart
         }
 
         replace_abstractable_functions(module);
+
+        if ( option("LART_STUB", "lart stub missing functions") ) {
+            StubDecls stubDecls;
+            stubDecls.run(module);
+        }
         
         // propagate abstraction type from annotated roots
         auto types = dfa::analysis::run_on( module );
