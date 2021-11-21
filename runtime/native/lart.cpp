@@ -76,4 +76,14 @@ extern "C"
         auto msg = __lart::rt::report_payload(assertion);
         __lart::rt::fault(fault_event{fault_type::assert_failed, loc, msg});
     }
+
+    void __lart_stub_fault( const char *msg )
+    {
+        using fault_event = __lart::rt::fault_event;
+        using fault_type  = __lart::rt::fault_type;
+
+        auto loc = __lart::rt::source_location("unknown", "unknown", 0, 0);
+        auto report = __lart::rt::report_payload(msg);
+        __lart::rt::fault(fault_event{fault_type::stub_called, loc, report}); 
+    }
 }

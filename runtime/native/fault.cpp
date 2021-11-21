@@ -66,7 +66,8 @@ namespace __lart::rt
         {
             switch (event.type)
             {
-                case fault_type::assert_failed: handle_assert_failed(event);
+                case fault_type::assert_failed: handle_assert_failed(event); break;
+                case fault_type::stub_called: handle_stub_called(event); break;
             }
         }
 
@@ -77,6 +78,15 @@ namespace __lart::rt
                 << event.location << "\n";
 
             config->error_found = true;
+            if ( config->backtrace ) {
+                print_backtrace(out);
+            }
+        }
+
+        void handle_stub_called(const fault_event &event) const noexcept
+        {
+            file_stream out( stderr );
+            out << "[lart fault] stub called " << event.report << "\n";
             if ( config->backtrace ) {
                 print_backtrace(out);
             }

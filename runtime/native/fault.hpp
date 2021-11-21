@@ -102,7 +102,7 @@ namespace __lart::rt
         unsigned _column;
     };
 
-    enum class fault_type { assert_failed };
+    enum class fault_type { assert_failed, stub_called };
 
     struct fault_event
     {
