@@ -98,6 +98,20 @@ namespace lart::dfa::detail
         // creates edge between operand and function arguments
         auto arguse = [&] (const llvm::Use &use) {
             auto call = llvm::cast< llvm::CallBase >( use.getUser() );
+
+            auto ignore_list = {
+                "fprintf", "printf", "snprintf", "printk", "__dynamic_dev_dbg", "dev_err", "_dev_info",
+            };
+            
+            auto ignore = [&] (auto fn) {
+                auto name = fn->getName();
+                for (auto ignore_name : ignore_list) {
+                    if (name == ignore_name)
+                        return true;
+                }
+                return false;
+            };
+
             for ( auto fn : destinations(call) ) {
                 if (!fn)
                     continue;
@@ -110,19 +124,10 @@ namespace lart::dfa::detail
                     /* TODO deal with different return values */
                     forward_use( use.get(), use.getUser() );
                 } else {
-                    auto name = fn->getName();
-                    if ( name == "printk" )
-                        continue;
-                    if ( name == "__dynamic_dev_dbg" )
-                        continue;
-                    if ( name == "snprintf" )
-                        continue;
-                    if ( name == "dev_err" )
-                        continue;
-                    if ( name == "_dev_info" )
+                    if (ignore(fn))
                         continue;
                     if (fn->isVarArg()) {
-                        spdlog::warn( "variadic function {}", name );
+                        spdlog::warn( "variadic function {}", fn->getName() );
                     }
                     assert( !fn->isVarArg() && "abstract varargs are not yet supported" );
                     // unify call argument and function argument abstraction
