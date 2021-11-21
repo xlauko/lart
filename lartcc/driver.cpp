@@ -179,7 +179,7 @@ namespace lart
 
                 auto list = {
                     "__lamp", "__lart", "__assert_fail", "abort", "malloc", "calloc", "realloc", "free",
-                    "printf", "puts", "memcpy", "memset", "alloca"
+                    "fprintf", "printf", "puts", "memcpy", "memset", "alloca"
                 };
                 
                 for (auto pref : list) {
