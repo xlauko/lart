@@ -90,3 +90,38 @@ install (TARGETS native-concrete
     ARCHIVE DESTINATION lib
     PUBLIC_HEADER DESTINATION include
 )
+
+add_library( native-concrete-i386
+  STATIC
+    fault.cpp
+    config.cpp
+    concrete.cpp
+)
+
+set_property( TARGET native-concrete-i386 PROPERTY POSITION_INDEPENDENT_CODE ON )
+set_property( TARGET native-concrete-i386 PROPERTY CXX_STANDARD 20 )
+
+target_compile_options( native-concrete-i386 PUBLIC
+  -fno-exceptions -fno-rtti -m32
+)
+
+target_include_directories( native-concrete-i386
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include/runtime
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_link_libraries( native-concrete-i386
+  PRIVATE
+    project_warnings
+    project_options
+)
+
+install (TARGETS native-concrete-i386
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    PUBLIC_HEADER DESTINATION include
+)

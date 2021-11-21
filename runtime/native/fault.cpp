@@ -30,7 +30,7 @@
 
 namespace __lart::rt
 {
-    constexpr fixed_report::fixed_report( std::string_view report ) noexcept
+    fixed_report::fixed_report( std::string_view report ) noexcept
         : _report{}, _report_size{0}
     {
         auto end = [&] {
@@ -47,7 +47,9 @@ namespace __lart::rt
         _report_size = std::distance( _report.begin(), end );
     }
 
-    static_assert( fixed_report( "short report" ).what() == "short report" );
+// #if defined(__x86_64__)
+//     static_assert( fixed_report( "short report" ).what() == "short report" );
+// #endif
 
     constexpr source_location source_location::current(
         std::string_view file,

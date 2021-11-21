@@ -29,9 +29,9 @@ namespace __lart::rt
 
         using storage = std::array< char, report_reserve_size >;
 
-        constexpr fixed_report( std::string_view report ) noexcept;
+        fixed_report( std::string_view report ) noexcept;
         
-        [[nodiscard]] constexpr inline std::string_view what() const noexcept
+        [[nodiscard]] inline std::string_view what() const noexcept
         {
             return std::string_view( _report.data(), _report_size );
         }
@@ -44,13 +44,13 @@ namespace __lart::rt
 
     struct report_payload
     {
-        explicit constexpr report_payload( std::string_view report ) noexcept
+        explicit report_payload( std::string_view report ) noexcept
             : _report(report) {}
 
-        explicit constexpr report_payload( fixed_report report ) noexcept
+        explicit report_payload( fixed_report report ) noexcept
             : _report(report.what()) {}
         
-        [[nodiscard]] constexpr inline std::string_view what() const noexcept
+        [[nodiscard]] inline std::string_view what() const noexcept
         {
             return _report;
         }
