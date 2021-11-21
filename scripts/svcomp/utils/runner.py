@@ -127,7 +127,7 @@ class runner(object):
             if "__VERIFIER_nondet" in line:
                 if "extern" in line:
                     return "\n"
-                if all(key not in line for key in ["if", "switch", "return", "="]):
+                if all(key not in line for key in ["if", "switch", "return", "while", "="]):
                     return "\n"
 
             line = line.replace("__isinf", "isinf")
