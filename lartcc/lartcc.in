@@ -40,9 +40,9 @@ fi
 
 if [[ ${domain} == "concrete" ]]; then
      exec @CLANG_BINARY@                             \
-          ${CFLAGS}                                  \
           ${@:2}                                     \
-          ${LDFLAGS}                                 \
+          -lm                                        \
+          -lstdc++                                   \
           ${CONCRETE_RUNTIME}                        \
           -Qunused-arguments
 else
