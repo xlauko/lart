@@ -35,8 +35,8 @@ class compilation(object):
         lamp = self.cfg.lamp if self.cfg.symbolic else "concrete"
         cmd = [cc, lamp, self.preprocesed]
         # TODO: usupported by dataflow sanitizer
-        # if self.cfg.architecture == 32:
-        #     cmd.append("-m32")
+        if self.cfg.architecture == 32 and not self.cfg.symbolic:
+            cmd.append("-m32")
 
         # for backtrace
         cmd += ["-rdynamic"]
