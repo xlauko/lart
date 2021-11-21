@@ -39,7 +39,7 @@ class config:
         self.witness    : bool = True
         self.report     : Optional[str] = None
         self.lamp       : str = lamp
-        
+
         self.print_cause : bool = False
         
         # file offset for line debug info
