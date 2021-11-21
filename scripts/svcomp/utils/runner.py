@@ -138,8 +138,8 @@ class runner(object):
             line = line.replace("__isnan", "isnan")
             line = line.replace("__finite", "finite")
 
-        # line.replace("__builtin_uaddl_overflow", "__lamp_lifter_uaddl_overflow"):
-        # line.replace("__builtin_umull_overflow", "__lamp_lifter_umull_overflow"):
+            line = line.replace("__builtin_uaddl_overflow", "__lamp_lifter_uaddl_overflow")
+            line = line.replace("__builtin_umull_overflow", "__lamp_lifter_umull_overflow")
         return line
 
     def compile(self):

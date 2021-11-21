@@ -47,6 +47,26 @@ namespace lart
 
 extern "C"
 {
+    extern void __lart_stub_fault(const char *msg);
+
+    bool __lamp_lifter_umull_overflow(unsigned long a, unsigned long b) {
+        if  ( lart::tainted(&a) || lart::tainted(&b) ) {
+            __lart_stub_fault("not implemented umull_overflow");
+        }
+
+        unsigned long c;
+        return __builtin_umull_overflow(a, b, &c);
+    }
+
+    bool __lamp_lifter_uaddl_overflow(unsigned long a, unsigned long b) {
+        if  ( lart::tainted(&a) || lart::tainted(&b) ) {
+            __lart_stub_fault("not implemented umull_overflow");
+        }
+
+        unsigned long c;
+        return __builtin_uaddl_overflow(a, b, &c);
+    }
+
     // malloc
 
     void* __lamp_lifter_malloc( size_t size )
