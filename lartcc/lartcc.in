@@ -40,10 +40,12 @@ fi
 
 if [[ ${domain} == "concrete" ]]; then
      exec @CLANG_BINARY@                             \
+          -Wl,--whole-archive                        \
+          ${CONCRETE_RUNTIME}                        \
+          -Wl,--no-whole-archive                     \
           ${@:2}                                     \
           -lm                                        \
           -lstdc++                                   \
-          ${CONCRETE_RUNTIME}                        \
           -Qunused-arguments
 else
      exec @CLANG_BINARY@                             \
