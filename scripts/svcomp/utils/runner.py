@@ -130,7 +130,7 @@ class runner(object):
                 if all(key not in line for key in ["if", "switch", "return", "while", "="]):
                     return "\n"
             
-            if self.cfg.architecture == 32:
+            if self.cfg.architecture == 32 and self.cfg.symbolic:
                 if "long long int" not in line:
                     line = line.replace("long int", "int")
 
