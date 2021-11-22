@@ -381,8 +381,8 @@ void __lamp_stub()
     __lamp_fn_malloc( ptr );
     __lamp_lifter_malloc( 0 );
 
-    __lamp_lifter_umull_overflow( 0, 0, __lamp_null );
-    __lamp_lifter_uaddl_overflow( 0, 0, __lamp_null );
+    // __lamp_lifter_umull_overflow( 0, 0, __lamp_null );
+    // __lamp_lifter_uaddl_overflow( 0, 0, __lamp_null );
     
     __lamp_fn_abs( ptr );
     __lamp_lifter_abs( 0, 0 );
