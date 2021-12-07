@@ -9,11 +9,21 @@
 #include <lamp/support/semilattice.hpp>
 
 #include <sstream>
+#include <cstdio>
+#include <string_view>
+#include <sys/mman.h>
 
 namespace __lava
 {
     using bound_t = sup::bound< int64_t >;
     using interval_t = sup::interval< bound_t >;
+
+    struct interval_config_t
+    {
+        bound_t choose_bound = 200;
+    };
+
+    interval_config_t *__interval_cfg;
 
     template< template< typename > typename storage >
     struct interval : storage< interval_t >
@@ -37,9 +47,6 @@ namespace __lava
 
         using ref = domain_ref< interval >;
 
-        constexpr static bound choose_bound = 200;
-
-
         interval( sup::interval< bound > i ) : interval_storage( i )
         {
             if ( is_bottom() )
@@ -56,11 +63,8 @@ namespace __lava
         }
 
         interval( tristate t )  : interval_storage( t ) {}
-<<<<<<< HEAD
-=======
         interval( bool t )  : interval_storage( t ) {}
         
->>>>>>> d546b09 (lava: refactor interval printing)
         interval clone() const {
             auto const &self = static_cast< const interval& > ( *this );
             return interval( self->low, self->high );
@@ -197,13 +201,13 @@ namespace __lava
             auto diff_high = r_new.high - r.high();
 
             // lower bound correction
-            if ( diff_low > bound ( 0 ) && diff_low <= bound ( choose_bound ) ) {
+            if ( diff_low > bound ( 0 ) && diff_low <= bound ( __interval_cfg->choose_bound ) ) {
                 auto i = __lart_choose( bound_type( diff_low + 1 ) );
                 a->meet_low( a.low() + i );
                 b->meet_low( b.low() + diff_low - i );
             }
             // upper bound correction
-            if ( diff_high > bound( 0 ) && diff_high <= bound( choose_bound ) ) {
+            if ( diff_high > bound( 0 ) && diff_high <= bound( __interval_cfg->choose_bound ) ) {
                 auto i = __lart_choose( bound_type( diff_high + 1 ) );
                 a->meet_high( a.high() - i );
                 b->meet_high( b.high() - diff_high + i );
@@ -219,13 +223,13 @@ namespace __lava
             auto diff_high = r_new.high - r.high();
 
             // lower bound correction
-            if ( diff_low > bound ( 0 ) && diff_low <= bound ( choose_bound ) ) {
+            if ( diff_low > bound ( 0 ) && diff_low <= bound ( __interval_cfg->choose_bound ) ) {
                 auto i = __lart_choose( bound_type( diff_low + 1 ) );
                 a->meet_low( a.low() + i );
                 b->meet_high( b.high() - diff_low + i );
             }
             // upper bound correction
-            if ( diff_high > bound( 0 ) && diff_high <= bound( choose_bound ) ) {
+            if ( diff_high > bound( 0 ) && diff_high <= bound( __interval_cfg->choose_bound ) ) {
                 auto i = __lart_choose( bound_type( diff_high + 1 ) );
                 a->meet_high( a.high() - i );
                 b->meet_low( b.low() + diff_high - i );
@@ -248,7 +252,7 @@ namespace __lava
             auto diff_high = r_new.high - r.high();
 
             // lower bound correction
-            if ( diff_low > bound ( 0 ) && diff_low <= bound ( choose_bound ) ) {
+            if ( diff_low > bound ( 0 ) && diff_low <= bound ( __interval_cfg->choose_bound ) ) {
                 auto new_high = div_up( r.low(), b.low() );
                 auto new_low = div_up( r.low(), b.high() );
                 a->meet_low( new_low );
@@ -260,7 +264,7 @@ namespace __lava
 
             }
             // upper bound correction
-            if ( diff_high > bound( 0 ) && diff_high <= bound( choose_bound ) ) {
+            if ( diff_high > bound( 0 ) && diff_high <= bound( __interval_cfg->choose_bound ) ) {
                 auto new_low = std::max( r.high() / b.high(), a.low() );
                 auto i = __lart_choose( bound_type( a.high() - new_low + 1 ) );
                 a->meet_high( new_low + i );
@@ -318,7 +322,7 @@ namespace __lava
             a.intersect( b.get() );
             b.intersect( a.get() );
             auto interval_size = a.high() - a.low();
-            if ( interval_size > bound( 0 ) && interval_size <= bound( choose_bound ) ) {
+            if ( interval_size > bound( 0 ) && interval_size <= bound( __interval_cfg->choose_bound ) ) {
                 auto i = __lart_choose( bound_type( interval_size ) );
                 a.intersect( { a.low() + i, a.low() + i } );
                 b.intersect( { b.low() + i, b.low() + i } );
@@ -351,7 +355,7 @@ namespace __lava
                 return;
 
             int size = intersection.size();
-            if ( choose_bound < static_cast< const bound >( size ) )
+            if ( __interval_cfg->choose_bound < static_cast< const bound >( size ) )
                 return;
 
             auto delim = __lart_choose( strict ? size + 1 : size ) + intersection.low;
@@ -407,4 +411,14 @@ namespace __lava
             return os << trace(i);
         }
     };
+
+    [[gnu::constructor]] void term_setup()
+    {
+        __interval_cfg = (interval_config_t*)mmap(NULL, sizeof(interval_config_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
+        if ( auto opt = std::getenv( "INTERVAL_CHOOSE_BOUND" ); opt ) {
+            fprintf( stderr, "[interval config] choose bound = %s\n", opt );
+            __interval_cfg->choose_bound = std::atoi( opt );
+        }
+    }
 }
