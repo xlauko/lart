@@ -1,0 +1,75 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "ninja-multi-default",
+            "displayName": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/builds/${presetName}",
+            "generator": "Ninja Multi-Config",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "CMAKE_CONFIGURATION_TYPES": "Release;RelWithDebInfo;Debug",
+                "ENABLE_TESTING": "ON",
+                "VCPKG_OVERLAY_PORTS": "${sourceDir}/ports",
+                "VCPKG_KEEP_ENV_VARS": "LLVM_INSTALL_DIR",
+                "LLVM_INSTALL_DIR": "$env{LLVM_INSTALL_DIR}"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "ninja-rel",
+            "configurePreset": "ninja-multi-default",
+            "displayName": "Build ninja-multi-rel",
+            "configuration": "Release"
+        },
+        {
+            "name": "ninja-rel-with-deb",
+            "configurePreset": "ninja-multi-default",
+            "displayName": "Build ninja-multi-rel-with-deb",
+            "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "ninja-deb",
+            "configurePreset": "ninja-multi-default",
+            "displayName": "Build ninja-multi-deb",
+            "configuration": "Debug"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "test-base",
+            "hidden": true,
+            "configurePreset": "ninja-multi-default",
+            "output": {
+              "outputOnFailure": true,
+              "verbosity": "default"
+            },
+            "execution": {
+              "noTestsAction": "error",
+              "stopOnFailure": false
+            }
+        },
+        {
+            "name": "default",
+            "hidden": true,
+            "configurePreset": "ninja-multi-default",
+            "inherits": "test-base"
+        },
+        {
+            "name": "ninja-rel", "inherits": "default",
+            "displayName": "Test ninja-rel",
+            "configuration": "Release"
+        },
+        {
+            "name": "ninja-deb", "inherits": "default",
+            "displayName": "Test ninja-deb",
+            "configuration": "Debug"
+        }
+    ]
+}
