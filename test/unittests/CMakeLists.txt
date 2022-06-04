@@ -4,9 +4,9 @@ include(Catch)
 
 # catch2 main
 add_library( catch-main STATIC catch-main.cpp )
-target_link_libraries( catch-main 
+target_link_libraries( catch-main
     PRIVATE lart_project_options
-    PUBLIC  Catch2::Catch2
+    PUBLIC  doctest::doctest
 )
 
 target_include_directories( catch-main
@@ -16,8 +16,8 @@ target_include_directories( catch-main
 # test configs
 add_library( test-properties INTERFACE )
 target_link_libraries( test-properties
-    INTERFACE 
-        catch-main 
+    INTERFACE
+        catch-main
         lamp-api
         lart-runtime
         lart_project_options
