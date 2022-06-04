@@ -1,0 +1,13 @@
+{
+    "name": "main",
+    "version-string": "latest",
+    "dependencies": [
+      "catch2",
+      "cppcoro",
+      "doctest",
+      "fmt",
+      "range-v3",
+      "spdlog",
+      "svf"
+    ]
+}
