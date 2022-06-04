@@ -12,8 +12,8 @@ include( ${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake )
 set_project_warnings( lart_project_warnings )
 
 # sanitizer options if supported by compiler
-# include( ${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake )
-# enable_sanitizers( lart_project_options )
+include( ${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake )
+enable_sanitizers( lart_project_options )
 
 # clang time profiling
 if ( CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" )
@@ -31,6 +31,10 @@ include( ${PROJECT_SOURCE_DIR}/cmake/static_analyzers.cmake )
 # VERIFY LLVM INSTALLATION DIR
 
 # Set this to a valid LLVM installation dir
+if ( DEFINED ENV{LLVM_INSTALL_DIR} AND NOT DEFINED LLVM_INSTALL_DIR )
+  set( LLVM_INSTALL_DIR "$ENV{LLVM_INSTALL_DIR}" )
+endif()
+
 set( LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory" )
 
 set( LIBCXX_INSTALL_DIR "" CACHE PATH "LIBCXX installation directory" )
@@ -53,7 +57,7 @@ endif()
 # find_package can locate it)
 list( APPEND CMAKE_PREFIX_PATH "${LLVM_INSTALL_DIR}/lib/cmake/llvm/" )
 
-find_package( LLVM REQUIRED CONFIG 12.0 )
+find_package( LLVM REQUIRED CONFIG 13.0 )
 
 message( STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}" )
 message( STATUS "Using LLVMConfig.cmake from ${LLVM_DIR}" )
@@ -78,10 +82,6 @@ add_library( lartcc
     backend/native.cpp
 )
 
-set_target_properties( lartcc PROPERTIES
-  COMPILE_FLAGS "-fcoroutines"
-)
-
 set_property(TARGET lartcc PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories( lartcc
@@ -89,14 +89,13 @@ target_include_directories( lartcc
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-add_dependencies( lartcc svflib )
-
 find_package( spdlog CONFIG REQUIRED )
 find_package( fmt CONFIG REQUIRED )
+find_package( SVF CONFIG REQUIRED )
 
 target_link_libraries( lartcc PRIVATE
   llvmsc::llvmsc
-  svflib
+  svf::Svf
   fmt::fmt
   spdlog::spdlog
 )
