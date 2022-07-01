@@ -89,15 +89,15 @@ target_include_directories( lartcc
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-find_package( spdlog CONFIG REQUIRED )
 find_package( fmt CONFIG REQUIRED )
+find_package( spdlog CONFIG REQUIRED )
 find_package( SVF CONFIG REQUIRED )
 
 target_link_libraries( lartcc PRIVATE
-  llvmsc::llvmsc
-  svf::Svf
   fmt::fmt
+  llvmsc::llvmsc
   spdlog::spdlog
+  svf::Svf
 )
 
 target_link_libraries( lartcc PRIVATE lart_project_options lart_project_warnings )

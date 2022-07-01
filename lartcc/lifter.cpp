@@ -20,6 +20,8 @@
 #include <sc/ranges.hpp>
 #include <sc/builder.hpp>
 
+#include <range/v3/algorithm/count_if.hpp>
+
 #include <numeric>
 #include <algorithm>
 
@@ -95,7 +97,7 @@ namespace lart
 
         auto count_taints( const std::vector< argument > &args )
         {
-            return std::ranges::count_if( args, with_taint );
+            return ranges::count_if( args, with_taint );
         }
 
         auto final_args( llvm::BasicBlock *where
@@ -103,7 +105,7 @@ namespace lart
                        , const auto &types )
         {
             size_t count = 0;
-            auto fargs = args | std::views::transform( [&] (const auto &a) {
+            auto fargs = args | ranges::views::transform( [&] (const auto &a) {
                 auto value = final( a );
                 auto dst = types[ count++ ];
                 if  ( value->getType() != dst ) {
@@ -112,7 +114,7 @@ namespace lart
                 }
                 return value;
             });
-            return sc::views::to_vector( fargs );
+            return ranges::to_vector( fargs );
         }
 
     } // namespace detail
@@ -162,7 +164,7 @@ namespace lart
                  | sc::action::function{ function() }
                  | sc::action::create_block{ "entry" };
 
-        auto args = sc::views::to_vector( detail::arguments( *this ) );
+        auto args = ranges::to_vector( detail::arguments( *this ) );
 
         auto wrap = [&] ( auto val ) {
             auto name = "__lamp_wrap_" + [&] {
@@ -192,7 +194,7 @@ namespace lart
                 auto lbb = bld.block( lift_block );
 
                 args_t wrap_args{ a->concrete };
-                
+
                 bld = bld
                     | sc::action::set_block{ entry_block }
                     | sc::action::condbr( a->taint, mbb, lbb )

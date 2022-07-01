@@ -30,7 +30,6 @@ fi
 
 exec @CLANG_BINARY@                             \
      -Xclang -load -Xclang "$PASS"              \
-     -fsanitize=dataflow                        \
      ${CFLAGS}                                  \
      "${@:2}"                                   \
      ${LDFLAGS}                                 \

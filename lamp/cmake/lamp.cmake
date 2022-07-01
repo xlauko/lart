@@ -19,25 +19,6 @@ macro( register_domain domain )
     # dataflow sanitized domain options
     add_library( ${domain}-dfs INTERFACE )
 
-    # TODO create libc++ target
-    target_include_directories( ${domain}-dfs
-      INTERFACE
-        ${LIBCXX_INSTALL_DIR}/include/c++/v1
-    )
-
-    target_link_options( ${domain}-dfs
-      INTERFACE
-        -Wl,-rpath,${LLVM_INSTALL_DIR}/lib
-        -L${LIBCXX_INSTALL_DIR}/lib
-        -Wl,-rpath,${LIBCXX_INSTALL_DIR}/lib
-    )
-
-    target_compile_options( ${domain}-dfs INTERFACE
-      -nostdinc++
-      -fsanitize=dataflow
-      -fsanitize-blacklist=${CMAKE_CURRENT_SOURCE_DIR}/dataflow-blacklist.txt
-    )
-
     # # domain source
     # add_library( ${domain}-src STATIC ${domain}.cpp )
     # target_link_libraries( ${domain}-src

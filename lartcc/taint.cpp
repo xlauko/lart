@@ -19,6 +19,8 @@
 
 #include <sc/ranges.hpp>
 
+#include <range/v3/range/conversion.hpp>
+
 namespace lart::taint
 {
     namespace sv = sc::views;
@@ -63,7 +65,7 @@ namespace lart::taint
     llvm::CallInst * make_call( llvm::Module &module, const operation &op )
     {
         lart::lifter lifter( module, op );
-        auto args = sc::views::to_vector( detail::arguments( lifter, op ) );
+        auto args = ranges::to_vector( detail::arguments( lifter, op ) );
         return op::make_call( op, args, detail::name( op ) );
     }
 

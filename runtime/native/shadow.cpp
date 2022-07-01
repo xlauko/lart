@@ -18,7 +18,6 @@
 
 #include <cstddef>
 #include <cstdlib>
-#include <sanitizer/dfsan_interface.h>
 
 namespace __lart::rt
 {
@@ -31,18 +30,20 @@ namespace __lart::rt
         return meta;
     }
 
+
     void poke( void *addr, size_t bytes, void *value )
     {
         auto meta = make_meta( addr, bytes, value );
-        auto shadow = dfsan_create_label( "shadow", meta );
-        dfsan_set_label( shadow, addr, bytes );
+        auto shadow = create_shadow_label( "shadow", meta );
+        set_shadow_label( shadow, addr, bytes );
     }
 
     shadow_meta *peek( const void *addr )
     {
-        auto meta        = dfsan_read_label( addr, 1 );
-        const auto *info = dfsan_get_label_info( meta );
+        auto meta        = read_shadow_label( addr, 1 );
+        const auto *info = get_shadow_label_info( meta );
         return static_cast< shadow_meta* >( info->userdata );
+        return nullptr;
     }
 
 } // namespace __lart::rt

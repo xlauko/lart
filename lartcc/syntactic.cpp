@@ -109,13 +109,13 @@ namespace lart
                     // TODO
                 }
             },
-            [&] ( llvm::Argument * ) { 
-                /* fallthrough */ 
+            [&] ( llvm::Argument * ) {
+                /* fallthrough */
             },
             [&] ( llvm::PHINode *phi ) {
                 result = op::phi( phi );
             },
-            [&] ( llvm::Value *value ) { 
+            [&] ( llvm::Value *value ) {
                 /* fallthrough */
                 std::string buff;
                 llvm::raw_string_ostream ss(buff);
@@ -138,7 +138,7 @@ namespace lart
                 co_yield op.value();
             }
         }
-        
+
         for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
             if ( is_abstract( store->getPointerOperand() ) )
                 if ( auto op = make_operation(store); op.has_value() )
@@ -259,14 +259,14 @@ namespace lart
             auto concrete = llvm::cast< llvm::PHINode >( op::value(o) );
             llvm::IRBuilder<> irb( op::location(o) );
             auto aptr = op::abstract_pointer();
-            
+
             auto phi = irb.CreatePHI( aptr->getType(), concrete->getNumIncomingValues() );
             for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i ) {
                 phi->addIncoming( aptr, concrete->getIncomingBlock( i ) );
             }
-            
+
             abstract[concrete] = phi;
-           
+
             for ( auto &arg : paired_view( concrete, phi ) ) {
                 auto &con = arg.concrete;
                 if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
@@ -274,7 +274,7 @@ namespace lart
                 else
                     places[con].push_back( arg );
             }
-            
+
             update_places( concrete );
             propagate_identity( concrete );
 
