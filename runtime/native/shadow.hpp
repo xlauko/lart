@@ -17,6 +17,7 @@
 #pragma once
 
 #include "shadowmeta.h"
+#include "shadowmem.hpp"
 
 #include <cstddef>
 

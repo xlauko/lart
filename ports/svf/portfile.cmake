@@ -28,15 +28,14 @@ endif()
 set( LLVM_DIR "${LLVM_INSTALL_DIR}/lib/cmake/llvm/" CACHE PATH "LLVM config path" )
 message( STATUS "Using LLVM_DIR: ${LLVM_DIR}" )
 
-vcpkg_configure_cmake(
+vcpkg_cmake_configure(
   SOURCE_PATH "${SOURCE_PATH}"
-  PREFER_NINJA
   OPTIONS
     -DLLVM_DIR=${LLVM_DIR}
     -DCMAKE_CXX_FLAGS=-Wno-unused-variable
 )
 
-vcpkg_install_cmake()
+vcpkg_cmake_install()
 vcpkg_cmake_config_fixup(
   PACKAGE_NAME "svf"
   CONFIG_PATH lib/cmake/svf

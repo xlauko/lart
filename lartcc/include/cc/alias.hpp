@@ -21,7 +21,6 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 
-#include <svf/Graphs/PAG.h>
 #include <svf/WPA/Andersen.h>
 
 #include <sc/generator.hpp>

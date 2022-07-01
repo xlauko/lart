@@ -20,16 +20,16 @@
 
 namespace __lart::rt
 {
-    dfsan_label taint;
+    shadow_label_t taint;
 
     constructor void init_taint()
     {
-        taint = dfsan_create_label( "taint", nullptr );
+        taint = create_shadow_label( "taint", nullptr );
     }
 
     void make_tainted( void *value, unsigned bytes )
     {
-        dfsan_set_label( taint, value, bytes );
+        set_shadow_label( taint, value, bytes );
     }
 
 

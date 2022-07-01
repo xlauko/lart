@@ -31,6 +31,10 @@
 #include <variant>
 #include <experimental/iterator>
 
+#include <range/v3/algorithm/any_of.hpp>
+#include <range/v3/range/conversion.hpp>
+#include <range/v3/view/transform.hpp>
+
 #include <sc/generator.hpp>
 
 namespace lart::op
@@ -303,10 +307,10 @@ namespace lart::op
         stash( llvm::Value *what, llvm::Instruction *call )
             : base( what, call )
         {}
-        
+
         std::string name() const
         {
-            return "stash." + sc::fmt::llvm_to_string(_what->getType()); 
+            return "stash." + sc::fmt::llvm_to_string(_what->getType());
         }
         std::string impl() const { return "__lart_stash"; }
 
@@ -394,9 +398,9 @@ namespace lart::op
 
     inline bool with_abstract_arg( const operation &o )
     {
-        return std::ranges::any_of( arguments(o), argument::is_abstract );
+        return ranges::any_of( arguments(o), argument::is_abstract );
     }
-    
+
     inline bool returns_value( const operation &o )
     {
         return default_value(o).has_value();
@@ -431,8 +435,8 @@ namespace lart::op
 
     inline auto unique_name_suffix(const operation &o)
     {
-        auto values = std::views::transform( [] (const auto &o_) { return o_.value; } );
-        auto format = std::views::transform( [] (auto t) { return sc::fmt::type(t); } );
+        auto values = ranges::views::transform( [] (const auto &o_) { return o_.value; } );
+        auto format = ranges::views::transform( [] (auto t) { return sc::fmt::type(t); } );
 
         std::stringstream suff;
         auto args = arguments(o);
@@ -449,7 +453,7 @@ namespace lart::op
                 case argtype::abstract:
                     co_yield arg.value;
                     co_yield op::abstract_pointer();
-                    break; 
+                    break;
                 case op::argtype::test:
                 case op::argtype::concrete:
                     co_yield arg.value;
@@ -485,7 +489,7 @@ namespace lart::op
     {
         llvm::IRBuilder<> irb( op::location(op) );
         auto mod = irb.GetInsertBlock()->getModule();
-        auto arg_types = sc::views::to_vector( args | sv::types );
+        auto arg_types = ranges::to_vector( args | sv::types );
         auto rty = extract_return_type( op, arg_types );
 
         spdlog::debug("make call: {} :: {} -> {}", intr_name, sc::fmt::llvm_to_string(arg_types), sc::fmt::llvm_to_string(rty));

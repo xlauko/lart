@@ -112,11 +112,11 @@ namespace lart
         };
 
         auto nonbr = [] ( auto i ) {
-            return std::ranges::any_of( i->users(), sv::isnot< llvm::BranchInst > );
+            return ranges::any_of( i->users(), sv::isnot< llvm::BranchInst > );
         };
 
         auto cmps = sv::filter< llvm::CmpInst >( *fn );
-        for ( auto cmp : cmps | std::views::filter( nonbr ) )
+        for ( auto cmp : cmps | ranges::views::filter( nonbr ) )
             lower( cmp );
     }
 

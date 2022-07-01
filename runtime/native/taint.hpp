@@ -17,19 +17,20 @@
 #pragma once
 
 #include <cstdint>
-#include <sanitizer/dfsan_interface.h>
+
+#include "shadowmem.hpp"
 
 namespace __lart::rt
 {
-    extern dfsan_label taint;
+    extern shadow_label_t taint;
 
     void make_tainted( void *value, unsigned bytes );
 
     template< typename integral > bool is_tainted( integral value )
     {
-        auto label = dfsan_get_label( static_cast< std::int64_t >( value ) );
-        return label && (dfsan_has_label( label, taint ) ||
-               dfsan_has_label_with_desc( label, "shadow" ));
+        auto label = get_shadow_label( static_cast< std::int64_t >( value ) );
+        return label && (has_shadow_label( label, taint ) ||
+               has_label_with_desc( label, "shadow" ));
     }
 
 } // namespace __lart::rt

@@ -92,7 +92,7 @@ namespace lart::dfa::detail
         auto arguse = [&] (const llvm::Use &use) {
             auto call = llvm::cast< llvm::CallBase >( use.getUser() );
             for ( auto fn : destinations(call) ) {
-                if ( ignore_function(fn)) 
+                if ( ignore_function(fn))
                     continue;
                 // FIXME transform function even if abstract version exists (perform copy)
                 if ( abstract_function(fn) ) {
