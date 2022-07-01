@@ -3,9 +3,9 @@
     "version-string": "latest",
     "dependencies": [
       "catch2",
-      "cppcoro",
       "doctest",
       "fmt",
+      "llvm",
       "range-v3",
       "spdlog",
       "svf"
