@@ -19,10 +19,12 @@ set( CMAKE_CXX_STANDARD 20 )
 set( CMAKE_CXX_EXTENSIONS ON )
 
 add_subdirectory( external )
-add_subdirectory( lartcc )
+
 add_subdirectory( runtime )
 add_subdirectory( lava )
 add_subdirectory( lamp )
+
+add_subdirectory( lartcc )
 
 
 if ( ENABLE_TESTING )

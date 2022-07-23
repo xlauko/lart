@@ -1,7 +1,8 @@
-cmake_minimum_required( VERSION 3.16 )
+cmake_minimum_required( VERSION 3.22 )
 
 include( cmake/lamp.cmake )
 
+set( LAMP_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE )
 
 register_domain( unit )
 register_domain( tracing-unit )
@@ -24,6 +25,8 @@ target_include_directories( lamp-api
         $<INSTALL_INTERFACE:include>
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
+
+set( LART_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE )
 
 set_target_properties( lamp-api PROPERTIES PUBLIC_HEADER
     "include/lamp.h;include/lamp-pointers.h;include/svcomp.h"

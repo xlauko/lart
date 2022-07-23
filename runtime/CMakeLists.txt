@@ -2,6 +2,8 @@ add_subdirectory( native )
 
 add_library( runtime INTERFACE )
 
+set( RUNTIME_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/native PARENT_SCOPE )
+
 set_target_properties( runtime PROPERTIES PUBLIC_HEADER
     "include/runtime/lart.h;include/runtime/shadowmeta.h"
 )
