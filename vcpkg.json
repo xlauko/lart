@@ -5,8 +5,6 @@
       "catch2",
       "doctest",
       "fmt",
-      "llvm",
-      "range-v3",
       "spdlog",
       "svf"
     ]
