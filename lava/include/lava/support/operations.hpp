@@ -25,14 +25,14 @@ namespace __lava::op
         unknown,
         any, lift, lower,
         join, meet,
-        
+
         alloca, store, load,
 
         add, sub, mul, sdiv, udiv, srem, urem,
         fadd, fsub, fmul, fdiv, frem,
 
         fneg,
-        
+
         op_and, op_or, op_xor,
 
         zfit, zext, sext, trunc,
@@ -42,7 +42,7 @@ namespace __lava::op
 
         ne, eq, slt, sgt, sle, sge, ult, ugt, ule, uge,
 
-        foeq, fogt, foge, folt, fole, fone, ford, 
+        foeq, fogt, foge, folt, fole, fone, ford,
         funo, fueq, fugt, fuge, fult, fule, fune,
 
         ffalse, ftrue,
@@ -63,7 +63,7 @@ namespace __lava::op
             case tag::lower: return "lower";
             case tag::join:  return "join";
             case tag::meet:  return "meet";
-            
+
             case tag::alloca: return "alloca";
             case tag::store:  return "store";
             case tag::load:   return "load";
@@ -83,14 +83,14 @@ namespace __lava::op
             case tag::frem: return "frem";
 
             case tag::fneg: return "fneg";
-            
+
             case tag::op_and: return "op_and";
             case tag::op_or: return "op_or";
             case tag::op_xor: return "op_xor";
 
             case tag::zfit: return "zfit";
-            case tag::zext: return "zext"; 
-            case tag::sext: return "sext"; 
+            case tag::zext: return "zext";
+            case tag::sext: return "sext";
             case tag::trunc: return "trunc";
 
             case tag::fptrunc: return "fptrunc";
@@ -119,7 +119,7 @@ namespace __lava::op
             case tag::folt: return "folt";
             case tag::fole: return "fole";
             case tag::fone: return "fone";
-            case tag::ford: return "ford"; 
+            case tag::ford: return "ford";
             case tag::funo: return "funo";
             case tag::fueq: return "fueq";
             case tag::fugt: return "fugt";
@@ -139,9 +139,9 @@ namespace __lava::op
 
             case tag::malloc: return "malloc";
             case tag::realloc: return "realloc";
-            
+
             case tag::dealloca: return "dealloca";
-            case tag::free : return "free";    
+            case tag::free : return "free";
         }
 
         __builtin_unreachable();
@@ -340,25 +340,25 @@ namespace __lava::op
         static constexpr auto ashr = []( const auto &a ) { return std::decay_t< decltype( a ) >::bop_ashr; };
     }
 
-    static constexpr auto run = []( const auto &op, const auto & ... bind  ) __inline
+    static constexpr auto run = []( const auto &op, const auto & ... bind  ) __lart_inline
     {
-        return [=]( const auto &arg, const auto & ... args ) __inline
+        return [=]( const auto &arg, const auto & ... args ) __lart_inline
         {
             return op( arg )( arg, args..., bind... );
         };
     };
 
-    static constexpr auto wrap = []( const auto &op, const auto & ... bind  ) __inline
+    static constexpr auto wrap = []( const auto &op, const auto & ... bind  ) __lart_inline
     {
-        return [=]( const auto &arg, const auto & ... args ) __inline
+        return [=]( const auto &arg, const auto & ... args ) __lart_inline
         {
             return op( arg )( arg, args..., bind... );
         };
     };
 
-    static constexpr auto wrapr = []( const auto &op, const auto & ... bind  ) __inline
+    static constexpr auto wrapr = []( const auto &op, const auto & ... bind  ) __lart_inline
     {
-        return [=]( auto &arg, const auto & ... args ) __inline
+        return [=]( auto &arg, const auto & ... args ) __lart_inline
         {
             return op( arg )( arg, args..., bind... );
         };

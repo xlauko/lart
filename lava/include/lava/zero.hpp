@@ -15,7 +15,7 @@ namespace __lava
     };
 
     template< template< typename > typename storage >
-    struct zero : storage< zero_storage > 
+    struct zero : storage< zero_storage >
                 , domain_mixin< zero< storage > >
     {
         using base = storage< zero_storage >;
@@ -28,14 +28,14 @@ namespace __lava
         using zv = zero;
         using zr = const zero &;
 
-        __inline ze::value_type value() const { return this->get().value; }
+        __lart_inline ze::value_type value() const { return this->get().value; }
 
-        __inline bool is_bottom()  const { return value() == ze::bottom; }
-        __inline bool is_zero()    const { return value() == ze::zero; }
+        __lart_inline bool is_bottom()  const { return value() == ze::bottom; }
+        __lart_inline bool is_zero()    const { return value() == ze::zero; }
 
         static zero top()    { return ze::unknown; }
         static zero bottom() { return ze::bottom; }
-    
+
         template< typename type >
         static zero lift( const type &v ) {
             if constexpr ( std::is_integral_v< type > || std::is_pointer_v< type > )
@@ -194,7 +194,7 @@ namespace __lava
         static zero op_sdiv( zr a, zr b ) { return div( a, b ); }
         static zero op_urem( zr a, zr b ) { return div( a, b ); }
         static zero op_srem( zr a, zr b ) { return div( a, b ); }
-    
+
         /* TODO: implement float arithmetic operations
         static zero op_fadd( zr, zr ) { return {}; }
         static zero op_fsub( zr, zr ) { return {}; }
