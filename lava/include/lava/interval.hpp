@@ -57,7 +57,7 @@ namespace __lava
 
         interval( tristate t )  : interval_storage( t ) {}
         interval( bool t )  : interval_storage( t ) {}
-        
+
         interval clone() const {
             auto const &self = static_cast< const interval& > ( *this );
             return interval( self->low, self->high );
@@ -97,7 +97,7 @@ namespace __lava
             return interval( v );
         }
 
-        template< typename type > static auto lift( type v )
+        template< typename type > static auto lift( type /* v */ )
             -> std::enable_if_t< !std::is_integral_v< type >, interval >
         {
             return mixin::fail();
@@ -166,9 +166,9 @@ namespace __lava
         static iv op_shl ( ir a, ir b ) { return a.get() << b.get(); }
         static iv op_ashr( ir a, ir b ) { return a.get() >> b.get(); } //FIXME
         static iv op_lshr( ir a, ir b ) { return a.get() >> b.get(); }
-        static iv op_and ( ir a, ir b ) { return { plus_infinity(), minus_infinity() }; } //FIXME
-        static iv op_or  ( ir a, ir b ) { return { plus_infinity(), minus_infinity() }; } //FIXME
-        static iv op_xor ( ir a, ir b ) { return { plus_infinity(), minus_infinity() }; } //FIXME
+        static iv op_and ( ir /* a */, ir /* b */ ) { return { plus_infinity(), minus_infinity() }; } //FIXME
+        static iv op_or  ( ir /* a */, ir /* b */ ) { return { plus_infinity(), minus_infinity() }; } //FIXME
+        static iv op_xor ( ir /* a */, ir /* b */ ) { return { plus_infinity(), minus_infinity() }; } //FIXME
 
         static void validity_check( interval &i )
         {
@@ -195,13 +195,13 @@ namespace __lava
 
             // lower bound correction
             if ( diff_low > bound ( 0 ) && diff_low <= bound ( choose_bound ) ) {
-                auto i = __lart_choose( bound_type( diff_low + 1 ) );
+                auto i = __lart_choose( int(bound_type( diff_low + 1 )) );
                 a->meet_low( a.low() + i );
                 b->meet_low( b.low() + diff_low - i );
             }
             // upper bound correction
             if ( diff_high > bound( 0 ) && diff_high <= bound( choose_bound ) ) {
-                auto i = __lart_choose( bound_type( diff_high + 1 ) );
+                auto i = __lart_choose( int(bound_type( diff_high + 1 )) );
                 a->meet_high( a.high() - i );
                 b->meet_high( b.high() - diff_high + i );
             }
@@ -217,13 +217,13 @@ namespace __lava
 
             // lower bound correction
             if ( diff_low > bound ( 0 ) && diff_low <= bound ( choose_bound ) ) {
-                auto i = __lart_choose( bound_type( diff_low + 1 ) );
+                auto i = __lart_choose( int(bound_type( diff_low + 1 )) );
                 a->meet_low( a.low() + i );
                 b->meet_high( b.high() - diff_low + i );
             }
             // upper bound correction
             if ( diff_high > bound( 0 ) && diff_high <= bound( choose_bound ) ) {
-                auto i = __lart_choose( bound_type( diff_high + 1 ) );
+                auto i = __lart_choose( int(bound_type( diff_high + 1 )) );
                 a->meet_high( a.high() - i );
                 b->meet_low( b.low() + diff_high - i );
             }
@@ -249,7 +249,7 @@ namespace __lava
                 auto new_high = div_up( r.low(), b.low() );
                 auto new_low = div_up( r.low(), b.high() );
                 a->meet_low( new_low );
-                auto i = __lart_choose( bound_type( new_high - new_low + 1 ) );
+                auto i = __lart_choose( int(bound_type( new_high - new_low + 1 )) );
                 a->meet_low( new_high - i );
                 b->meet_low( div_up( r.low(), ( new_high - i ) ) );
                 if ( a.is_bottom() || b.is_bottom() )
@@ -259,7 +259,7 @@ namespace __lava
             // upper bound correction
             if ( diff_high > bound( 0 ) && diff_high <= bound( choose_bound ) ) {
                 auto new_low = std::max( r.high() / b.high(), a.low() );
-                auto i = __lart_choose( bound_type( a.high() - new_low + 1 ) );
+                auto i = __lart_choose( int(bound_type( a.high() - new_low + 1 )) );
                 a->meet_high( new_low + i );
                 b->meet_high( r.high() / ( new_low + i ) );
                 if ( a.is_bottom() || b.is_bottom() )
@@ -316,7 +316,7 @@ namespace __lava
             b.intersect( a.get() );
             auto interval_size = a.high() - a.low();
             if ( interval_size > bound( 0 ) && interval_size <= bound( choose_bound ) ) {
-                auto i = __lart_choose( bound_type( interval_size ) );
+                auto i = __lart_choose( int(bound_type( interval_size )) );
                 a.intersect( { a.low() + i, a.low() + i } );
                 b.intersect( { b.low() + i, b.low() + i } );
             }
@@ -347,11 +347,11 @@ namespace __lava
             if ( intersection.empty() )
                 return;
 
-            int size = intersection.size();
-            if ( choose_bound < static_cast< const bound >( size ) )
+            auto size = intersection.size();
+            if ( choose_bound < bound_type( size ) )
                 return;
 
-            auto delim = __lart_choose( strict ? size + 1 : size ) + intersection.low;
+            auto delim = __lart_choose( strict ? int(size + 1) : int(size) ) + intersection.low;
             a.intersect( { delim, a.high() } );
             b.intersect( { b.low(), strict ? delim - 1 : delim } );
         }

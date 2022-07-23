@@ -43,7 +43,7 @@ namespace __lava
     struct to_tristate_second {};
     struct to_tristate_disabled {};
 
-    template< 
+    template<
         typename lowering_strategy_t,
         typename to_tristate_strategy_t
     >
@@ -85,7 +85,7 @@ namespace __lava
         {
             return static_cast< const product& >( *this );
         }
-    
+
         const left_type& left()  const { return self()->first; }
         const right_type& right() const { return self()->second; }
 
@@ -260,12 +260,12 @@ namespace __lava
             op( a->second );
         }
 
-        static void dump( pr a )
+        static void dump( pr /* a */ )
         {
             __builtin_unreachable();
         }
 
-        static std::string trace( pr a )
+        static std::string trace( pr /* a */ )
         {
             __builtin_unreachable();
         }
@@ -275,7 +275,7 @@ namespace __lava
         {
             return os << "(" << a->first << ", " << a->second << ")";
         }
-        
+
         // backward operations
         static void bop_add ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::add ), r, a, b ); }
         static void bop_sub ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::sub ), r, a, b ); }

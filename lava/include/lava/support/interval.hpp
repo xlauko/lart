@@ -278,7 +278,7 @@ namespace sup
 
         template< typename T >
         constexpr interval( const T &low, const T &high )
-            : low( low ), high( high )
+            : low( value_t(low) ), high( value_t(high) )
         {}
 
         template< typename T >
@@ -308,7 +308,7 @@ namespace sup
                 low = high = static_cast< bool >( t );
             }
         }
-        
+
         explicit constexpr interval( bool b )
             : low( b ), high( b )
         {}
@@ -443,7 +443,7 @@ namespace sup
                     interval non_zero = r.exclude( static_cast< bound_t > (0) );
                     return l / non_zero;
                 }
-                
+
 
 
                 interval int_neg = { r.low, static_cast< bound_t > (-1) };

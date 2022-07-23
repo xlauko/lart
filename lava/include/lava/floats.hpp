@@ -142,10 +142,10 @@ namespace __lava
     // };
 
     template< template< typename > typename storage >
-    struct floats : storage< float_storage > 
+    struct floats : storage< float_storage >
                  , domain_mixin< floats< storage > >
     {
-        
+
         using fl = float_storage;
         using fv = floats;
         using fr = const floats &;
@@ -215,7 +215,7 @@ namespace __lava
             f.intersect( constraint ? fl::pos : fl::pzero );
         }
 
-        static tristate to_tristate( fr f ) { return { ( tristate::value_t ) f->value }; }
+        static tristate to_tristate( fr f ) { return { tristate::value_t(f->value) }; }
 
 
         using elementary_op = fl::value_type[ 7 ][ 7 ];
@@ -331,7 +331,7 @@ namespace __lava
         };
 
         template< typename op_t >
-        static fl::value_type eval(op_t op, fl::value_type a, fl::value_type b )
+        static fl::value_type eval(op_t /* op */, fl::value_type /* a */, fl::value_type /* b */ )
         {
             fl::value_type res = fl::bottom;
 

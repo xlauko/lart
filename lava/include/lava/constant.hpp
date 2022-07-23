@@ -32,7 +32,7 @@ namespace __lava
         enum type { bv, fp, ptr } ty;
         bitwidth_t bw;
 
-        constant_data( uint64_t v, type t, bitwidth_t b ) 
+        constant_data( uint64_t v, type t, bitwidth_t b )
             : value( v ), ty( t ), bw( b )
         {}
     };
@@ -209,7 +209,7 @@ namespace __lava
 
         static void dump( cr c )
         {
-            printf( "%lu\n", c->value );
+            printf( "%llu\n", c->value );
         }
 
         static std::string trace( cr c )
