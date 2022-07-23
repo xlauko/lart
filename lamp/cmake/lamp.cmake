@@ -6,10 +6,6 @@ macro( register_domain domain )
     # general domain build properties/setup
     add_library( ${domain}-prop INTERFACE )
 
-    # target_compile_options( ${domain}-prop INTERFACE
-    #   -fno-exceptions -fno-rtti
-    # )
-
     target_include_directories( ${domain}-prop
       INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
