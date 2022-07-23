@@ -20,7 +20,7 @@
 
 #include <cc/logger.hpp>
 
-#include <sc/ranges.hpp>
+#include <sc/query.hpp>
 #include <sc/format.hpp>
 #include <sc/constant.hpp>
 
@@ -31,15 +31,12 @@
 #include <variant>
 #include <experimental/iterator>
 
-#include <range/v3/algorithm/any_of.hpp>
-#include <range/v3/range/conversion.hpp>
-#include <range/v3/view/transform.hpp>
+#include <sc/warnings.hpp>
 
 #include <sc/generator.hpp>
 
 namespace lart::op
 {
-
     struct abstract_pointer_default {};
     struct concrete_argument_default { unsigned index; };
 
@@ -365,6 +362,8 @@ namespace lart::op
     };
 
     struct phi : without_taints_base {
+        explicit phi(llvm::PHINode *node) : without_taints_base(node) {}
+
         std::string name() const { return "phi"; }
         std::string impl() const { llvm_unreachable( "invalid op" ); }
         args_t arguments() const { llvm_unreachable( "invalid op" ); }
@@ -398,7 +397,7 @@ namespace lart::op
 
     inline bool with_abstract_arg( const operation &o )
     {
-        return ranges::any_of( arguments(o), argument::is_abstract );
+        return sc::query::query(arguments(o)).any( argument::is_abstract );
     }
 
     inline bool returns_value( const operation &o )
@@ -431,16 +430,13 @@ namespace lart::op
         return out.has_value() ? extract_default( out.value(), types ) : sc::void_t();
     }
 
-    namespace sv = sc::views;
-
     inline auto unique_name_suffix(const operation &o)
     {
-        auto values = ranges::views::transform( [] (const auto &o_) { return o_.value; } );
-        auto format = ranges::views::transform( [] (auto t) { return sc::fmt::type(t); } );
-
         std::stringstream suff;
         auto args = arguments(o);
-        auto fmt = args | values | sv::types | format;
+        auto get_value = [] (auto o) { return o.value; };
+        auto fmt = sc::query::query( args ).map( get_value ).map( sc::query::type ).map( sc::fmt::type );
+
         std::copy(fmt.begin(), fmt.end(), std::experimental::make_ostream_joiner(suff, "."));
         return suff.str();
     }
@@ -489,7 +485,7 @@ namespace lart::op
     {
         llvm::IRBuilder<> irb( op::location(op) );
         auto mod = irb.GetInsertBlock()->getModule();
-        auto arg_types = ranges::to_vector( args | sv::types );
+        auto arg_types = sc::query::types( args ).freeze();
         auto rty = extract_return_type( op, arg_types );
 
         spdlog::debug("make call: {} :: {} -> {}", intr_name, sc::fmt::llvm_to_string(arg_types), sc::fmt::llvm_to_string(rty));

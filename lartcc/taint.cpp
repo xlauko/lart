@@ -17,13 +17,10 @@
 #include <cc/taint.hpp>
 #include <cc/lifter.hpp>
 
-#include <sc/ranges.hpp>
-
-#include <range/v3/range/conversion.hpp>
+#include <sc/query.hpp>
 
 namespace lart::taint
 {
-    namespace sv = sc::views;
     namespace detail
     {
         std::string name( const operation &op )
@@ -65,7 +62,10 @@ namespace lart::taint
     llvm::CallInst * make_call( llvm::Module &module, const operation &op )
     {
         lart::lifter lifter( module, op );
-        auto args = ranges::to_vector( detail::arguments( lifter, op ) );
+        std::vector< llvm::Value * > args;
+        for (auto arg : detail::arguments( lifter, op )) {
+            args.push_back(arg);
+        }
         return op::make_call( op, args, detail::name( op ) );
     }
 

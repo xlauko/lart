@@ -18,14 +18,13 @@
 
 #include <cc/operation.hpp>
 
-#include <sc/ranges.hpp>
+#include <sc/query.hpp>
 
 #include <variant>
 
 namespace lart::ir
 {
     using operation = lart::op::operation;
-    namespace sv = sc::views;
 
     struct intrinsic
     {

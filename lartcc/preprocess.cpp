@@ -20,7 +20,7 @@
 #include <cc/util.hpp>
 #include <cc/logger.hpp>
 
-#include <sc/ranges.hpp>
+#include <sc/query.hpp>
 
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Instructions.h>
@@ -30,8 +30,6 @@
 
 namespace lart
 {
-    namespace sv = sc::views;
-
     void preprocessor::run( llvm::Function *fn )
     {
         if ( !util::tag_function_with_metadata( *fn, preprocessor::tag ) )
@@ -75,7 +73,7 @@ namespace lart
             newCont->getInstList().erase( select );
         };
 
-        auto selects = sv::filter< llvm::SelectInst >( *fn );
+        auto selects = sc::query::filter_llvm< llvm::SelectInst >( *fn );
         for ( auto select : selects )
             lower( select );
     }
@@ -112,11 +110,11 @@ namespace lart
         };
 
         auto nonbr = [] ( auto i ) {
-            return ranges::any_of( i->users(), sv::isnot< llvm::BranchInst > );
+            return sc::query::query( i->users() ).any( sc::query::isnot< llvm::BranchInst > );
         };
 
-        auto cmps = sv::filter< llvm::CmpInst >( *fn );
-        for ( auto cmp : cmps | ranges::views::filter( nonbr ) )
+        auto cmps = sc::query::filter_llvm< llvm::CmpInst >( *fn );
+        for ( auto cmp : cmps.filter( nonbr ) )
             lower( cmp );
     }
 

@@ -37,18 +37,21 @@ namespace lart::backend
 
         auto test = [&] ( auto arg ) -> llvm::Value* {
             if ( arg->getType()->isIntegerTy() ) {
-                bld = bld | sc::action::zfit( arg, sc::i8() )
-                          | sc::action::call( testtaint_fn, { std::nullopt } );
+                bld = std::move(bld)
+                    | sc::action::zfit( arg, sc::i8() )
+                    | sc::action::call( testtaint_fn, { std::nullopt } );
                 return bld.stack.back();
             }
             else if ( arg->getType()->isFloatingPointTy() ) {
-                bld = bld | sc::action::fptoui( arg, sc::i8() )
-                          | sc::action::call( testtaint_fn, { std::nullopt } );
+                bld = std::move(bld)
+                    | sc::action::fptoui( arg, sc::i8() )
+                    | sc::action::call( testtaint_fn, { std::nullopt } );
                 return bld.stack.back();
             }
             else if ( arg->getType()->isPointerTy() ) {
-                bld = bld | sc::action::ptrtoint( arg, sc::i8() )
-                          | sc::action::call( testtaint_fn, { std::nullopt } );
+                bld = std::move(bld)
+                    | sc::action::ptrtoint( arg, sc::i8() )
+                    | sc::action::call( testtaint_fn, { std::nullopt } );
                 return bld.stack.back();
 
             }
@@ -66,7 +69,7 @@ namespace lart::backend
                     auto abstract = fn->getArg(pos + 1);
                     auto taint = test( concrete );
 
-                    bld = bld | sc::action::or_{ tainted, taint };
+                    bld = std::move(bld) | sc::action::or_{ tainted, taint };
                     tainted = bld.stack.back();
 
                     args.push_back( taint );
@@ -77,11 +80,11 @@ namespace lart::backend
                 }
                 case op::argtype::test: {
                     auto taint = test( fn->getArg(pos) );
-                    bld = bld | sc::action::or_{ tainted, taint };
+                    bld = std::move(bld) | sc::action::or_{ tainted, taint };
                     tainted = bld.stack.back();
                     pos += 1;
                     break;
-                } 
+                }
                 case op::argtype::concrete: {
                     args.push_back( fn->getArg(pos) );
                     pos += 1;
@@ -99,17 +102,17 @@ namespace lart::backend
         auto abstract_block = "abstract.path";
         auto concrete_block = "concrete.path";
 
-        bld = bld
+        bld = std::move(bld)
             | sc::action::create_block{ abstract_block }
             | sc::action::create_block{ concrete_block };
 
         auto abb = bld.block( abstract_block );
         auto cbb = bld.block( concrete_block );
-        
+
         auto fty = bld.function_type_from_value( fn->getArg(0) );
         auto callee = llvm::FunctionCallee( fty, fn->getArg(0) );
 
-        bld = bld 
+        bld = std::move(bld)
             | sc::action::set_block{ "entry" }
             | sc::action::condbr( tainted, abb, cbb )
             /* abstract path */
@@ -120,9 +123,9 @@ namespace lart::backend
             | sc::action::set_block{ concrete_block };
 
         if ( auto def = op::default_value(i.op); def.has_value() ) {
-            bld | sc::action::ret{ extract_default( def.value(), args ) };
+            std::move(bld) | sc::action::ret{ extract_default( def.value(), args ) };
         } else {
-            bld | sc::action::ret();
+            std::move(bld) | sc::action::ret();
         }
     }
 
