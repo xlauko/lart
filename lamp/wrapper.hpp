@@ -44,45 +44,45 @@ using ref = domain_ref< dom >;
 struct wrapper
 {
     template< typename op_t >
-    __inline static __lamp_ptr wrap( op_t op ) { return { op().disown() }; }
+    __lart_inline static __lamp_ptr wrap( op_t op ) { return { op().disown() }; }
 
     template< typename op_t, typename... args_t >
-    __inline static __lamp_ptr wrap( op_t op, __lamp_ptr arg, args_t ...args )
+    __lart_inline static __lamp_ptr wrap( op_t op, __lamp_ptr arg, args_t ...args )
     {
         ref a( arg.ptr );
-        return wrap( [&]( auto ...args_ ) __inline { return op( a, args_... ); }, args... );
+        return wrap( [&]( auto ...args_ ) __lart_inline { return op( a, args_... ); }, args... );
     }
 
     template< typename op_t, typename arg_t, typename... args_t >
-    __inline static auto wrap( op_t op, const arg_t &arg, args_t ...args )
+    __lart_inline static auto wrap( op_t op, const arg_t &arg, args_t ...args )
         -> std::enable_if_t< !std::is_same_v< arg_t, dom >, __lamp_ptr >
     {
-        return wrap( [&] ( auto ...args_ ) __inline { return op( arg, args_... ); }, args... );
+        return wrap( [&] ( auto ...args_ ) __lart_inline { return op( arg, args_... ); }, args... );
     }
 
     template< typename op_t >
-    __inline static void wrap_void( op_t op ) { op(); }
+    __lart_inline static void wrap_void( op_t op ) { op(); }
 
     template< typename op_t, typename... args_t >
-    __inline static void wrap_void( op_t op, __lamp_ptr arg, args_t ...args )
+    __lart_inline static void wrap_void( op_t op, __lamp_ptr arg, args_t ...args )
     {
         ref a( arg.ptr );
-        wrap_void( [&]( auto ...args_ ) __inline { op( a, args_... ); }, args... );
+        wrap_void( [&]( auto ...args_ ) __lart_inline { op( a, args_... ); }, args... );
     }
 
     template< typename op_t, typename arg_t, typename... args_t >
-    __inline static auto wrap_void( op_t op, const arg_t &arg, args_t ...args )
+    __lart_inline static auto wrap_void( op_t op, const arg_t &arg, args_t ...args )
         -> std::enable_if_t< !std::is_same_v< arg_t, dom >, void >
     {
-        wrap_void( [&] ( auto ...args_ ) __inline { op( arg, args_... ); }, args... );
+        wrap_void( [&] ( auto ...args_ ) __lart_inline { op( arg, args_... ); }, args... );
     }
 };
 
 template< typename... args_t >
-__inline static __lamp_ptr wrap( const args_t & ...args ) { return wrapper::wrap( args... ); }
+__lart_inline static __lamp_ptr wrap( const args_t & ...args ) { return wrapper::wrap( args... ); }
 
 template< typename... args_t >
-__inline static void wrap_void( const args_t & ...args ) { wrapper::wrap_void( args... ); }
+__lart_inline static void wrap_void( const args_t & ...args ) { wrapper::wrap_void( args... ); }
 
 template< typename type >
 inline type defualt_tainted_value() {
@@ -278,7 +278,7 @@ extern "C"
 
     void __lamp_assume( __lamp_ptr a, bool c ) {
         auto r = ref( a.ptr );
-        dom::assume( r, c ); 
+        dom::assume( r, c );
     }
     __lamp_ptr __lamp_extract( __lamp_ptr a, bw s, bw e ) { return wrap( dom::op_extract, a, s, e ); }
 
@@ -322,7 +322,7 @@ namespace lamp::detail
     {
         return uintptr_t(addr) - uintptr_t(meta->origin);
     }
-    
+
     void freeze( __lamp_ptr val, void *addr, size_t bytes )
     {
         __lart_poke( addr, bytes, val.ptr );

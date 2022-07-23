@@ -85,7 +85,7 @@ namespace __lamp
         }
 
         template< typename to, typename from >
-        __inline static decltype(auto) lift_to( const from &f )
+        __lart_inline static decltype(auto) lift_to( const from &f )
         {
             if constexpr ( std::is_base_of_v< index_tag, from > )
             {
@@ -112,7 +112,7 @@ namespace __lamp
         }
 
         template< typename op_t, int idx = 0, typename... args_t >
-        __inline static self in_domain( int dom, op_t op, const args_t & ... args )
+        __lart_inline static self in_domain( int dom, op_t op, const args_t & ... args )
         {
             if constexpr ( idx < doms::size )
             {
@@ -128,7 +128,7 @@ namespace __lamp
         }
 
         template< typename op_t, typename sl_t, int idx = 0 >
-        __inline static auto cast_one( op_t op, const sl_t &v )
+        __lart_inline static auto cast_one( op_t op, const sl_t &v )
         {
             if constexpr ( idx < doms::size )
             {
@@ -155,21 +155,21 @@ namespace __lamp
         }
 
         template< typename op_t >
-        __inline static auto cast( op_t op ) { return op(); }
+        __lart_inline static auto cast( op_t op ) { return op(); }
 
         template< typename op_t, typename arg_t, typename... args_t >
-        __inline static auto cast( op_t op, const arg_t &a, const args_t & ... args )
+        __lart_inline static auto cast( op_t op, const arg_t &a, const args_t & ... args )
         {
-            auto rec = [&]( const auto &c ) __inline
+            auto rec = [&]( const auto &c ) __lart_inline
             {
-                return cast( [&]( const auto & ... cs ) __inline { return op( c, cs... ); }, args... );
+                return cast( [&]( const auto & ... cs ) __lart_inline { return op( c, cs... ); }, args... );
             };
 
             return cast_one( rec, a );
         }
 
         template< typename op_t, typename sl_t, int idx = 0 >
-        __inline static void cast_one_void( op_t op, const sl_t &v )
+        __lart_inline static void cast_one_void( op_t op, const sl_t &v )
         {
             if constexpr ( idx < doms::size )
             {
@@ -197,25 +197,25 @@ namespace __lamp
         }
 
         template< typename op_t >
-        __inline static void cast_void( op_t op ) { op(); }
+        __lart_inline static void cast_void( op_t op ) { op(); }
 
         template< typename op_t, typename arg_t, typename... args_t >
-        __inline static void cast_void( op_t op, const arg_t &a, const args_t & ... args )
+        __lart_inline static void cast_void( op_t op, const arg_t &a, const args_t & ... args )
         {
-            auto rec = [&]( const auto &c ) __inline
+            auto rec = [&]( const auto &c ) __lart_inline
             {
-                cast_void( [&]( const auto & ... cs ) __inline { op( c, cs... ); }, args... );
+                cast_void( [&]( const auto & ... cs ) __lart_inline { op( c, cs... ); }, args... );
             };
 
             cast_one_void( rec, a );
         }
 
         template< typename op_t, typename... args_t >
-        __inline static self op( op_t operation, const args_t & ... args )
+        __lart_inline static self op( op_t operation, const args_t & ... args )
         {
             int dom = join( args.tag() ... );
 
-            auto downcasted = [&]( const auto & ... args ) __inline
+            auto downcasted = [&]( const auto & ... args ) __lart_inline
             {
                 return in_domain( dom, operation, args... );
             };
@@ -224,7 +224,7 @@ namespace __lamp
         }
 
         template< typename op_t, int idx = 0, typename... args_t >
-        __inline static void in_domain_void( int dom, op_t op, const args_t & ... args )
+        __lart_inline static void in_domain_void( int dom, op_t op, const args_t & ... args )
         {
             if constexpr ( idx < doms::size )
             {
@@ -240,11 +240,11 @@ namespace __lamp
         }
 
         template< typename op_t, typename... args_t >
-        __inline static void op_void( op_t operation, const args_t & ... args )
+        __lart_inline static void op_void( op_t operation, const args_t & ... args )
         {
             int dom = join( args.tag() ... );
 
-            auto downcasted = [&]( const auto & ... args ) __inline
+            auto downcasted = [&]( const auto & ... args ) __lart_inline
             {
                 in_domain_void( dom, operation, args... );
             };
@@ -338,7 +338,7 @@ namespace __lamp
 
         static self op_concat ( sref a, sref b ) { return op( wrap( op::concat ), a, b ); }
         static self op_extract( sref a, bw f, bw t ) { return op( wrap( op::extract, f, t ), a ); }
-    
+
         static void op_store( sref a, sref b, bw w )
         {
            op_void( wrap( op::store, w ), a, scalar_w( b ) );

@@ -22,19 +22,19 @@
 
 #include "shadowmeta.h"
 
-#define __annotate( x )   __attribute__(( __annotate__( #x ) ))
-#define __inline          __attribute__(( __always_inline__ ))
-#define __noinline        __attribute__(( __noinline__ ))
-#define __flatten         __attribute__(( __flatten__ ))
+#define __lart_annotate( x )  __attribute__(( __annotate__( #x ) ))
+#define __lart_inline         __attribute__(( __always_inline__ ))
+#define __lart_noinline       __attribute__(( __noinline__ ))
+#define __lart_flatten        __attribute__(( __flatten__ ))
 
-#define __ignore_return   __annotate( lart.transform.ignore.ret )
-#define __ignore_args     __annotate( lart.transform.ignore.arg )
-#define __noalias_return  __annotate( lart.noalias.ret )
-#define __noalias_args    __annotate( lart.noalias.arg )
-#define __noalias         __noalias_return __noalias_args
-#define __unused          __attribute__((unused))
-#define __used            __attribute__((used))
-#define __export          __attribute__((weak))
+#define __lart_ignore_return   __lart_annotate( lart.transform.ignore.ret )
+#define __lart_ignore_args     __lart_annotate( lart.transform.ignore.arg )
+#define __lart_noalias_return  __lart_annotate( lart.noalias.ret )
+#define __lart_noalias_args    __lart_annotate( lart.noalias.arg )
+#define __lart_noalias         __lart_noalias_return __lart_noalias_args
+#define __lart_unused          __attribute__((unused))
+#define __lart_used            __attribute__((used))
+#define __lart_export          __attribute__((weak))
 #define __lart_stub       { __builtin_unreachable(); }
 
 #define __lart_ignore_diagnostic \
@@ -61,21 +61,21 @@ extern "C" {
     * TODO The second problem might have to be tackled in the verification
     * algorithm anyway, since there might be other ways to trigger the same
     * problem. */
-    __export void __lart_stash( void* abstract ) __lart_stub;
+    __lart_export void __lart_stash( void* abstract ) __lart_stub;
 
-    __export void* __lart_unstash()  __lart_stub;
+    __lart_export void* __lart_unstash()  __lart_stub;
 
-    __export bool __lart_test_taint( uint8_t byte ) __lart_stub;
+    __lart_export bool __lart_test_taint( uint8_t byte ) __lart_stub;
 
-    __export void __lart_set_taint( void *value, unsigned bytes )  __lart_stub;
+    __lart_export void __lart_set_taint( void *value, unsigned bytes )  __lart_stub;
 
-    __export int __lart_choose( int count ) __lart_stub;
+    __lart_export int __lart_choose( int count ) __lart_stub;
 
-    __export void __lart_cancel() __lart_stub;
+    __lart_export void __lart_cancel() __lart_stub;
 
-    __export void __lart_poke( void *addr, size_t bytes, void* value );
-    
-    __export struct __lart_shadow_meta *__lart_peek( const void *addr );
+    __lart_export void __lart_poke( void *addr, size_t bytes, void* value );
+
+    __lart_export struct __lart_shadow_meta *__lart_peek( const void *addr );
 
 #ifdef __cplusplus
 }
