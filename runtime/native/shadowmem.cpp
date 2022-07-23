@@ -14,37 +14,39 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#pragma once
-
 #include <cstdint>
 #include <string_view>
 
+#include "shadowmem.hpp"
+
 namespace __lart::rt
 {
-    using shadow_label_t = std::uint64_t;
+    shadow_label_t create_shadow_label( std::string_view name, void *meta) {
+        return 0; // TODO
+    }
 
-    struct shadow_label_info {
-        // Fields for union labels, set to 0 for base labels.
-        shadow_label_t l1;
-        shadow_label_t l2;
+    void set_shadow_label(shadow_label_t label, void *addr, size_t size) {}
 
-        // Fields for base labels.
-        const char *desc;
-        void *userdata;
-    };
+    shadow_label_t read_shadow_label(const void *addr, size_t size) {
+        return 0; // TODO
+    }
 
-    shadow_label_t create_shadow_label( std::string_view name, void *meta);
+    const struct shadow_label_info* get_shadow_label_info(shadow_label_t label) {
+        return nullptr;
+    }
 
-    void set_shadow_label(shadow_label_t label, void *addr, size_t size);
+    shadow_label_t has_label_with_desc(shadow_label_t label, const char *desc) {
+        return 0; // TODO
+    }
 
-    shadow_label_t read_shadow_label(const void *addr, size_t size);
+    shadow_label_t get_shadow_label(long data) {
+        return 0; // TODO
+    }
 
-    const struct shadow_label_info* get_shadow_label_info(shadow_label_t label);
+    bool has_shadow_label(shadow_label_t label, shadow_label_t elem) {
+        return false; // TODO
+    }
 
-    shadow_label_t has_label_with_desc(shadow_label_t label, const char *desc);
 
-    shadow_label_t get_shadow_label(long data);
-
-    bool has_shadow_label(shadow_label_t label, shadow_label_t elem);
 
 } // namespace __lart::rt
