@@ -21,14 +21,12 @@
 #include <cc/ir.hpp>
 #include <cc/taint.hpp>
 
-#include <sc/ranges.hpp>
+#include <sc/query.hpp>
 
 #include <algorithm>
 
 namespace lart
 {
-    namespace sv = sc::views;
-
     bool is_abstract( const dfa::types::type &type )
     {
         return static_cast< bool >( type.back().abstract );
@@ -139,13 +137,13 @@ namespace lart
             }
         }
 
-        for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
+        for ( auto store : sc::query::filter_llvm< llvm::StoreInst >( module ) ) {
             if ( is_abstract( store->getPointerOperand() ) )
                 if ( auto op = make_operation(store); op.has_value() )
                     co_yield op.value();
         }
 
-        for ( auto br : sv::filter< llvm::BranchInst >( module ) ) {
+        for ( auto br : sc::query::filter_llvm< llvm::BranchInst >( module ) ) {
             if ( !br->isConditional() )
                 continue;
             auto cond = br->getCondition();
@@ -165,7 +163,7 @@ namespace lart
             return false;
         };
 
-        for ( auto call : sv::filter< llvm::CallInst >( module ) ) {
+        for ( auto call : sc::query::filter_llvm< llvm::CallInst >( module ) ) {
             if ( !is_testtaint(call) && !is_lamp_call(call) ) {
                 // TODO stash only possibly abstract arguments
                 if ( has_abstract_arg(call) ) {
@@ -178,7 +176,7 @@ namespace lart
             }
         }
 
-        for ( auto ret : sv::filter< llvm::ReturnInst >( module ) ) {
+        for ( auto ret : sc::query::filter_llvm< llvm::ReturnInst >( module ) ) {
             auto val = ret->getReturnValue();
             if ( is_abstract(val) )
                 co_yield op::stash(val, ret);
@@ -204,7 +202,10 @@ namespace lart
         if ( op::with_taints( op ) )
             return { taint::make_call( m, op ), op };
 
-        auto args = sc::views::to_vector( op::duplicated_arguments(op) );
+        std::vector< llvm::Value * > args;
+        for (auto arg : op::duplicated_arguments(op)) {
+            args.push_back(arg);
+        }
         auto name = "lart." + op::name(op);
         return { op::make_call( op, args, name ), op };
     }

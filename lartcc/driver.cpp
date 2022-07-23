@@ -25,7 +25,7 @@
 #include <cc/backend/native.hpp>
 
 #include <sc/erase.hpp>
-#include <sc/ranges.hpp>
+#include <sc/query.hpp>
 
 #include <queue>
 #include <vector>
@@ -33,8 +33,6 @@
 
 namespace lart
 {
-    namespace sv = sc::views;
-
     bool driver::run()
     {
         spdlog::cfg::load_env_levels();
@@ -46,7 +44,7 @@ namespace lart
         // lower pointer arithmetic to scalar operations
         {
             sc::deferred_erase_vector erase([&] (auto inst) { types.erase(inst); });
-            
+
             for ( auto &[val, type] : types ) {
                 if ( auto gep = llvm::dyn_cast< llvm::GetElementPtrInst >( val ) ) {
                     for ( auto [src, inst] : lower_pointer_arithmetic( gep ) ) {

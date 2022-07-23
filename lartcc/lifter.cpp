@@ -17,18 +17,17 @@
 #include <cc/lifter.hpp>
 #include <cc/util.hpp>
 
-#include <sc/ranges.hpp>
+#include <sc/query.hpp>
+#include <sc/generator.hpp>
 #include <sc/builder.hpp>
 
-#include <range/v3/algorithm/count_if.hpp>
+#include <ranges>
 
 #include <numeric>
 #include <algorithm>
 
 namespace lart
 {
-    namespace sv = sc::views;
-
     namespace arg
     {
         struct with_taint
@@ -97,7 +96,7 @@ namespace lart
 
         auto count_taints( const std::vector< argument > &args )
         {
-            return ranges::count_if( args, with_taint );
+            return std::count_if( args.begin(), args.end(), with_taint );
         }
 
         auto final_args( llvm::BasicBlock *where
@@ -105,7 +104,7 @@ namespace lart
                        , const auto &types )
         {
             size_t count = 0;
-            auto fargs = args | ranges::views::transform( [&] (const auto &a) {
+            return sc::query::query( args ).map( [&] (const auto &a) {
                 auto value = final( a );
                 auto dst = types[ count++ ];
                 if  ( value->getType() != dst ) {
@@ -113,8 +112,7 @@ namespace lart
                     return irb.CreatePointerCast( value, dst );
                 }
                 return value;
-            });
-            return ranges::to_vector( fargs );
+            }).freeze();
         }
 
     } // namespace detail
@@ -164,7 +162,10 @@ namespace lart
                  | sc::action::function{ function() }
                  | sc::action::create_block{ "entry" };
 
-        auto args = ranges::to_vector( detail::arguments( *this ) );
+        std::vector< argument > args;
+        for (auto arg : detail::arguments( *this )) {
+            args.push_back(arg);
+        }
 
         auto wrap = [&] ( auto val ) {
             auto name = "__lamp_wrap_" + [&] {
@@ -182,7 +183,7 @@ namespace lart
             std::string lift_block  = "lift." + std::to_string(pos);
             std::string merge_block = "merge." + std::to_string(pos);
             if ( auto a = std::get_if< arg::with_taint >( &arg ) ) {
-                bld = bld
+                bld = std::move(bld)
                     | sc::action::create_block{ lift_block }
                     | sc::action::create_block{ merge_block }
                     | sc::action::set_block{ entry_block }
@@ -195,7 +196,7 @@ namespace lart
 
                 args_t wrap_args{ a->concrete };
 
-                bld = bld
+                bld = std::move(bld)
                     | sc::action::set_block{ entry_block }
                     | sc::action::condbr( a->taint, mbb, lbb )
                     | sc::action::set_block{ lift_block }
@@ -205,9 +206,9 @@ namespace lart
                         auto wrapped = builder->stack.back();
                         edges.push_back({ wrapped, builder->current_block });
                     })
-                    | sc::action::branch( mbb )
+                    | sc::action::branch{ mbb }
                     | sc::action::set_block{ merge_block };
-                bld = bld
+                bld = std::move(bld)
                     /* merge block */
                     | sc::action::phi{ edges };
 
@@ -228,8 +229,8 @@ namespace lart
         auto impl = module.getFunction( op::impl(op) );
         auto types = impl->getFunctionType()->params();
         auto final_args = detail::final_args( bld.current_block, args, types );
-        bld | sc::action::call{ impl, std::span(final_args) }
-            | sc::action::ret();
+        std::move(bld) | sc::action::call{ impl, std::span(final_args) }
+                       | sc::action::ret();
     }
 
 } // namespace lart

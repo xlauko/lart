@@ -22,7 +22,7 @@
 #include <cc/logger.hpp>
 
 #include <llvm/Support/ErrorHandling.h>
-#include <svf/SVF-FE/PAGBuilder.h>
+// #include <svf/SVF-FE/PAGBuilder.h>
 #include <svf/SVF-FE/LLVMModule.h>
 #include <svf/WPA/Andersen.h>
 
@@ -176,7 +176,7 @@ namespace lart::dfa::detail
 
         auto unif_edge =  [] ( auto l, auto r ) { return edge{ l, r, type::uniform }; };
         auto load_edge =  [] ( auto l, auto r ) { return edge{ l, r, type::load }; };
-        auto store_edge = [] ( auto l, auto r ) { return edge{ l, r, type::store }; };
+        // auto store_edge = [] ( auto l, auto r ) { return edge{ l, r, type::store }; };
 
         edges_t edges;
 
@@ -199,8 +199,8 @@ namespace lart::dfa::detail
             {
                 if ( lhs == s->getValueOperand() )
                 {
-                    for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
-                        push( store_edge( lhs, p ) );
+                    // for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
+                    //     push( store_edge( lhs, p ) );
                     // TODO: stores.insert( s );
                 }
             },
@@ -226,25 +226,25 @@ namespace lart::dfa::detail
         return edges;
     }
 
-    type_map dataflow_analysis::run_from( const roots_map &roots )
+    type_map dataflow_analysis::run_from( const roots_map & /* roots */ )
     {
         spdlog::debug( "setup svf module" );
-        auto svfmodule = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule( module );
-        assert( svfmodule != nullptr && "SVF Module is null" );
+        // auto svfmodule = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule( module );
+        // assert( svfmodule != nullptr && "SVF Module is null" );
 
-        SVF::PAGBuilder builder;
-        auto pag = builder.build( svfmodule );
-        assert( pag != nullptr && "SVF Module is null" );
+        // SVF::PAGBuilder builder;
+        // auto pag = builder.build( svfmodule );
+        // assert( pag != nullptr && "SVF Module is null" );
 
-        aliases.init( pag );
+        // aliases.init( pag );
 
-        for ( const auto  &[call, kind] : roots ) {
-            types.add( call, kind );
-            push( call );
-        }
+        // for ( const auto  &[call, kind] : roots ) {
+        //     types.add( call, kind );
+        //     push( call );
+        // }
 
-        while ( !worklist.empty() )
-            process( pop() );
+        // while ( !worklist.empty() )
+        //     process( pop() );
 
         return types;
     }

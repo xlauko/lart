@@ -39,14 +39,14 @@ namespace lart::aa
             return pta->getPAG()->getValueNode(value);
         }
 
-        inline sc::generator< llvm::Value * > pointsto( llvm::Value *value )
-        {
-            for (auto pts : pta->getPts( node( value ) ) ) {
-                auto target = pta->getPAG()->getPAGNode(pts);
-                if ( target->hasValue() )
-                    co_yield const_cast< llvm::Value * >( target->getValue() );
-            }
-        }
+        // inline sc::generator< llvm::Value * > pointsto( llvm::Value *value )
+        // {
+        //     for (auto pts : pta->getPts( node( value ) ) ) {
+        //         auto target = pta->getPAG()->getPAGNode(pts);
+        //         if ( target->hasValue() )
+        //             co_yield const_cast< llvm::Value * >( target->getValue() );
+        //     }
+        // }
 
         SVF::AndersenWaveDiff * pta = nullptr;
     };
