@@ -41,7 +41,6 @@ vcpkg_cmake_config_fixup(
   CONFIG_PATH lib/cmake/svf
 )
 
-
 file( REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include" )
 
 file(

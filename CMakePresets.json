@@ -16,7 +16,6 @@
                 "CMAKE_CONFIGURATION_TYPES": "Release;RelWithDebInfo;Debug",
                 "ENABLE_TESTING": "ON",
                 "VCPKG_OVERLAY_PORTS": "${sourceDir}/ports",
-                "VCPKG_KEEP_ENV_VARS": "LLVM_INSTALL_DIR",
                 "LLVM_INSTALL_DIR": "$env{LLVM_INSTALL_DIR}"
             }
         }
