@@ -14,6 +14,10 @@ project( lart VERSION 0.1.0
   HOMEPAGE_URL "https://github.com/xlauko/lart"
 )
 
+# Globally set the required C++ standard
+set( CMAKE_CXX_STANDARD 20 )
+set( CMAKE_CXX_EXTENSIONS ON )
+
 add_subdirectory( external )
 add_subdirectory( lartcc )
 add_subdirectory( runtime )
