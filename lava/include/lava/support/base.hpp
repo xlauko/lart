@@ -19,12 +19,7 @@
 
 #include <cstdint>
 #include <cstddef>
-
-// fix lava release build with system glibc
-#define __lava_cplusplus __cplusplus
-#undef __cplusplus
-#include <string.h>
-#define __cplusplus __lava_cplusplus
+#include <cstring>
 
 #include <string>
 #include <memory>

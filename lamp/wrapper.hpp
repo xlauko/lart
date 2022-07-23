@@ -342,7 +342,7 @@ namespace lamp::detail
 
             // truncate
             if (meta->bytes > bytes) {
-                return __lamp_trunc( { meta->value }, bytes * 8 );
+                return __lamp_trunc( { meta->value }, bw(bytes * 8) );
             }
 
             // todo concat multiple values

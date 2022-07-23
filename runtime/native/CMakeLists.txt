@@ -21,11 +21,6 @@ add_library( native
 set_property( TARGET native PROPERTY POSITION_INDEPENDENT_CODE ON )
 set_property( TARGET native PROPERTY CXX_STANDARD 20 )
 
-target_compile_options( native PUBLIC
-  -fno-exceptions -fno-rtti
-)
-
-
 target_include_directories( native
   PUBLIC
     $<INSTALL_INTERFACE:include>
