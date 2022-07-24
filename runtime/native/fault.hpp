@@ -17,6 +17,7 @@
 #pragma once
 
 #include <string_view>
+#include <cstdio>
 #include <array>
 
 namespace __lart::rt
@@ -29,7 +30,7 @@ namespace __lart::rt
         using storage = std::array< char, report_reserve_size >;
 
         constexpr fixed_report( std::string_view report ) noexcept;
-        
+
         [[nodiscard]] constexpr inline std::string_view what() const noexcept
         {
             return std::string_view( _report.data(), _report_size );
@@ -48,12 +49,12 @@ namespace __lart::rt
 
         explicit constexpr report_payload( fixed_report report ) noexcept
             : _report(report.what()) {}
-        
+
         [[nodiscard]] constexpr inline std::string_view what() const noexcept
         {
             return _report;
         }
-        
+
         template< typename stream >
         friend auto operator<<(stream &os, const report_payload &report) noexcept -> decltype( os << "" )
         {
@@ -70,22 +71,20 @@ namespace __lart::rt
         static constexpr source_location current(
             std::string_view file = __builtin_FILE(),
             std::string_view function = __builtin_FUNCTION(),
-            unsigned line = __builtin_LINE(),
-            unsigned column = __builtin_COLUMN()
+            unsigned line = __builtin_LINE()
         ) noexcept;
-    
+
         constexpr source_location( std::string_view file
-                                 , std::string_view func 
-                                 , unsigned line, unsigned column) noexcept
-            :  _file(file), _func(func), _line(line), _column(column)
+                                 , std::string_view func
+                                 , unsigned line) noexcept
+            :  _file(file), _func(func), _line(line)
         {}
-        
+
         constexpr std::string_view file() const noexcept { return _file; }
         constexpr std::string_view function() const noexcept { return _func; }
 
         constexpr unsigned line() const noexcept { return _line; }
-        constexpr unsigned column() const noexcept { return _column; }
-        
+
         template< typename stream >
         friend auto operator<<( stream &os, const source_location &loc ) noexcept -> decltype( os << "" )
         {
@@ -93,7 +92,7 @@ namespace __lart::rt
             std::sprintf(line.data(), "%d", loc.line());
             return os << loc.file() << ":" << loc.function() << ":" << line.data();
         }
-        
+
     private:
         std::string_view _file;
         std::string_view _func;
