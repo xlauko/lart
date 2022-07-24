@@ -24,6 +24,7 @@
 
 #include <csignal>
 #include <cstdio>
+#include <algorithm>
 
 #include "utils.hpp"
 
@@ -42,7 +43,7 @@ namespace __lart::rt
             }
             return std::copy( report.begin(), report.end(), _report.begin() );
         } ();
-        
+
         _report_size = std::distance( _report.begin(), end );
     }
 
@@ -51,10 +52,10 @@ namespace __lart::rt
     constexpr source_location source_location::current(
         std::string_view file,
         std::string_view function,
-        unsigned line, unsigned column
+        unsigned line
     ) noexcept
     {
-        return source_location( file, function, line, column );
+        return source_location( file, function, line );
     }
 
     struct fault_handler
@@ -70,7 +71,7 @@ namespace __lart::rt
         void handle_assert_failed(const fault_event &event) const noexcept
         {
             file_stream out( stderr );
-            out << "[lart fault] assertion " << event.report << " failed at: " 
+            out << "[lart fault] assertion " << event.report << " failed at: "
                 << event.location << "\n";
 
             config->error_found = true;
@@ -100,7 +101,7 @@ namespace __lart::rt
 
             for (int i = 0; i < frames; ++i) {
                 auto symbol = symbols[i];
-                if (!symbol || ignore_symbol(symbol)) 
+                if (!symbol || ignore_symbol(symbol))
                     continue;
 
                 out << header << ' ' <<  format_symbol(symbol) << '\n';
@@ -120,7 +121,7 @@ namespace __lart::rt
             auto to = symbol.rfind('+');
 
             constexpr auto npos = std::string_view::npos;
-            
+
             if (from != npos && to != npos) {
                 symbol = symbol.substr(from + 1, to - from - 1);
             }
@@ -133,7 +134,7 @@ namespace __lart::rt
     };
 
     fault_handler handler;
-    
+
     [[noreturn]] void fault( const fault_event &event ) noexcept
     {
         handler.handle(event);
@@ -145,7 +146,7 @@ namespace __lart::rt
         handler.handle_abort();
     }
 
-    void init_fault_handler() noexcept 
+    void init_fault_handler() noexcept
     {
         signal( SIGABRT, handle_abort );
     }

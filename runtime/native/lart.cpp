@@ -66,13 +66,13 @@ extern "C"
     {
         return __lart::rt::peek( addr );
     }
-    
+
     void __assert_fail(const char *assertion, const char *file, unsigned int line, const char *func)
     {
         using fault_event = __lart::rt::fault_event;
         using fault_type  = __lart::rt::fault_type;
 
-        auto loc = __lart::rt::source_location(file, func, line, 0);
+        auto loc = __lart::rt::source_location(file, func, line);
         auto msg = __lart::rt::report_payload(assertion);
         __lart::rt::fault(fault_event{fault_type::assert_failed, loc, msg});
     }
