@@ -79,10 +79,10 @@ struct wrapper
 };
 
 template< typename... args_t >
-__lart_inline static __lamp_ptr wrap( const args_t & ...args ) { return wrapper::wrap( args... ); }
+static __lamp_ptr wrap( const args_t & ...args ) { return wrapper::wrap( args... ); }
 
 template< typename... args_t >
-__lart_inline static void wrap_void( const args_t & ...args ) { wrapper::wrap_void( args... ); }
+static void wrap_void( const args_t & ...args ) { wrapper::wrap_void( args... ); }
 
 template< typename type >
 inline type defualt_tainted_value() {

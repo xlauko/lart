@@ -42,7 +42,7 @@ namespace __lava
         using bw = typename mixin::bw;
 
         using base::base;
-        
+
         relational( const relational &v ) = delete;
         relational( relational&& ) = default;
 
@@ -61,7 +61,7 @@ namespace __lava
             const auto &tagged = underlying()->value;
             return tagged->right()->value;
         }
-        
+
         constexpr void* arg(unsigned idx) const
         {
             return underlying()->children[idx];
@@ -101,12 +101,12 @@ namespace __lava
                 case op::tag::lift:  return;
                 case op::tag::lower: return;
 
-                case op::tag::join: mixin::fail("unsupported join bop");
-                case op::tag::meet: mixin::fail("unsupported meet bop");
-                
-                case op::tag::alloca: mixin::fail("unsupported alloca bop");
-                case op::tag::store:  mixin::fail("unsupported store bop");
-                case op::tag::load:   mixin::fail("unsupported load bop");
+                case op::tag::join: mixin::fail("unsupported join bop"); return;
+                case op::tag::meet: mixin::fail("unsupported meet bop"); return;
+
+                case op::tag::alloca: mixin::fail("unsupported alloca bop"); return;
+                case op::tag::store:  mixin::fail("unsupported store bop"); return;
+                case op::tag::load:   mixin::fail("unsupported load bop"); return;
 
                 case op::tag::add: bin( op::backward::add ); break;
                 case op::tag::sub: bin( op::backward::sub ); break;
@@ -122,8 +122,8 @@ namespace __lava
                 case op::tag::fdiv: bin( op::backward::fdiv ); break;
                 case op::tag::frem: bin( op::backward::frem ); break;
 
-                case op::tag::fneg: mixin::fail("unsupported fneg bop");
-                
+                case op::tag::fneg: mixin::fail("unsupported fneg bop"); return;
+
                 case op::tag::op_and: bin( op::backward::op_and ); break;
                 case op::tag::op_or:  bin( op::backward::op_or ); break;
                 case op::tag::op_xor: bin( op::backward::op_xor ); break;
@@ -140,8 +140,8 @@ namespace __lava
                 case op::tag::fptoui:  un( op::backward::fptoui ); break;
                 case op::tag::fpext:   un( op::backward::fpext ); break;
 
-                case op::tag::inttoptr: mixin::fail("unsupported inttoptr bop");
-                case op::tag::ptrtoint: mixin::fail("unsupported ptrtoint bop");
+                case op::tag::inttoptr: mixin::fail("unsupported inttoptr bop"); return;
+                case op::tag::ptrtoint: mixin::fail("unsupported ptrtoint bop"); return;
 
                 case op::tag::ne: bin( op::backward::ne ); break;
                 case op::tag::eq: bin( op::backward::eq ); break;
@@ -162,7 +162,7 @@ namespace __lava
                 case op::tag::folt: bin( op::backward::folt ); break;
                 case op::tag::fole: bin( op::backward::fole ); break;
                 case op::tag::fone: bin( op::backward::fone ); break;
-                case op::tag::ford: bin( op::backward::ford ); break; 
+                case op::tag::ford: bin( op::backward::ford ); break;
                 case op::tag::funo: bin( op::backward::funo ); break;
                 case op::tag::fueq: bin( op::backward::fueq ); break;
                 case op::tag::fugt: bin( op::backward::fugt ); break;
@@ -178,14 +178,14 @@ namespace __lava
                 case op::tag::lshr: bin( op::backward::lshr ); break;
                 case op::tag::ashr: bin( op::backward::ashr ); break;
 
-                case op::tag::concat: mixin::fail("unsupported concat bop");
-                case op::tag::extract: mixin::fail("unsupported extract bop");
+                case op::tag::concat: mixin::fail("unsupported concat bop"); return;
+                case op::tag::extract: mixin::fail("unsupported extract bop"); return;
 
-                case op::tag::malloc: mixin::fail("unsupported malloc bop");
-                case op::tag::realloc: mixin::fail("unsupported realloc bop");
-                
-                case op::tag::dealloca: mixin::fail("unsupported dealloca bop");
-                case op::tag::free: mixin::fail("unsupported free bop");
+                case op::tag::malloc: mixin::fail("unsupported malloc bop"); return;
+                case op::tag::realloc: mixin::fail("unsupported realloc bop"); return;
+
+                case op::tag::dealloca: mixin::fail("unsupported dealloca bop"); return;
+                case op::tag::free: mixin::fail("unsupported free bop"); return;
             }
 
             for (const auto &ch : a.underlying()->children) {
@@ -263,7 +263,7 @@ namespace __lava
         static self op_uitofp  ( sref a, bw b ) { return base::op_uitofp( a, b ); }
         static self op_zext    ( sref a, bw b ) { return base::op_zext( a, b ); }
         static self op_zfit    ( sref a, bw b ) { return base::op_zfit( a, b ); }
-        
+
         template< typename stream >
         friend stream& operator<<( stream &os, sref v )
         {

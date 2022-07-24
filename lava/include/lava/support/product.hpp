@@ -25,7 +25,7 @@
 namespace __lava
 {
     template< typename A, typename B >
-    struct [[gnu::packed]] product_storage
+    struct /* [[gnu::packed]] */ product_storage
     {
         constexpr product_storage(A &&a, B &&b)
             : first(std::move(a)), second(std::move(b))

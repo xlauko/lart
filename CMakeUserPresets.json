@@ -1,0 +1,42 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "ninja-multi-default-custom",
+            "displayName": "Ninja Multi-Config Custom",
+            "binaryDir": "${sourceDir}/builds/${presetName}",
+            "generator": "Ninja Multi-Config",
+            "inherits": "ninja-multi-default",
+            "environment": {
+                "VCPKG_ROOT": "TODO",
+                "Z3_ROOT": "TODO",
+                "LLVM_INSTALL_DIR": "TODO"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "ninja-rel-custom",
+            "configurePreset": "ninja-multi-default-custom",
+            "displayName": "Build ninja-multi-rel-custom",
+            "configuration": "Release"
+        },
+        {
+            "name": "ninja-rel-with-deb-custom",
+            "configurePreset": "ninja-multi-default-custom",
+            "displayName": "Build ninja-multi-rel-with-deb-custom",
+            "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "ninja-deb-custom",
+            "configurePreset": "ninja-multi-default-custom",
+            "displayName": "Build ninja-multi-deb-custom",
+            "configuration": "Debug"
+        }
+    ]
+}

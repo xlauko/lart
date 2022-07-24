@@ -31,10 +31,8 @@ namespace __lamp
     static constexpr tag_t invalid_tag = std::numeric_limits< tag_t >::max();
 
     using construct_shared_t = __lava::construct_shared_t;
-    static constexpr auto construct_shared = __lava::construct_shared; 
+    static constexpr auto construct_shared = __lava::construct_shared;
 
-namespace
-{
     template< typename type >
     struct wrapped
     {
@@ -51,7 +49,7 @@ namespace
     };
 
     template< typename type >
-    struct [[gnu::packed]] tagged
+    struct /* [[gnu::packed]] */ tagged
     {
         using value_type = type;
 
@@ -99,7 +97,7 @@ namespace
 
         const value_type &get() const { return _storage->value(); }
         value_type       &get()       { return _storage->value(); }
-        
+
         const storage &store() const { return *_storage; }
         storage       &store()       { return *_storage; }
 
@@ -113,8 +111,6 @@ namespace
     private:
         std::unique_ptr< storage > _storage;
     };
-
-} // anonymous namespace
 
     template< typename data >
     using wrapped_storage = pointer< storage< wrapped< data > > >;

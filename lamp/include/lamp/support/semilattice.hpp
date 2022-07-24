@@ -215,9 +215,9 @@ namespace __lamp
         {
             int dom = join( args.tag() ... );
 
-            auto downcasted = [&]( const auto & ... args ) __lart_inline
+            auto downcasted = [&]( const auto & ... _args ) __lart_inline
             {
-                return in_domain( dom, operation, args... );
+                return in_domain( dom, operation, _args... );
             };
 
             return cast( downcasted, args... );
@@ -244,9 +244,9 @@ namespace __lamp
         {
             int dom = join( args.tag() ... );
 
-            auto downcasted = [&]( const auto & ... args ) __lart_inline
+            auto downcasted = [&]( const auto & ... _args ) __lart_inline
             {
-                in_domain_void( dom, operation, args... );
+                in_domain_void( dom, operation, _args... );
             };
 
             cast_void( downcasted, args... );

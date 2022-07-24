@@ -97,16 +97,18 @@ namespace sup
         constexpr bound& operator*=( const bound &o )
         {
             auto overflows = [] ( auto a, auto b ) {
-                if ( a < 0 )
+                if ( a < 0 ) {
                     if ( b < 0 && -a > max() / -b )
                         return overflow::plus;
                     if ( b > 0 && a < min() / b )
                         return overflow::minus;
-                if ( a > 0 )
+                }
+                if ( a > 0 ) {
                     if ( b < 0 && b < min() / a )
                         return overflow::minus;
                     if ( b > 0 && a > max() / b )
                         return overflow::plus;
+                }
                 return overflow::none;
             };
 
@@ -277,8 +279,8 @@ namespace sup
         bound_t high;
 
         template< typename T >
-        constexpr interval( const T &low, const T &high )
-            : low( value_t(low) ), high( value_t(high) )
+        constexpr interval( const T &l, const T &h )
+            : low( value_t(l) ), high( value_t(h) )
         {}
 
         template< typename T >
