@@ -16,36 +16,44 @@
 
 #include <cc/pass.hpp>
 #include <cc/stats.hpp>
-#include <llvm/IR/LegacyPassManager.h>
-#include <llvm/Transforms/IPO/PassManagerBuilder.h>
+
+#include <llvm/Passes/PassPlugin.h>
+#include <llvm/Passes/PassBuilder.h>
 
 namespace lart
 {
-    bool pass::doInitialization( llvm::Module &m )
-    {
-        DEBUG_WITH_TYPE( "lart", dbgs() << "initialize lart\n" );
-        _driver = std::make_unique< driver >( m );
-        return true;
-    }
-
-    bool pass::runOnModule( llvm::Module & )
-    {
-        DEBUG_WITH_TYPE( "lart", dbgs() << "run lart\n" );
+    llvm::PreservedAnalyses lartcc::run(
+        llvm::Module & mod, llvm::ModuleAnalysisManager & /* mgr */
+    ) {
+        _driver = std::make_unique< driver >( mod );
         return _driver->run();
     }
 
-    void regiter_pass( const llvm::PassManagerBuilder &,
-                       llvm::legacy::PassManagerBase &pm )
-    {
-        pm.add( new lart::pass() );
-    }
-
-    char pass::ID = 0;
-
 } // namespace lart
 
-static llvm::RegisterPass< lart::pass > X( "lart", "Abstraction Pass" );
-static struct llvm::RegisterStandardPasses
-    Y( llvm::PassManagerBuilder::EP_VectorizerStart, lart::regiter_pass );
-static struct llvm::RegisterStandardPasses
-    Z( llvm::PassManagerBuilder::EP_EnabledOnOptLevel0, lart::regiter_pass );
+llvm::PassPluginLibraryInfo get_lartcc_plugin_info() {
+    return {LLVM_PLUGIN_API_VERSION, "lartcc", LLVM_VERSION_STRING,
+        [](llvm::PassBuilder &bld) {
+            bld.registerPipelineStartEPCallback(
+                [](llvm::ModulePassManager &mgr, llvm::PassBuilder::OptimizationLevel) {
+                    return mgr.addPass(lart::lartcc()), true;
+                }
+            );
+
+            bld.registerPipelineParsingCallback(
+                [](llvm::StringRef name, llvm::ModulePassManager &mgr,
+                   llvm::ArrayRef<llvm::PassBuilder::PipelineElement>)
+                {
+                    if (name == "lartcc")
+                        return mgr.addPass(lart::lartcc()), true;
+                    return false;
+                }
+            );
+        }
+    };
+}
+
+extern "C" LLVM_ATTRIBUTE_WEAK
+llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
+    return get_lartcc_plugin_info();
+}

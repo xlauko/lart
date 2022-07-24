@@ -19,16 +19,14 @@
 #include "driver.hpp"
 
 #include <llvm/Pass.h>
+#include <llvm/IR/PassManager.h>
+
 namespace lart
 {
-    struct pass : llvm::ModulePass
-    {
-        static char ID;
-
-        pass() : llvm::ModulePass( ID ) {}
-
-        bool doInitialization( llvm::Module &m ) override;
-        bool runOnModule( llvm::Module &m ) override;
+    struct lartcc : llvm::PassInfoMixin< lartcc > {
+        llvm::PreservedAnalyses run(
+            llvm::Module &mod, llvm::ModuleAnalysisManager &mgr
+        );
 
     private:
         std::unique_ptr< driver > _driver;

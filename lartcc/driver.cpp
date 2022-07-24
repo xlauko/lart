@@ -33,7 +33,7 @@
 
 namespace lart
 {
-    bool driver::run()
+    llvm::PreservedAnalyses driver::run()
     {
         spdlog::cfg::load_env_levels();
         spdlog::info("lartcc started");
@@ -79,7 +79,7 @@ namespace lart
         }
 
         spdlog::info("lartcc finished");
-        return true;
+        return llvm::PreservedAnalyses::none();
     }
 
 } // namespace lart
