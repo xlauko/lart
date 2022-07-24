@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstdio>
 #include <string_view>
 
 namespace __lart::rt

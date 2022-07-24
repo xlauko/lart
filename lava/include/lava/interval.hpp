@@ -21,7 +21,7 @@ namespace __lava
     {
         using base = storage< interval_t >;
         using mixin = domain_mixin< interval >;
-        using constant = constant< __lamp::tagged_storage >;
+        using constant_type = constant< __lamp::tagged_storage >;
 
         using bw = typename mixin::bw;
         using base::base;
@@ -89,7 +89,7 @@ namespace __lava
         constexpr bool includes( ir o ) { return low() <= o->low && o->high <= high(); }
         constexpr bool excludes( ir o ) { return o->high < low() || high() < o->low; }
 
-        static iv lift( const constant& con ) { return constant::lift_to< interval >( con ); }
+        static iv lift( const constant_type& con ) { return constant_type::lift_to< interval >( con ); }
 
         template< typename type > static auto lift( type v )
             -> std::enable_if_t< std::is_integral_v< type >, interval >
@@ -103,9 +103,9 @@ namespace __lava
             return mixin::fail();
         }
 
-        static constant lower( ir i )
+        static constant_type lower( ir i )
         {
-            return constant::lift(
+            return constant_type::lift(
                 bound_type( i.low() ) + __lart_choose( i.get().size() )
             );
         }

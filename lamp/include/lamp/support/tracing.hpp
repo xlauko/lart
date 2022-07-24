@@ -34,7 +34,7 @@ namespace __lamp
 
         struct traced_result
         {
-            traced_result( std::string_view op, domain_ref r ) : op( op ), result( r ) {}
+            traced_result( std::string_view o, domain_ref r ) : op( o ), result( r ) {}
 
             std::string_view op;
             domain_ref result;
@@ -43,9 +43,9 @@ namespace __lamp
         struct traced_cast : traced_result
         {
             using bw = typename domain::bw;
-            
-            traced_cast( std::string_view op, domain_ref r, domain_ref a, bw b )
-                : traced_result( op, r ), arg( a ), bitwidth( b ) {}
+
+            traced_cast( std::string_view o, domain_ref r, domain_ref a, bw b )
+                : traced_result( o, r ), arg( a ), bitwidth( b ) {}
 
             domain_ref arg;
             bw bitwidth;
@@ -58,11 +58,11 @@ namespace __lamp
 
             domain_ref arg;
         };
-        
+
         struct traced_binary : traced_result
         {
-            traced_binary( std::string_view op, domain_ref r, domain_ref a, domain_ref b )
-                : traced_result( op, r ), left( a ), right( b ) {}
+            traced_binary( std::string_view o, domain_ref r, domain_ref a, domain_ref b )
+                : traced_result( o, r ), left( a ), right( b ) {}
 
             domain_ref left, right;
         };
@@ -70,7 +70,7 @@ namespace __lamp
         struct traced_assume
         {
             traced_assume( domain_ref a, bool e ) : arg( a ), expected( e ) {}
-    
+
             domain_ref arg;
             bool expected;
         };
@@ -82,7 +82,7 @@ namespace __lamp
         using domain::domain;
 
         using bw = typename domain::bw;
-        
+
         using self = domain;
         using sref = const domain &;
 
@@ -98,16 +98,16 @@ namespace __lamp
             auto s = stream();
             auto res = op();
             s << traced_result( fn, res ) << "\n";
-            return std::move( res );
+            return res;
         }
-        
+
         template< typename op_t, typename ...args_t >
         static domain trace( std::string_view fn, op_t op, sref a )
         {
             auto s = stream();
             auto res = op( a );
             s << traced_unary( fn, res, a ) << "\n";
-            return std::move( res );
+            return res;
         }
 
         template< typename op_t >
@@ -116,7 +116,7 @@ namespace __lamp
             auto s = stream();
             auto res = op( a, b );
             s << traced_binary( fn, res, a, b ) << "\n";
-            return std::move( res );
+            return res;
         }
 
         template< typename op_t >
@@ -125,7 +125,7 @@ namespace __lamp
             auto s = stream();
             auto res = op( a, b );
             s << traced_cast( fn, res, a, b ) << "\n";
-            return std::move( res );
+            return res;
         }
 
         static void trace( std::string_view, decltype( domain::assume ) op, self &a, bool expected )
@@ -134,9 +134,9 @@ namespace __lamp
             op( a, expected );
             s << traced_assume( a, expected ) << "\n";
         }
-        
+
         #define TRACE(...) trace(__FUNCTION__, __VA_ARGS__);
-        
+
         template< typename val_t >
         static self lift( const val_t &val ) { return TRACE( domain::lift, val ); }
 
@@ -223,7 +223,7 @@ namespace __lamp
         using traced_cast   = typename base::traced_cast;
         using traced_unary  = typename base::traced_unary;
         using traced_binary = typename base::traced_binary;
-        
+
         outstream& underlying() { return *static_cast< outstream* >( this ); }
 
         simple_stream& operator<<(std::string_view str) noexcept
@@ -237,7 +237,7 @@ namespace __lamp
             underlying() << r.op << " ➞  " << r.result;
             return *this;
         }
-        
+
         simple_stream& operator<<(const traced_assume &a) noexcept
         {
             underlying() << "assume: " << (a.expected ? "" : "not ") << a.arg;
@@ -255,11 +255,51 @@ namespace __lamp
             underlying() << u.op << " " << u.arg << " ➞  " << u.result;
             return *this;
         }
-        
+
         simple_stream& operator<<(const traced_binary &b) noexcept
         {
             underlying() << b.op << " " << b.left << " " << b.right << " ➞  " << b.result;
             return *this;
+        }
+    };
+
+    template< typename type >
+    struct as_string
+    {
+        as_string( const type &v ) : value( v ) {}
+        const type &value;
+
+        template< typename stream >
+        friend stream& operator<<( stream &os, const as_string &s )
+        {
+            return os << "\"" << s.value << "\"";
+        }
+    };
+
+    template< typename type > as_string( const type& ) -> as_string< type >;
+
+    template< typename domain, typename value_t >
+    struct keyvalue
+    {
+        keyvalue(std::string_view k, const value_t &v ) : key( k ), value( v ) {}
+        std::string_view key;
+        const value_t &value;
+
+        template< typename stream >
+        friend stream& operator<<( stream &os, const keyvalue &kv )
+        {
+            os << as_string( kv.key ) << ": ";
+            if constexpr ( std::is_same_v< value_t, domain > ) {
+                return os << as_string( kv.value );
+            } else if constexpr ( std::is_same_v< value_t, std::string_view > ) {
+                return os << as_string( kv.value );
+            } else if constexpr ( std::is_integral_v< value_t > ) {
+                std::array< char, 65 > buff{};
+                std::snprintf( buff.data(), buff.size(), "%d", kv.value );
+                return os << std::string_view( buff.data() );
+            } else {
+                return os << kv.value;
+            }
         }
     };
 
@@ -276,50 +316,6 @@ namespace __lamp
         using traced_unary  = typename base::traced_unary;
         using traced_binary = typename base::traced_binary;
 
-        template< typename value_t >
-        struct keyvalue
-        {
-            keyvalue(std::string_view k, const value_t &v ) : key( k ), value( v ) {}
-            std::string_view key;
-            const value_t &value;
-
-            template< typename type >
-            struct asstring
-            {
-                asstring( const type &v ) : value( v ) {}
-                const type &value;
-
-                template< typename stream >
-                friend stream& operator<<( stream &os, const asstring &s )
-                {
-                    return os << "\"" << s.value << "\"";
-                }
-            };
-
-            template< typename type > asstring( const type& ) -> asstring< type >;
-
-            template< typename stream >
-            friend stream& operator<<( stream &os, const keyvalue &kv )
-            {
-                os << asstring( kv.key ) << ": ";
-                if constexpr ( std::is_same_v< value_t, domain > ) {
-                    return os << asstring( kv.value );
-                } else if constexpr ( std::is_same_v< value_t, std::string_view > ) {
-                    return os << asstring( kv.value );
-                } else if constexpr ( std::is_integral_v< value_t > ) {
-                    std::array< char, 65 > buff{};
-                    std::snprintf( buff.data(), buff.size(), "%d", kv.value );
-                    return os << std::string_view( buff.data() );
-                } else {
-                    return os << kv.value;
-                }
-            }
-        };
-        
-        template< typename value_t >
-        keyvalue( std::string_view, const value_t& ) -> keyvalue< value_t >;
-
-
         struct value_with_address
         {
             using address = std::array< char, 16 >;
@@ -333,7 +329,7 @@ namespace __lamp
             template< typename stream >
             friend stream& operator<<( stream &os, const value_with_address &v )
             {
-                return os << keyvalue( v.name, std::tuple( 
+                return os << keyvalue( v.name, std::tuple(
                     keyvalue( "value", v.value ),
                     keyvalue( "addr", std::string_view( v.addr.data() ) )
                 ));
@@ -362,8 +358,8 @@ namespace __lamp
         json_stream& operator<<( std::tuple< first, rest... > const &t )
         {
             self() << "{";
-            for_all_indices( [&]( auto const &value ) { 
-                self() << value << ", "; }, 
+            for_all_indices( [&]( auto const &value ) {
+                self() << value << ", "; },
                 t, std::index_sequence_for< rest... >{}
             );
             self() << std::get< sizeof...(rest) >(t) << "}";
@@ -387,7 +383,7 @@ namespace __lamp
                 value_with_address( "result", r.result )
             );
         }
-        
+
         json_stream& operator<<(const traced_assume &a) noexcept
         {
             return self() << std::tuple(
@@ -417,7 +413,7 @@ namespace __lamp
                 value_with_address( "arg", u.arg )
             );;
         }
-        
+
         json_stream& operator<<(const traced_binary &b) noexcept
         {
             return self() << std::tuple(
@@ -435,14 +431,14 @@ namespace __lamp
     struct configured_stream : file_stream
     {
         file_stream& underlying() { return *static_cast< file_stream* >( this ); }
-        
+
         configured_stream()
         {
             auto file = __lart::rt::config->trace_file;
             if ( file )
                 this->_file = file;
         }
-        
+
         configured_stream& operator<<(const std::string_view str) noexcept
         {
             underlying() << str;
@@ -460,7 +456,7 @@ namespace __lamp
             underlying() << ui;
             return *this;
         }
-        
+
         configured_stream& operator<<(int si) noexcept
         {
             underlying() << si;
@@ -472,7 +468,7 @@ namespace __lamp
             underlying() << us;
             return *this;
         }
-        
+
         configured_stream& operator<<(short ss) noexcept
         {
             underlying() << ss;
@@ -484,7 +480,7 @@ namespace __lamp
             underlying() << ul;
             return *this;
         }
-        
+
         configured_stream& operator<<(long sl) noexcept
         {
             underlying() << sl;

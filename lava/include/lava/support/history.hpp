@@ -28,9 +28,9 @@
 namespace __lava
 {
     template< typename domain >
-    struct [[gnu::packed]] history_storage
+    struct /* [[gnu::packed]] */ history_storage
     {
-        constexpr history_storage(domain &&v) 
+        constexpr history_storage(domain &&v)
             : value( std::make_shared< domain >( std::move(v) ) )
         {}
 
@@ -49,11 +49,11 @@ namespace __lava
         using bw = typename mixin::bw;
         using base::base;
 
-        with_history( const domain &v ) = delete; 
-        
+        with_history( const domain &v ) = delete;
+
         using self = with_history;
         using sref = const with_history &;
-        
+
         template< typename type >
         static self lift( const type &val ) { return domain::lift( val ); }
 
@@ -78,7 +78,7 @@ namespace __lava
             r->children.push_back( b.unsafe_ptr() );
             return r;
         }
-        
+
         template< typename op_t >
         static self cast( op_t op, sref a, bw b )
         {

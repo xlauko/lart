@@ -434,7 +434,7 @@ namespace lart::op
     {
         std::stringstream suff;
         auto args = arguments(o);
-        auto get_value = [] (auto o) { return o.value; };
+        auto get_value = [] (auto op) { return op.value; };
         auto fmt = sc::query::query( args ).map( get_value ).map( sc::query::type ).map( sc::fmt::type );
 
         std::copy(fmt.begin(), fmt.end(), std::experimental::make_ostream_joiner(suff, "."));
