@@ -10,11 +10,11 @@ runtime="native"
 
 RUNTIME="@RUNTIME_BINARY_DIR@/lib${runtime}.a"
 DOMAIN="@LAMP_BINARY_DIR@/lib${domain}.a"
-PASS="@LARTCC_BINARY_DIR@/liblartcc.dylib"
+PASS="@LARTCC_BINARY_DIR@/liblartcc.so"
 
 LART_INTERFACE="@LART_INTERFACE_DIR@"
 
-LDFLAGS="${LDFLAGS} -lc++"
+LDFLAGS="${LDFLAGS} -lstdc++"
 
 RED='\033[0;31m'
 NC='\033[0m' # No Color
