@@ -61,17 +61,17 @@ extern "C" {
     * TODO The second problem might have to be tackled in the verification
     * algorithm anyway, since there might be other ways to trigger the same
     * problem. */
-    __lart_export void __lart_stash( void* abstract ) __lart_stub;
+    __lart_export void __lart_stash( void* abstract ) __lart_stub
 
-    __lart_export void* __lart_unstash()  __lart_stub;
+    __lart_export void* __lart_unstash()  __lart_stub
 
-    __lart_export bool __lart_test_taint( uint8_t byte ) __lart_stub;
+    __lart_export bool __lart_test_taint( uint8_t byte ) __lart_stub
 
-    __lart_export void __lart_set_taint( void *value, unsigned bytes )  __lart_stub;
+    __lart_export void __lart_set_taint( void *value, unsigned bytes )  __lart_stub
 
-    __lart_export int __lart_choose( int count ) __lart_stub;
+    __lart_export int __lart_choose( int count ) __lart_stub
 
-    __lart_export void __lart_cancel() __lart_stub;
+    __lart_export void __lart_cancel() __lart_stub
 
     __lart_export void __lart_poke( void *addr, size_t bytes, void* value );
 
