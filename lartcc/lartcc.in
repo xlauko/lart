@@ -25,11 +25,10 @@ if [ -z $domain ]; then
 fi
 
 exec @CLANG_BINARY@                             \
-     -Xclang -load -Xclang "$PASS"              \
+     -fpass-plugin="$PASS"                      \
      ${CFLAGS}                                  \
      "${@:2}"                                   \
      ${LDFLAGS}                                 \
-     "$RUNTIME"                                 \
      "$DOMAIN"                                  \
-     -I"$LART_INTERFACE"                        \
-     -Qunused-arguments
+     "$RUNTIME"                                 \
+     -I"$LART_INTERFACE"

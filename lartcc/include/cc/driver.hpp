@@ -17,6 +17,8 @@
 #pragma once
 
 #include <llvm/IR/Module.h>
+#include <llvm/Passes/PassBuilder.h>
+
 #include <sc/init.hpp>
 
 namespace lart
@@ -25,7 +27,7 @@ namespace lart
     {
         explicit driver( llvm::Module &m ) : sc::with_context( m ), module( m ) {}
 
-        bool run();
+        llvm::PreservedAnalyses run();
 
         llvm::Module &module;
     };
