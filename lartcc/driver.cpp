@@ -21,6 +21,7 @@
 #include <cc/syntactic.hpp>
 #include <cc/logger.hpp>
 #include <cc/preprocess.hpp>
+#include <cc/runtime.hpp>
 
 #include <cc/backend/native.hpp>
 
@@ -37,6 +38,8 @@ namespace lart
     {
         spdlog::cfg::load_env_levels();
         spdlog::info("lartcc started");
+
+        runtime::initialize( module );
 
         // propagate abstraction type from annotated roots
         auto types = dfa::analysis::run_on( module );
