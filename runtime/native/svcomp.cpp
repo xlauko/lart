@@ -20,13 +20,13 @@
 #include "stream.hpp"
 
 #include <execinfo.h>
- 
+
 #include <stdint.h>
 #include <assert.h>
 #include <stdbool.h>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
 
 void trace_any_call(std::string_view file, std::string_view func, unsigned int line)
 {
@@ -48,7 +48,7 @@ extern "C" {
     float    __lamp_any_f32(void);
     double   __lamp_any_f64(void);
     void*    __lamp_any_ptr(void);
-    
+
     uint8_t __lamp_any_i1_traced(const char *file, unsigned int line, const char *func)
     {
         return TRACED( __lamp_any_i1 );
@@ -58,32 +58,32 @@ extern "C" {
     {
         return TRACED( __lamp_any_i8 );
     }
-    
+
     uint16_t __lamp_any_i16_traced(const char *file, unsigned int line, const char *func)
     {
         return TRACED( __lamp_any_i16 );
     }
-    
+
     uint32_t __lamp_any_i32_traced(const char *file, unsigned int line, const char *func)
     {
         return TRACED( __lamp_any_i32 );
     }
-    
+
     uint64_t __lamp_any_i64_traced(const char *file, unsigned int line, const char *func)
     {
         return TRACED( __lamp_any_i64 );
     }
-    
+
     float __lamp_any_f32_traced(const char *file, unsigned int line, const char *func)
     {
         return TRACED( __lamp_any_f32 );
     }
-    
+
     float __lamp_any_f64_traced(const char *file, unsigned int line, const char *func)
     {
         return TRACED( __lamp_any_f64 );
     }
-    
+
     void* __lamp_any_ptr_traced(const char *file, unsigned int line, const char *func)
     {
         return TRACED( __lamp_any_ptr );
