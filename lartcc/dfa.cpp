@@ -22,7 +22,7 @@
 #include <cc/logger.hpp>
 
 #include <llvm/Support/ErrorHandling.h>
-// #include <svf/SVF-FE/PAGBuilder.h>
+#include <svf/SVF-FE/SVFIRBuilder.h>
 #include <svf/SVF-FE/LLVMModule.h>
 #include <svf/WPA/Andersen.h>
 
@@ -206,7 +206,7 @@ namespace lart::dfa::detail
             },
             [&] ( llvm::ReturnInst * r )
             {
-                // ASSERT( lhs == r->getReturnValue() );
+                assert( lhs == r->getReturnValue() );
                 push( unif_edge( r->getReturnValue(), sc::get_function( rhs ) ) );
             },
             [&] ( llvm::Function * )
@@ -226,25 +226,26 @@ namespace lart::dfa::detail
         return edges;
     }
 
-    type_map dataflow_analysis::run_from( const roots_map & /* roots */ )
+    type_map dataflow_analysis::run_from( const roots_map &roots )
     {
         spdlog::debug( "setup svf module" );
-        // auto svfmodule = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule( module );
-        // assert( svfmodule != nullptr && "SVF Module is null" );
+        auto svfmodule = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule( module );
+        svfmodule->buildSymbolTableInfo();
+        assert( svfmodule != nullptr && "SVF Module is null" );
 
-        // SVF::PAGBuilder builder;
-        // auto pag = builder.build( svfmodule );
-        // assert( pag != nullptr && "SVF Module is null" );
+        SVF::SVFIRBuilder builder;
+        auto svfir = builder.build( svfmodule );
+        assert( svfir != nullptr && "SVFIR is null" );
 
-        // aliases.init( pag );
+        aliases.init( svfir );
 
-        // for ( const auto  &[call, kind] : roots ) {
-        //     types.add( call, kind );
-        //     push( call );
-        // }
+        for ( const auto  &[call, kind] : roots ) {
+            types.add( call, kind );
+            push( call );
+        }
 
-        // while ( !worklist.empty() )
-        //     process( pop() );
+        while ( !worklist.empty() )
+            process( pop() );
 
         return types;
     }
