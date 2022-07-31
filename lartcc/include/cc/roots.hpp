@@ -18,11 +18,16 @@
 
 #include <sc/annotation.hpp>
 #include <sc/case.hpp>
+#include <sc/builder.hpp>
+#include <sc/types.hpp>
+
+#include <cc/runtime.hpp>
 
 #include <llvm/Support/ErrorHandling.h>
 
 #include <map>
 #include <queue>
+#include <utility>
 
 namespace lart
 {
@@ -30,72 +35,58 @@ namespace lart
 
     using roots_map = std::map< llvm::CallBase*, abstract_kind >;
 
-    inline abstract_kind annotated_kind( const sc::annotation &ann )
+    inline std::optional< abstract_kind > get_abstract_kind(sc::function fn)
     {
-        if ( ann.name() == "scalar" )
+        auto scalar = runtime::abstract_scalar_attr();
+        if (fn->hasFnAttribute(scalar.getKindAsString()))
             return abstract_kind::scalar;
-        if ( ann.name() == "pointer" )
+
+        auto pointer = runtime::abstract_pointer_attr();
+        if (fn->hasFnAttribute(pointer.getKindAsString()))
             return abstract_kind::pointer;
-        llvm_unreachable( "unknown annotation kind" );
+
+        return std::nullopt;
     }
 
-    inline roots_map gather_roots( llvm::Module &m )
+    using abstract_value_generator = std::pair< sc::function, abstract_kind >;
+    inline sc::generator< abstract_value_generator > generators(sc::module_ref mod) {
+        for (auto &fn : mod) {
+            if (auto kind = get_abstract_kind(&fn)) {
+                co_yield { &fn, kind.value() };
+            }
+        }
+    }
+
+    inline roots_map gather_roots(sc::module_ref m)
     {
         roots_map result;
-        /*auto ns = sc::annotation("lart", "abstract", "return");
-        auto annotated = sc::annotation::enumerate_in_namespace< llvm::Function >(ns, m);
 
-
-        for ( const auto &[fn, ann] : annotated )
+        for (auto [gen, kind] : generators(m))
         {
             std::queue< llvm::Value* > worklist;
             auto transitive_users = [&] (auto val) {
-                for ( auto user : val->users() )
+                for ( auto user : val->users() ) {
                     worklist.emplace( user );
+                }
             };
 
-            auto kind = annotated_kind( ann );
+            auto register_root = [&] (auto root) {
+                spdlog::debug("root: {}", sc::fmt::llvm_to_string(root));
+                result[root] = kind;
+            };
 
-            transitive_users(fn);
+            transitive_users(gen);
             while ( !worklist.empty() ) {
                 sc::llvmcase( worklist.front(),
                     [&] ( llvm::CastInst *c )     { transitive_users(c); },
                     [&] ( llvm::ConstantExpr *c ) { transitive_users(c); },
-                    [&] ( llvm::CallInst *c )     { result[c] = kind; },
-                    [&] ( llvm::InvokeInst * c)   { result[c] = kind; }
-                );
-                worklist.pop();
-            }
-        }*/
-
-        for ( auto &fn : m )
-        {
-            if ( fn.hasName() && !(
-                fn.getName().startswith( "__lamp_lift" ) ||
-                fn.getName().startswith( "__lamp_any" ) ||
-                fn.getName().startswith( "__VERIFIER_nondet" )
-               ) )
-               continue;
-
-            std::queue< llvm::Value* > worklist;
-            auto transitive_users = [&] (auto val) {
-                for ( auto user : val->users() )
-                    worklist.emplace( user );
-            };
-
-            auto kind = abstract_kind::scalar;
-
-            transitive_users(&fn);
-            while ( !worklist.empty() ) {
-                sc::llvmcase( worklist.front(),
-                    [&] ( llvm::CastInst *c )     { transitive_users(c); },
-                    [&] ( llvm::ConstantExpr *c ) { transitive_users(c); },
-                    [&] ( llvm::CallInst *c )     { result[c] = kind; },
-                    [&] ( llvm::InvokeInst * c)   { result[c] = kind; }
+                    [&] ( llvm::CallInst *c )     { register_root(c); },
+                    [&] ( llvm::InvokeInst * c)   { register_root(c); }
                 );
                 worklist.pop();
             }
         }
+
         return result;
     }
 
