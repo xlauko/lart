@@ -33,7 +33,7 @@
 typedef struct { void *ptr; } __lamp_ptr;
 
 using dom = __lamp::meta_domain;
-using bw = __lava::bitwidth_t;
+using bw  = __lava::bitwidth_t;
 
 using shadow_meta = __lart_shadow_meta;
 
