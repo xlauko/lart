@@ -62,9 +62,11 @@ namespace lart
         // syntactic pass
         std::vector< ir::intrinsic > intrinsics;
         syntactic syn( module, types );
-        for ( const auto &op : syn.toprocess() )
-            if ( auto intr = syn.process( op ) )
+        for ( const auto &op : syn.toprocess() ) {
+            if ( auto intr = syn.process( op ) ) {
                 intrinsics.push_back( intr.value() );
+            }
+        }
 
         // 6. release ?
 
@@ -76,10 +78,6 @@ namespace lart
             backend.lower( intr );
         }
 
-        // delete stubs
-        if ( auto stub = module.getFunction( "__lamp_stub" ) ) {
-            stub->deleteBody();
-        }
 
         spdlog::info("lartcc finished");
         return llvm::PreservedAnalyses::none();
