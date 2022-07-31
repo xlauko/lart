@@ -76,6 +76,7 @@ add_library( lartcc
     pass.cpp
     preprocess.cpp
     syntactic.cpp
+    runtime.cpp
     taint.cpp
 
     backend/base.cpp

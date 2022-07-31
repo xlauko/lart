@@ -34,6 +34,7 @@ namespace lart
 llvm::PassPluginLibraryInfo get_lartcc_plugin_info() {
     return {LLVM_PLUGIN_API_VERSION, "lartcc", LLVM_VERSION_STRING,
         [](llvm::PassBuilder &bld) {
+            // TODO find out the best spot to run lart
             bld.registerPipelineStartEPCallback(
                 [](llvm::ModulePassManager &mgr, llvm::PassBuilder::OptimizationLevel) {
                     return mgr.addPass(lart::lartcc()), true;
