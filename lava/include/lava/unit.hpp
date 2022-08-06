@@ -23,7 +23,7 @@ namespace __lava
     struct empty_storage {};
 
     template< template< typename > typename storage >
-    struct unit : storage< empty_storage > 
+    struct unit : storage< empty_storage >
                 , domain_mixin< unit< storage > >
     {
         using base = storage< empty_storage >;
@@ -121,7 +121,7 @@ namespace __lava
 
         static void dump( ur ) { printf( "unit\n" ); }
         static std::string trace( ur ) { return "unit"; }
-        
+
         template< typename stream >
         friend stream& operator<<( stream &os, ur ) { return os << "unit"; }
     };
