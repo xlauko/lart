@@ -488,7 +488,7 @@ namespace lart::op
         auto arg_types = sc::query::types( args ).freeze();
         auto rty = extract_return_type( op, arg_types );
 
-        spdlog::debug("make call: {} :: {} -> {}", intr_name, sc::fmt::llvm_to_string(arg_types), sc::fmt::llvm_to_string(rty));
+        spdlog::debug("[cc] make call: {} :: {} -> {}", intr_name, sc::fmt::llvm_to_string(arg_types), sc::fmt::llvm_to_string(rty));
         return irb.CreateCall( function(mod, rty, arg_types, intr_name), args );
     }
 

@@ -22,6 +22,7 @@
 #include <cc/logger.hpp>
 #include <cc/preprocess.hpp>
 #include <cc/runtime.hpp>
+#include <cc/shadow.hpp>
 
 #include <cc/backend/native.hpp>
 
@@ -78,6 +79,10 @@ namespace lart
             backend.lower( intr );
         }
 
+        shadow instrument( module, types );
+        for (const auto &op : instrument.toprocess()) {
+            instrument.process(op);
+        }
 
         spdlog::info("lartcc finished");
         return llvm::PreservedAnalyses::none();

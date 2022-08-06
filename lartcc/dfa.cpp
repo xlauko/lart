@@ -14,7 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "sc/format.hpp"
+#include <sc/format.hpp>
+
 #include <cc/dfa.hpp>
 
 #include <cc/alias.hpp>
@@ -49,7 +50,7 @@ namespace lart::dfa::detail
 
     void dataflow_analysis::push( edge &&e ) noexcept
     {
-        spdlog::debug( "push {}", e );
+        spdlog::debug( "[dfa] push {}", e );
         worklist.push( e );
     }
 
@@ -69,7 +70,7 @@ namespace lart::dfa::detail
     {
         auto e = worklist.front();
         worklist.pop();
-        spdlog::debug( "pop {}", e );
+        spdlog::debug( "[dfa] pop {}", e );
         return e;
     }
 
@@ -153,8 +154,11 @@ namespace lart::dfa::detail
         };*/
 
         auto uses = [&] ( auto val ) {
-            // for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
-            //            push( store_edge( lhs, p ) )
+            // if ( auto s = llvm::dyn_cast< llvm::StoreInst >(val) ) {
+            //     for ( auto p : aliases.pointsto( s->getPointerOperand() ) ) {
+            //         push( store_edge( v, p ) );
+            //     }
+            // }
             /*if ( auto aml = dfg.gv_to_aml( node ) )
                 return query::query( aml->succs )
                     .filter( std::not_fn( in_abstractable_function ) )
@@ -176,7 +180,7 @@ namespace lart::dfa::detail
 
         auto unif_edge =  [] ( auto l, auto r ) { return edge{ l, r, type::uniform }; };
         auto load_edge =  [] ( auto l, auto r ) { return edge{ l, r, type::load }; };
-        // auto store_edge = [] ( auto l, auto r ) { return edge{ l, r, type::store }; };
+        auto store_edge = [] ( auto l, auto r ) { return edge{ l, r, type::store }; };
 
         edges_t edges;
 
@@ -199,8 +203,8 @@ namespace lart::dfa::detail
             {
                 if ( lhs == s->getValueOperand() )
                 {
-                    // for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
-                    //     push( store_edge( lhs, p ) );
+                    for ( auto p : aliases.pointsto( s->getPointerOperand() ) )
+                        push( store_edge( lhs, p ) );
                     // TODO: stores.insert( s );
                 }
             },
@@ -228,7 +232,7 @@ namespace lart::dfa::detail
 
     type_map dataflow_analysis::run_from( const roots_map &roots )
     {
-        spdlog::debug( "setup svf module" );
+        spdlog::debug( "[dfa] setup svf module" );
         auto svfmodule = SVF::LLVMModuleSet::getLLVMModuleSet()->buildSVFModule( module );
         svfmodule->buildSymbolTableInfo();
         assert( svfmodule != nullptr && "SVF Module is null" );
@@ -239,13 +243,14 @@ namespace lart::dfa::detail
 
         aliases.init( svfir );
 
-        for ( const auto  &[call, kind] : roots ) {
+        for (const auto  &[call, kind] : roots) {
             types.add( call, kind );
             push( call );
         }
 
-        while ( !worklist.empty() )
+        while (!worklist.empty()) {
             process( pop() );
+        }
 
         return types;
     }
@@ -277,7 +282,7 @@ namespace lart::dfa::detail
             }
         } ();
 
-        spdlog::debug( "{} v {} = {}", from, to, joined );
+        spdlog::debug( "[dfa] {} v {} = {}", from, to, joined );
         push_change( e.to, joined );
     }
 

@@ -245,7 +245,7 @@ namespace lart
 
     std::optional< ir::intrinsic > syntactic::process( operation o )
     {
-        spdlog::debug( "process {}", op::name(o) );
+        spdlog::debug( "[syntactic] process {}", op::name(o) );
 
         if ( std::holds_alternative< op::identity >( o ) ) {
             auto cast = llvm::cast< llvm::CastInst >( op::value(o) );

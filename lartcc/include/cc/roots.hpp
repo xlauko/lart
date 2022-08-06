@@ -71,7 +71,7 @@ namespace lart
             };
 
             auto register_root = [&] (auto root) {
-                spdlog::debug("root: {}", sc::fmt::llvm_to_string(root));
+                spdlog::debug("[dfa] root: {}", sc::fmt::llvm_to_string(root));
                 result[root] = kind;
             };
 
