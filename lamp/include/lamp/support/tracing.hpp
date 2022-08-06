@@ -161,7 +161,7 @@ namespace __lamp
 
         static self op_fneg( sref a ) { return TRACE( domain::op_fneg, a ); }
 
-        // /* bitwise operations */
+        /* bitwise operations */
         static self op_shl ( sref a, sref b ) { return TRACE( domain::op_shl, a, b ); }
         static self op_lshr( sref a, sref b ) { return TRACE( domain::op_lshr, a, b ); }
         static self op_ashr( sref a, sref b ) { return TRACE( domain::op_ashr, a, b ); }
@@ -169,7 +169,7 @@ namespace __lamp
         static self op_or  ( sref a, sref b ) { return TRACE( domain::op_or, a, b ); }
         static self op_xor ( sref a, sref b ) { return TRACE( domain::op_xor, a, b ); }
 
-        // /* comparison operations */
+        /* comparison operations */
         static self op_foeq( sref a, sref b ) { return TRACE( domain::op_foeq, a, b ); }
         static self op_fogt( sref a, sref b ) { return TRACE( domain::op_fogt, a, b ); }
         static self op_foge( sref a, sref b ) { return TRACE( domain::op_foge, a, b ); }
