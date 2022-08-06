@@ -72,6 +72,15 @@ namespace lart::runtime
         lamp.register_operation("load", lamp.abstract_type(), {
             lamp.abstract_type(), lamp.bitwidth()
         });
+
+        std::array casts = {
+            "trunc", "fptrunc", "sitofp", "uitofp", "zext", "sext", "fpext", "fptosi", "fptoui"
+        };
+
+        for (const auto &cast : casts) {
+            lamp.register_cast(cast);
+        }
+
     }
 
 } // namespace lart::runtime

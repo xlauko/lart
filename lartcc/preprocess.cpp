@@ -35,7 +35,7 @@ namespace lart
         if ( !util::tag_function_with_metadata( *fn, preprocessor::tag ) )
             return;
 
-        spdlog::debug( "preprocess {}", fn->getName().str() );
+        spdlog::debug( "[cc] preprocess {}", fn->getName().str() );
 
         lower_selects( fn );
 

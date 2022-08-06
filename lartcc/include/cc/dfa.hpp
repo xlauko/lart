@@ -238,11 +238,12 @@ namespace detail
             auto pf = llvm_place( e.from );
             auto pt = llvm_place( e.to );
 
-            if ( pf == pt )
+            if ( pf == pt ) {
                 return s << pf << ":" << sc::fmt::llvm_name( e.from ) << " → "
-                        << sc::fmt::llvm_name( e.to );
+                         << sc::fmt::llvm_name( e.to );
+            }
             return s << pf << ":" << sc::fmt::llvm_name( e.from ) << " → "
-                    << pt << ":" << sc::fmt::llvm_name( e.to );
+                     << pt << ":" << sc::fmt::llvm_name( e.to );
         }
     };
 
@@ -284,11 +285,11 @@ namespace detail
 
     struct analysis
     {
-        explicit analysis( llvm::Module &m ) : impl( m ) {}
+        explicit analysis( sc::module_ref m ) : impl( m ) {}
 
-        static types run_on( llvm::Module &m )
+        static types run_on( sc::module_ref m )
         {
-            spdlog::debug( "start dataflow analysis" );
+            spdlog::debug( "[dfa] start dataflow analysis" );
             analysis dfa( m );
             auto roots = gather_roots( m );
             return dfa.impl.run_from( roots );
@@ -296,5 +297,4 @@ namespace detail
 
         detail::dataflow_analysis impl;
     };
-
 } // namespace lart::dfa

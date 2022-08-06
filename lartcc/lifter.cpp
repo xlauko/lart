@@ -227,6 +227,10 @@ namespace lart
         }
 
         auto impl = module.getFunction( op::impl(op) );
+        if (!impl) {
+            spdlog::error("missing: {}",op::impl(op));
+        }
+
         auto types = impl->getFunctionType()->params();
         auto final_args = detail::final_args( bld.current_block, args, types );
         std::move(bld) | sc::action::call{ impl, std::span(final_args) }

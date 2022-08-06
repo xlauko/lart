@@ -94,6 +94,11 @@ namespace lart::runtime
             return insert_operation(name, fty);
         }
 
+        sc::function register_cast(const std::string &name) {
+            auto fty = llvm::FunctionType::get( abstract_type(), { abstract_type(), bitwidth() }, false );
+            return insert_operation(name, fty);
+        }
+
         sc::module_ref mod;
     };
 
