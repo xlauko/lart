@@ -32,7 +32,7 @@ namespace lart
     };
 
     struct shadow_operation {
-        llvm::Value *value;
+        sc::value value;
         shadow_op_kind kind;
     };
 
@@ -44,17 +44,21 @@ namespace lart
 
         sc::generator< shadow_operation > toprocess();
 
-        std::optional< ir::intrinsic > process( shadow_operation op );
+        sc::value process( shadow_operation op );
+        sc::value process( sc::value op );
 
-        std::optional< ir::intrinsic > process_source( shadow_operation op );
+        sc::value process_source( shadow_operation op );
 
-        std::optional< ir::intrinsic > process_memory( shadow_operation op );
+        sc::value process_memory( shadow_operation op );
 
-        std::optional< ir::intrinsic > process_forward( shadow_operation op );
+        sc::value process_forward( shadow_operation op );
 
-        std::optional< ir::intrinsic > process_load( shadow_operation op );
+        sc::value process_load( shadow_operation op );
 
-        std::optional< ir::intrinsic > process_store( shadow_operation op );
+        sc::value process_store( shadow_operation op );
+
+        // maps concrete value to shadow value
+        std::unordered_map< sc::value, sc::value > ops;
 
         const dfa::types &types;
         sc::module_ref module;
