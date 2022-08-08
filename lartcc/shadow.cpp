@@ -16,6 +16,8 @@
 
 #include <cc/shadow.hpp>
 
+#include <sc/builder.hpp>
+
 namespace lart
 {
     std::string to_string(shadow_op_kind kind) {
@@ -42,6 +44,12 @@ namespace lart
             return shadow_op_kind::store;
         else if ( llvm::isa< llvm::LoadInst >(val) )
             return shadow_op_kind::load;
+        else if ( auto call = llvm::dyn_cast< llvm::CallInst >(val) ) {
+            auto fn = call->getCalledFunction();
+            if ( fn->hasName() && fn->getName().startswith("__lamp" ) ) {
+                return shadow_op_kind::source;
+            }
+        }
         return shadow_op_kind::forward;
     }
 
@@ -50,49 +58,101 @@ namespace lart
         for ( auto &[val, type] : types ) {
             co_yield { val, operation_kind(val) };
         }
+
+        for ( auto store : sc::query::filter_llvm< llvm::StoreInst >( module ) ) {
+            auto ptr = store->getPointerOperand();
+            // TODO deal with melt/store
+            if ( types.count(ptr) ) {
+                co_yield { store, shadow_op_kind::store };
+            }
+        }
     }
 
-    std::optional< ir::intrinsic > shadow::process( shadow_operation o )
+    sc::value shadow::process( shadow_operation o )
     {
+        if (ops.count(o.value)) {
+            return ops[o.value];
+        }
+
         spdlog::debug("[shadow] make {} op: {}",
             to_string(o.kind),
             sc::fmt::llvm_to_string(o.value)
         );
 
-        switch (o.kind) {
-            case shadow_op_kind::source:
-                return process_source(o);
-            case shadow_op_kind::memory:
-                return process_memory(o);
-            case shadow_op_kind::forward:
-                return process_forward(o);
-            case shadow_op_kind::store:
-                return process_store(o);
-            case shadow_op_kind::load:
-                return process_load(o);
+        auto result = [&] {
+            switch (o.kind) {
+                case shadow_op_kind::source:
+                    return process_source(o);
+                case shadow_op_kind::memory:
+                    return process_memory(o);
+                case shadow_op_kind::forward:
+                    return process_forward(o);
+                case shadow_op_kind::store:
+                    return process_store(o);
+                case shadow_op_kind::load:
+                    return process_load(o);
+            }
+
+            __builtin_unreachable();
+        } ();
+
+        ops[o.value] = result;
+        return result;
+    }
+
+    sc::value shadow::process( sc::value op ) {
+        return process({op, operation_kind(op)});
+    }
+
+    static sc::instruction* as_inst( sc::value value ) {
+        return llvm::cast< sc::instruction >(value);
+    }
+
+    sc::value shadow::process_source( shadow_operation /* op */ ) {
+        return sc::i1( true );
+    }
+
+    sc::value shadow::process_memory( shadow_operation op ) {
+        return as_inst( sc::stack_builder( as_inst( op.value ) )
+            | sc::action::alloc( sc::i1() )
+            | sc::action::keep_stack()
+            | sc::action::store( sc::i1( false ), {} )
+            | sc::action::last()
+        );
+    }
+
+    sc::value shadow::process_forward( shadow_operation op ) {
+        auto inst = as_inst( op.value );
+        auto bld = sc::stack_builder( inst )
+            | sc::action::push( process(inst->getOperand(0)) );
+
+        for (unsigned i = 1; i < inst->getNumOperands(); i++) {
+            bld = std::move(bld) | sc::action::or_( {}, process(inst->getOperand(i)) );
         }
-        return std::nullopt;
+
+        return bld.back();
     }
 
-    std::optional< ir::intrinsic > shadow::process_source( shadow_operation /* op */ ) {
-        return std::nullopt;
+    sc::value shadow::process_load( shadow_operation op ) {
+        auto load = llvm::cast< llvm::LoadInst >( op.value );
+        auto bld = sc::stack_builder( load );
+
+        auto ptr = load->getPointerOperand();
+
+        return std::move(bld)
+            | sc::action::load_ptr( sc::i1(), process(ptr) )
+            | sc::action::last();
     }
 
-    std::optional< ir::intrinsic > shadow::process_memory( shadow_operation /* op */ ) {
-        return std::nullopt;
-    }
+    sc::value shadow::process_store( shadow_operation op ) {
+        auto store = llvm::cast< llvm::StoreInst >( op.value );
+        auto bld = sc::stack_builder( store );
 
-    std::optional< ir::intrinsic > shadow::process_forward( shadow_operation /* op */ ) {
-        return std::nullopt;
-    }
+        auto val = store->getValueOperand();
+        auto ptr = store->getPointerOperand();
 
-    std::optional< ir::intrinsic > shadow::process_load( shadow_operation /* op */ ) {
-        return std::nullopt;
+        std::move(bld) | sc::action::store( process(val), process(ptr) );
+        return nullptr; // store does not return any value
     }
-
-    std::optional< ir::intrinsic > shadow::process_store( shadow_operation /* op */ ) {
-        return std::nullopt;
-    }
-
 
 } // namespace lart
