@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cc/backend/native.hpp>
+#include <cc/backend/native/native.hpp>
 #include <cc/taint.hpp>
 
 #include <sc/builder.hpp>
@@ -23,8 +23,9 @@
 
 namespace lart::backend
 {
-    void native::lower( ir::intrinsic i, testtaint )
+    void native::lower_test_taint( ir::intrinsic i )
     {
+        spdlog::debug("[native] lower {}", sc::fmt::llvm_to_string(i.call));
         auto fn = i.call->getCalledFunction();
         if ( !fn->empty() )
             return; // already synthesized
