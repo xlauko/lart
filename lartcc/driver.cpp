@@ -22,9 +22,9 @@
 #include <cc/logger.hpp>
 #include <cc/preprocess.hpp>
 #include <cc/runtime.hpp>
-#include <cc/shadow.hpp>
 
-#include <cc/backend/native.hpp>
+#include <cc/backend/native/shadow.hpp>
+#include <cc/backend/native/native.hpp>
 
 #include <sc/erase.hpp>
 #include <sc/query.hpp>
@@ -73,17 +73,16 @@ namespace lart
 
         // 7. interrupts ?
 
-        // TODO pick backend based on cmd arguments
-        auto backend = lart::backend::native( module );
-        for ( auto intr : intrinsics ) {
-            backend.lower( intr );
-        }
-
         shadow instrument( module, types );
         for (const auto &op : instrument.toprocess()) {
             instrument.process(op);
         }
 
+        // TODO pick backend based on cmd arguments
+        auto backend = lart::backend::native( module );
+        for ( auto intr : intrinsics ) {
+            backend.lower( intr );
+        }
         spdlog::info("lartcc finished");
         return llvm::PreservedAnalyses::none();
     }

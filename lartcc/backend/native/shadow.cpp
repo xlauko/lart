@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cc/shadow.hpp>
+#include <cc/backend/native/shadow.hpp>
 
 #include <sc/builder.hpp>
 

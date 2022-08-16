@@ -53,7 +53,7 @@ namespace lart::backend
         using base::testtaint;
         using base::callinst;
 
-        void lower( ir::intrinsic, testtaint ) override;
+        void lower_test_taint( ir::intrinsic ) override;
         void lower( callinst c, op::unstash u ) override;
         void lower( callinst c, op::stash s ) override;
 

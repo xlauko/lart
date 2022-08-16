@@ -77,11 +77,12 @@ add_library( lartcc
     preprocess.cpp
     syntactic.cpp
     runtime.cpp
-    shadow.cpp
     taint.cpp
 
     backend/base.cpp
-    backend/native.cpp
+
+    backend/native/shadow.cpp
+    backend/native/native.cpp
 )
 
 set_property(TARGET lartcc PROPERTY POSITION_INDEPENDENT_CODE ON)

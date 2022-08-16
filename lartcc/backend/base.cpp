@@ -22,7 +22,7 @@ namespace lart::backend
     void base::lower( ir::intrinsic i )
     {
         if ( op::with_taints( i.op ) )
-            this->lower( i, testtaint{} );
+            lower_test_taint( i );
         else
             std::visit( [&] (auto &&a) { this->lower( i.call, a ); }, i.op );
     }
