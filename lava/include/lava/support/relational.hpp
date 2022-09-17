@@ -79,6 +79,26 @@ namespace __lava
             backward_propagate( a );
         }
 
+        static bool memoize( sref v, void* twin, unsigned int line ) {
+            //printf("in relational\n");
+            return base::memoize( v, twin, line );
+        }
+        /*
+        template< typename... Args >
+        static void memoize_var( unsigned int line, Args&&... args ) {
+            base::memoize_var( line, std::forward<Args>( args )... );
+        }
+        */
+        template < typename T, typename R >
+        static void memoize_var( unsigned int line, T& twins, R& refs ) {
+            printf("in relational\n");
+            base::memoize_var( line, twins, refs );
+        }
+
+        //static void dump( sref v ) {
+        //    base::dump( v );
+        //}
+
         static constexpr auto wrap = __lava::op::wrap;
 
         static void backward_propagate( sref a )
@@ -101,12 +121,12 @@ namespace __lava
                 case op::tag::lift:  return;
                 case op::tag::lower: return;
 
-                case op::tag::join: mixin::fail("unsupported join bop"); return;
-                case op::tag::meet: mixin::fail("unsupported meet bop"); return;
+                case op::tag::join: mixin::fail("unsupported join bop");
+                case op::tag::meet: mixin::fail("unsupported meet bop");
 
-                case op::tag::alloca: mixin::fail("unsupported alloca bop"); return;
-                case op::tag::store:  mixin::fail("unsupported store bop"); return;
-                case op::tag::load:   mixin::fail("unsupported load bop"); return;
+                case op::tag::alloca: mixin::fail("unsupported alloca bop");
+                case op::tag::store:  mixin::fail("unsupported store bop");
+                case op::tag::load:   mixin::fail("unsupported load bop");
 
                 case op::tag::add: bin( op::backward::add ); break;
                 case op::tag::sub: bin( op::backward::sub ); break;
@@ -122,7 +142,7 @@ namespace __lava
                 case op::tag::fdiv: bin( op::backward::fdiv ); break;
                 case op::tag::frem: bin( op::backward::frem ); break;
 
-                case op::tag::fneg: mixin::fail("unsupported fneg bop"); return;
+                case op::tag::fneg: mixin::fail("unsupported fneg bop");
 
                 case op::tag::op_and: bin( op::backward::op_and ); break;
                 case op::tag::op_or:  bin( op::backward::op_or ); break;
@@ -184,8 +204,11 @@ namespace __lava
                 case op::tag::malloc: mixin::fail("unsupported malloc bop"); return;
                 case op::tag::realloc: mixin::fail("unsupported realloc bop"); return;
 
-                case op::tag::dealloca: mixin::fail("unsupported dealloca bop"); return;
-                case op::tag::free: mixin::fail("unsupported free bop"); return;
+                case op::tag::malloc: mixin::fail("unsupported malloc bop");
+                case op::tag::realloc: mixin::fail("unsupported realloc bop");
+
+                case op::tag::dealloca: mixin::fail("unsupported dealloca bop");
+                case op::tag::free: mixin::fail("unsupported free bop");
             }
 
             for (const auto &ch : a.underlying()->children) {

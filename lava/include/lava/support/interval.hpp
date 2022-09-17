@@ -82,8 +82,8 @@ namespace sup
             } else if ( is_infinite() && o.is_finite() ) {
                 // keep infinite value
             } else if ( o.is_infinite() && _value != o._value ) {
-                __lart_cancel();
-                //integer_fault( "addition of opposite infinities is undetermined" );
+                //__lart_cancel();
+                fprintf( stderr, "[lamp warning]: addition of ∞ and -∞ is not defined \n" );
             }
             return *this;
         }
@@ -214,7 +214,7 @@ namespace sup
             if (b == minus_infinity())
                 return os << "-∞";
             if (b == plus_infinity())
-                return os << "-∞";
+                return os << "∞";
             return os << b._value;
         }
 
@@ -310,7 +310,7 @@ namespace sup
                 low = high = static_cast< bool >( t );
             }
         }
-        
+
         explicit constexpr interval( bool b )
             : low( b ), high( b )
         {}

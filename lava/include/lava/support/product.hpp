@@ -260,9 +260,37 @@ namespace __lava
             op( a->second );
         }
 
-        static void dump( pr /* a */ )
+        static bool memoize( pr v, void* twin, unsigned int line )
+        {
+            //printf("in product\n");
+            //return op::wrap( op::memoize, twin, line );
+            auto op = op::wrap( op::memoize, twin, line );
+            return op( v->first);
+            //return op( v->second );
+        }
+
+        /*
+        template< typename... Args >
+        static void memoize_var( unsigned int line, Args&&... args )
+        {
+            auto op = op::wrap( op::memoize_var, line, std::forward<Args>(args)... );
+        }
+        */
+
+        template< typename T, typename R >
+        static void memoize_var( unsigned int line, T& twins, R& refs )
+        {
+            printf("in product \n");
+            auto op = op::wrap( op::memoize_var, twins, refs );
+            //op( v->first );
+            //op( v->second );
+        }
+
+        static void dump( pr a )
         {
             __builtin_unreachable();
+            //auto op = op::wrap( op::dump );
+            //op( a->first );
         }
 
         static std::string trace( pr /* a */ )

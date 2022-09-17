@@ -27,7 +27,12 @@
 #include <runtime/lart.h>
 #include <runtime/shadow.hpp>
 
-#include <string>
+#include <cstdarg>
+#include <vector>
+
+#ifdef __lart_cpp_runtime
+    #include <string>
+#endif
 
 typedef struct { void *ptr; } __lamp_ptr;
 
@@ -297,6 +302,63 @@ extern "C"
             return "concrete";
         }
     }
+    /*
+    void __lamp_memoize( void *twin, unsigned int line )
+    {
+        if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
+            auto *meta = __lart_peek( twin );
+            auto size = meta->bytes - lamp::detail::offset( meta, twin );
+            ref a( lamp::detail::melt( twin, size ).ptr );
+            return dom::memoize( a, twin, line ); // TODO size?
+        }
+        printf( "concrete memoize\n" );
+    }
+    */
+   void __lamp_memoize( void *twin, unsigned int line )
+    {
+        if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
+            auto *meta = __lart_peek( twin );
+            auto size = meta->bytes - lamp::detail::offset( meta, twin );
+            ref a( lamp::detail::melt( twin, size ).ptr );
+            if ( dom::memoize( a, twin, line ) ) { // TODO size?
+                __lart_cancel();
+            }
+        }
+        //printf( "concrete memoize\n" );
+    }
+
+    void __lamp_memoize_var( unsigned int line, unsigned int count, ... )
+    {
+        std::vector<void*> twins;
+        std::vector<ref> refs;
+        va_list args;
+        va_start( args, count );
+        for ( int i = 0; i < count; i++ ) {
+            void* twin = va_arg( args, void* );
+            if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
+                auto *meta = __lart_peek( twin );
+                auto size = meta->bytes - lamp::detail::offset( meta, twin );
+                ref a( lamp::detail::melt( twin, size ).ptr );
+                twins.push_back( twin );
+                refs.push_back( a );
+            }
+        }
+        if ( twins.size() == refs.size() && twins.size() != 0 ) {
+            printf( "concrete\n" );
+            return dom::memoize_var( line, twins, refs );
+        }
+        printf( "concrete memoize_var\n" );
+    }
+
+    /*
+    void __lamp_memoize( unsigned int line, ... )
+    {
+        va_list args;
+        va_start( args, line );
+        return dom::memoize_var( line, args );
+    }
+    */
+}
 
 extern "C" {
 
