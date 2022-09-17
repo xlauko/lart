@@ -30,6 +30,9 @@
 #include <cstdarg>
 #include <vector>
 
+#include <cstdarg>
+#include <vector>
+
 #ifdef __lart_cpp_runtime
     #include <string>
 #endif
