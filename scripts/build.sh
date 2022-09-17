@@ -1,7 +1,16 @@
+export PATH=$HOME/src/lart/build-lart/lartcc:$PATH
+
+export LIBCXX_DATAFLOW_DIR=~/opt/libcxx-dataflow/
+export LART_INSTALL_DIR=~/opt/lart
+export SVF_INSTALL_DIR=~/opt/svf/
+export LLVM_INSTALL_DIR=/usr/lib/llvm-12/
+export VCPKG_TOOLCHAIN=~/opt/vcpkg/scripts/buildsystems/vcpkg.cmake
+
+
  cmake \
     -GNinja \
-    -DCMAKE_C_COMPILER=clang \
-    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_C_COMPILER=clang-12 \
+    -DCMAKE_CXX_COMPILER=clang++-12 \
     -DBUILD_LART_RUNTIME=ON \
     -DCMAKE_BUILD_TYPE=Debug \
     -DLLVM_INSTALL_DIR=${LLVM_INSTALL_DIR} \
@@ -9,6 +18,7 @@
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_TOOLCHAIN} \
     -DCMAKE_INSTALL_PREFIX=${LART_INSTALL_DIR} \
     -B build-runtime \
+    -DCMAKE_INSTALL_PREFIX=~/opt/lart \
     -S .
 
 cmake --build build-runtime
