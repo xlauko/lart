@@ -1,11 +1,11 @@
 // RUN: %testrun %lartcc term -lz3 %s -o %t | %filecheck %s
 
-#include <lamp.h>
-#include <assert.h>
-
 #include "utils.h"
 
-int plus( int a, int b ) { return a + b; }
+#include <assert.h>
+#include <lamp.h>
+
+int plus(int a, int b) { return a + b; }
 
 int main() {
     int a = __lamp_any_i32();
