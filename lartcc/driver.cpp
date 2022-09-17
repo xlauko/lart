@@ -46,7 +46,7 @@ namespace lart
         // lower pointer arithmetic to scalar operations
         {
             sc::deferred_erase_vector erase([&] (auto inst) { types.erase(inst); });
-            
+
             for ( auto &[val, type] : types ) {
                 if ( auto gep = llvm::dyn_cast< llvm::GetElementPtrInst >( val ) ) {
                     for ( auto [src, inst] : lower_pointer_arithmetic( gep ) ) {

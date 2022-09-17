@@ -42,7 +42,7 @@ namespace __lava
         term_state_t()
             : solver( ctx )
         {}
-        
+
         z3::context ctx;
         z3::solver solver;
     };
@@ -55,7 +55,7 @@ namespace __lava
 
     term_state_t *__term_state;
     term_config_t *__term_cfg;
-    
+
     template< template< typename > typename storage >
     struct term : storage< z3::expr >
                 , domain_mixin< term< storage > >
@@ -87,7 +87,7 @@ namespace __lava
             std::strncpy( name, "var_", 4 );
             std::sprintf( name + 4, "%u", variable_counter() );
 
-            auto &ctx = __term_state->ctx;            
+            auto &ctx = __term_state->ctx;
             if constexpr ( std::is_integral_v < type > )
             {
                 return ctx.bv_const( name, bitwidth_v< type > );
@@ -110,13 +110,13 @@ namespace __lava
             return e == __term_state->ctx.bv_val( 1, 1 );
         }
 
-        static void assume( tr t, bool expected ) 
+        static void assume( tr t, bool expected )
         {
             auto &solver = __term_state->solver;
             const auto& e = t.get();
             auto b = e.is_bool() ? e : tobool( e );
             solver.add( expected ? b : !b );
-            
+
             if ( solver.check() == z3::unsat ) {
                 __lart_cancel();
             }
@@ -155,17 +155,17 @@ namespace __lava
 
         // static term op_inttoptr( tr, bw ) { return {}; }
         // static term op_ptrtoint( tr, bw ) { return {}; }
-        static term op_sext( tr t, bw b ) { 
+        static term op_sext( tr t, bw b ) {
             auto &v = t.get();
-            return z3::sext( v, b - v.get_sort().bv_size() ); 
+            return z3::sext( v, b - v.get_sort().bv_size() );
         }
         // static term op_sitofp( tr, bw ) { return {}; }
-        static term op_trunc( tr t, bw b ) { 
+        static term op_trunc( tr t, bw b ) {
             // TODO: check
-            return t.get().extract( b - 1, 0 ); 
+            return t.get().extract( b - 1, 0 );
         }
         // static term op_uitofp( tr, bw ) { return {}; }
-        static term op_zext( tr t, bw b ) { 
+        static term op_zext( tr t, bw b ) {
             auto &v = t.get();
             return z3::zext( v, b - v.get_sort().bv_size() );
         }

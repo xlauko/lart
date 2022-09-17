@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <vector>
+#include <utility>
 
 #include <runtime/vector.hpp>
 
@@ -30,7 +31,7 @@ namespace __lava
     template< typename domain >
     struct [[gnu::packed]] history_storage
     {
-        constexpr history_storage(domain &&v) 
+        constexpr history_storage(domain &&v)
             : value( std::make_shared< domain >( std::move(v) ) )
         {}
 
@@ -49,11 +50,11 @@ namespace __lava
         using bw = typename mixin::bw;
         using base::base;
 
-        with_history( const domain &v ) = delete; 
-        
+        with_history( const domain &v ) = delete;
+
         using self = with_history;
         using sref = const with_history &;
-        
+
         template< typename type >
         static self lift( const type &val ) { return domain::lift( val ); }
 
@@ -61,6 +62,20 @@ namespace __lava
         static self any() { return domain::template any< type >(); }
 
         static void assume( self &a, bool expected ) { domain::assume( value(a), expected ); }
+
+        static bool memoize( sref v, void *twin, unsigned int line ) { return domain::memoize( value(v), twin, line ); }
+        /*
+        template< typename... Args >
+        static void memoize_var( unsigned int line, Args&&... args ) { domain::memoize_var( line, std::forward<Args>( args )... ); }
+        */
+        /*
+        template< typename T, typename R >
+        static void memoize_var( unsigned int line, T& twins, R& refs ) {
+            printf("in with history\n");
+            domain::memoize_var( line, twins, refs );
+        }
+        */
+        //static void dump( sref v ) { domain::dump( value(v) ); }
 
         static tristate to_tristate( sref a )
         {
@@ -78,7 +93,7 @@ namespace __lava
             r->children.push_back( b.unsafe_ptr() );
             return r;
         }
-        
+
         template< typename op_t >
         static self cast( op_t op, sref a, bw b )
         {

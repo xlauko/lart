@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <stdio.h>
 #include <runtime/lart.h>
 
 namespace __lava

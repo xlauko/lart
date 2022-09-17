@@ -26,6 +26,9 @@
 
 #include <runtime/lart.h>
 
+#include <cstdarg>
+#include <vector>
+
 #ifdef __lart_cpp_runtime
     #include <string>
 #endif
@@ -278,7 +281,7 @@ extern "C"
 
     void __lamp_assume( __lamp_ptr a, bool c ) {
         auto r = ref( a.ptr );
-        dom::assume( r, c ); 
+        dom::assume( r, c );
     }
     __lamp_ptr __lamp_extract( __lamp_ptr a, bw s, bw e ) { return wrap( dom::op_extract, a, s, e ); }
 
@@ -300,6 +303,62 @@ extern "C"
         }
         printf( "concrete\n" );
     }
+    /*
+    void __lamp_memoize( void *twin, unsigned int line )
+    {
+        if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
+            auto *meta = __lart_peek( twin );
+            auto size = meta->bytes - lamp::detail::offset( meta, twin );
+            ref a( lamp::detail::melt( twin, size ).ptr );
+            return dom::memoize( a, twin, line ); // TODO size?
+        }
+        printf( "concrete memoize\n" );
+    }
+    */
+   void __lamp_memoize( void *twin, unsigned int line )
+    {
+        if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
+            auto *meta = __lart_peek( twin );
+            auto size = meta->bytes - lamp::detail::offset( meta, twin );
+            ref a( lamp::detail::melt( twin, size ).ptr );
+            if ( dom::memoize( a, twin, line ) ) { // TODO size?
+                __lart_cancel();
+            }
+        }
+        //printf( "concrete memoize\n" );
+    }
+
+    void __lamp_memoize_var( unsigned int line, unsigned int count, ... )
+    {
+        std::vector<void*> twins;
+        std::vector<ref> refs;
+        va_list args;
+        va_start( args, count );
+        for ( int i = 0; i < count; i++ ) {
+            void* twin = va_arg( args, void* );
+            if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
+                auto *meta = __lart_peek( twin );
+                auto size = meta->bytes - lamp::detail::offset( meta, twin );
+                ref a( lamp::detail::melt( twin, size ).ptr );
+                twins.push_back( twin );
+                refs.push_back( a );
+            }
+        }
+        if ( twins.size() == refs.size() && twins.size() != 0 ) {
+            printf( "concrete\n" );
+            return dom::memoize_var( line, twins, refs );
+        }
+        printf( "concrete memoize_var\n" );
+    }
+
+    /*
+    void __lamp_memoize( unsigned int line, ... )
+    {
+        va_list args;
+        va_start( args, line );
+        return dom::memoize_var( line, args );
+    }
+    */
 }
 
 #ifdef __lart_cpp_runtime
@@ -322,7 +381,7 @@ namespace lamp::detail
     {
         return uintptr_t(addr) - uintptr_t(meta->origin);
     }
-    
+
     void freeze( __lamp_ptr val, void *addr, size_t bytes )
     {
         __lart_poke( addr, bytes, val.ptr );

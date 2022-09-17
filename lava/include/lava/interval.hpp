@@ -6,12 +6,18 @@
 
 #include <lava/support/interval.hpp>
 
+//#include <lava/support/interval_mapalloc.hpp>
+
 #include <lamp/support/semilattice.hpp>
 
 #include <sstream>
 #include <cstdio>
 #include <string_view>
+#include <cstdarg>
+//#include <map>
+//#include <vector>
 #include <sys/mman.h>
+#include <stdlib.h>
 
 namespace __lava
 {
@@ -20,10 +26,37 @@ namespace __lava
 
     struct interval_config_t
     {
-        bound_t choose_bound = 200;
+        bound_t choose_bound = 0;
+    };
+
+    /*
+    template< typename Key, typename T >
+    using Map = std::map<Key, T, std::less<Key>, MyAllocator<std::pair<const Key, T>>>;
+    struct interval_state_t
+    {
+        //std::map< uint, snapshot_t > snapshots;
+        //std::map< void*, interval_t > snapshot;
+        //std::vector< interval_t > snapshot;
+        Map< void*, interval_t > snapshot;
+    };*/
+
+    struct interval_state_t
+    {
+        void* twin;
+        unsigned int line;
+        interval_t interval;
+    };
+
+    struct interval_states_t
+    {
+        size_t max_size = 0;
+        size_t size = 0;
+        interval_state_t *states;
     };
 
     interval_config_t *__interval_cfg;
+    //interval_state_t *__interval_states_array;
+    interval_states_t *__interval_states;
 
     template< template< typename > typename storage >
     struct interval : storage< interval_t >
@@ -64,7 +97,7 @@ namespace __lava
 
         interval( tristate t )  : interval_storage( t ) {}
         interval( bool t )  : interval_storage( t ) {}
-        
+
         interval clone() const {
             auto const &self = static_cast< const interval& > ( *this );
             return interval( self->low, self->high );
@@ -101,7 +134,7 @@ namespace __lava
         template< typename type > static auto lift( type v )
             -> std::enable_if_t< std::is_integral_v< type >, interval >
         {
-            return interval( v );
+            return interval( static_cast< int >( v ) );
         }
 
         template< typename type > static auto lift( type v )
@@ -145,9 +178,9 @@ namespace __lava
         static iv op_join( ir l, ir r ) { return join( l.get(), r.get() ); }
         static iv op_meet( ir l, ir r ) { return meet( l.get(), r.get() ); }
 
-        static iv op_add ( ir a, ir b ) { return a.get() + b.get(); }
-        static iv op_sub ( ir a, ir b ) { return a.get() - b.get(); }
-        static iv op_mul ( ir a, ir b ) { return a.get() * b.get(); }
+        static iv op_add ( ir a, ir b ) { /*dump(a); dump(b);*/ return a.get() + b.get(); }
+        static iv op_sub ( ir a, ir b ) { /*dump(a); dump(b);*/ return a.get() - b.get(); }
+        static iv op_mul ( ir a, ir b ) { /*dump(a); dump(b);*/ return a.get() * b.get(); }
         static iv op_sdiv( ir a, ir b ) { return a.get() / b.get(); }
         static iv op_udiv( ir a, ir b ) { return a.get() / b.get(); } // FIXME
         static iv op_srem( ir a, ir b ) { return a.get() % b.get(); }
@@ -159,7 +192,7 @@ namespace __lava
         static iv op_zext(  ir i, bw ) { return i.clone(); }
         static iv op_zfit(  ir i, bw ) { return i.clone(); }
 
-        static iv op_eq ( ir a, ir b ) { return a.get() == b.get(); }
+        static iv op_eq ( ir a, ir b ) { /*dump(a); dump(b);*/ return a.get() == b.get(); }
         static iv op_ne ( ir a, ir b ) { return a.get() != b.get(); }
         static iv op_ugt( ir a, ir b ) { return a.get() > b.get();  } // FIXME
         static iv op_uge( ir a, ir b ) { return a.get() >= b.get(); } // FIXME
@@ -376,7 +409,12 @@ namespace __lava
         }
 
         static void bop_eq( ir r, ir a, ir b ) { beq( r, a, b ); }
-        static void bop_ne( ir r, ir a, ir b ) { beq( r, a, b, true /* negated */ ); }
+        static void bop_ne( ir r, ir a, ir b ) {
+            //printf("---\n");
+            //dump(r); dump(a); dump(b);
+            beq( r, a, b, true /* negated */ );
+            //dump(a); dump(b); printf("---\n"); fflush(stdout);
+        }
 
         static void bop_sgt( ir r, ir a, ir b ) { bgt( r, a, b ); }
         static void bop_slt( ir r, ir a, ir b ) { bgt( r, b, a ); }
@@ -387,6 +425,8 @@ namespace __lava
         static void bop_uge( ir r, ir a, ir b ) { bop_sge( r, a, b ); }
         static void bop_ult( ir r, ir a, ir b ) { bop_slt( r, a, b ); }
         static void bop_ule( ir r, ir a, ir b ) { bop_sle( r, a, b ); }
+
+        static void bop_zext( ir r, ir a ) { /* noop */ }
 
         static void bop_zfit( ir r, ref a )
         {
@@ -410,15 +450,123 @@ namespace __lava
         {
             return os << trace(i);
         }
+
+        static bool memoize( ir iref, void* twin, unsigned int line )
+        {
+            printf("Memoize (%s, %p, %u, %zu)\n", trace(iref).c_str(), twin, line, __interval_states->size);
+            if ( __interval_states->max_size == 0 ) { return false; }
+            if ( __interval_states->size == 0)
+            {
+                add_state( iref, twin, line );
+                printf("Exit (%s, %p, %u, %zu)\n\n", trace(iref).c_str(), twin, line, __interval_states->size);
+                return false; // memoized
+            }
+            int i = 0;
+            while ( i < __interval_states->size && line > __interval_states->states[i].line ) { i++; }
+            while ( i < __interval_states->size && twin > __interval_states->states[i].twin ) { i++; }
+            print_states();
+            printf("I = %i\n", i);
+            auto state = __interval_states->states[i];
+            printf("found state (%s, %p, %u)\n", trace(state.interval).c_str(), state.twin, state.line);
+            if ( state.twin == twin && state.line == line )
+            {
+                printf("Similar state (%s, %p, %u)\n", trace(state.interval).c_str(), state.twin, state.line);
+                if ( state.interval.includes( iref.get() ) )
+                {
+                    printf("State (%s, %p, %u) includes ", trace(state.interval).c_str(), state.twin, state.line);
+                    printf("state (%s, %p, %u)\n", trace(iref).c_str(), twin, line);
+                    return true; // memoized
+                }
+            }
+            else
+            {
+                if ( __interval_states->size < __interval_states->max_size )
+                {
+                    add_state( iref, twin, line );
+                }
+            }
+            printf("Exit (%s, %p, %u, %zu)\n\n", trace(iref).c_str(), twin, line, __interval_states->size);
+            return false; // memoized
+        }
+
+        /*
+        void memoize_var( unsigned int line ){
+            printf("I am at the end\n");
+        }
+
+        template< typename Arg, typename... Args >
+        static void memoize_var( unsigned int line, Arg a, Args... args )
+        {
+            printf("Twin = %p\n", a);
+        }
+        */
+        /*
+        template < typename T, typename R >
+        void memoize_var( unsigned int line, T& twins, R& refs )
+        {
+            printf("Line = %i\n", line);
+            for( auto twin : twins ) {
+                printf("Twin = %p\n", twin);
+            }
+            for( auto iref : refs ) {
+                printf("Twin = %s\n", iref.get());
+            }
+            //size_t len = sizeof...(args);
+            //printf("Line = %i; twins = %i\n", line, sizeof...(args));
+        }
+        */
+
+        static void add_state( ir iref, void* twin, unsigned int line )
+        {
+            printf("Insert state (%s, %p, %u)\n", trace(iref).c_str(), twin, line);
+            __interval_states->states[__interval_states->size].twin = twin;
+            __interval_states->states[__interval_states->size].line = line;
+            __interval_states->states[__interval_states->size].interval = iref.get();
+            __interval_states->size++;
+            qsort( __interval_states->states, __interval_states->size, sizeof(interval_state_t), cmpfunc );
+        }
+
+        static int cmpfunc ( const void * a, const void * b )
+        {
+            interval_state_t* first = (interval_state_t*)a;
+            interval_state_t* second = (interval_state_t*)b;
+            if ( (long)(first->twin) - (long)(second->twin) == 0 )
+            {
+                return first->line - second->line;
+            }
+            return (long)(first->twin) - (long)(second->twin);
+        }
+
+        static void print_states()
+        {
+            for (int i = 0; i < __interval_states->size; i++){
+                auto state = __interval_states->states[i];
+                printf("\tState (%s, %p, %u)\n", trace(state.interval).c_str(), state.twin, state.line);
+            }
+        }
     };
 
-    [[gnu::constructor]] void term_setup()
+    [[gnu::constructor]] void interval_setup()
     {
-        __interval_cfg = (interval_config_t*)mmap(NULL, sizeof(interval_config_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        __interval_cfg = (interval_config_t*)mmap(NULL, sizeof(interval_config_t), PROT_READ |
+                                                PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
         if ( auto opt = std::getenv( "INTERVAL_CHOOSE_BOUND" ); opt ) {
             fprintf( stderr, "[interval config] choose bound = %s\n", opt );
             __interval_cfg->choose_bound = std::atoi( opt );
         }
+        //Najprv nainicializujem informacie o vsetkych stavoch
+        __interval_states = (interval_states_t*)mmap(NULL, sizeof(interval_states_t),
+                                        PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
+        if ( auto opt = std::getenv( "INTERVAL_MAX_STATES" ); opt ) {
+            fprintf( stderr, "[interval states] max states = %s\n", opt );
+            __interval_states->max_size = std::atoi( opt );
+        }
+
+        __interval_states->states = (interval_state_t*)mmap(NULL, sizeof(interval_state_t) * __interval_states->max_size,
+                                        PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
+        //new ( __interval_state ) interval_state_t;
     }
 }

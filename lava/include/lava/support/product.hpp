@@ -43,7 +43,7 @@ namespace __lava
     struct to_tristate_second {};
     struct to_tristate_disabled {};
 
-    template< 
+    template<
         typename lowering_strategy_t,
         typename to_tristate_strategy_t
     >
@@ -85,7 +85,7 @@ namespace __lava
         {
             return static_cast< const product& >( *this );
         }
-    
+
         const left_type& left()  const { return self()->first; }
         const right_type& right() const { return self()->second; }
 
@@ -260,9 +260,37 @@ namespace __lava
             op( a->second );
         }
 
+        static bool memoize( pr v, void* twin, unsigned int line )
+        {
+            //printf("in product\n");
+            //return op::wrap( op::memoize, twin, line );
+            auto op = op::wrap( op::memoize, twin, line );
+            return op( v->first);
+            //return op( v->second );
+        }
+
+        /*
+        template< typename... Args >
+        static void memoize_var( unsigned int line, Args&&... args )
+        {
+            auto op = op::wrap( op::memoize_var, line, std::forward<Args>(args)... );
+        }
+        */
+
+        template< typename T, typename R >
+        static void memoize_var( unsigned int line, T& twins, R& refs )
+        {
+            printf("in product \n");
+            auto op = op::wrap( op::memoize_var, twins, refs );
+            //op( v->first );
+            //op( v->second );
+        }
+
         static void dump( pr a )
         {
             __builtin_unreachable();
+            //auto op = op::wrap( op::dump );
+            //op( a->first );
         }
 
         static std::string trace( pr a )
@@ -275,7 +303,7 @@ namespace __lava
         {
             return os << "(" << a->first << ", " << a->second << ")";
         }
-        
+
         // backward operations
         static void bop_add ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::add ), r, a, b ); }
         static void bop_sub ( pr r, pr a, pr b ) { bin_bop( wrap( op::backward::sub ), r, a, b ); }

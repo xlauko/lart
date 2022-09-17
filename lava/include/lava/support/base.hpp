@@ -36,7 +36,7 @@ namespace __lava
     using bitwidth_t = uint8_t;
 
     struct construct_shared_t {};
-    static constexpr construct_shared_t construct_shared; 
+    static constexpr construct_shared_t construct_shared;
 
     template< typename domain >
     struct domain_ref : domain
@@ -237,17 +237,36 @@ namespace __lava
         static st op_extract( sr, bw, bw ) { return fail( "extract" ); }
 
         template< typename scal > static void op_store( sr, const scal&, bw ) { fail( "store" ); }
-        
+
         static st op_load( sr, bw ) { return fail( "load" ); }
 
         static void op_dealloca( sr s ) { s.~self_t(); }
 
         static void dump( sr ) { printf( "dump not implemented" ); }
         static std::string trace( sr ) { return "trace is not implemented"; }
-        
+
         static void report( const char * op )
-        { 
+        {
             fprintf( stderr, "[lamp warning]: unsupported bop %s\n", op );
+        }
+
+        static bool memoize( sr, void*, unsigned int )
+        {
+            fprintf( stderr, "[lamp warning]: unsupported memoize \n" );
+            return false;
+        }
+        /*
+        template< typename... Args >
+        static void memoize_var( unsigned int, Args... args )
+        {
+            fprintf( stderr, "[lamp warning]: unsupported memoize_var \n" );
+        }
+        */
+
+        template< typename T, typename R >
+        static void memoize_var( unsigned int, T&, R& )
+        {
+            fprintf( stderr, "[lamp warning]: unsupported memoize_var \n" );
         }
 
         // backward operations

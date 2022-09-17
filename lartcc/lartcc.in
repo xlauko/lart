@@ -21,7 +21,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 CFLAGS="-isystem ${LIBCXX}/include/c++/v1 -nostdlib++"
-LDFLAGS="-L${LIBCXX}/lib -Wl,-rpath,${LIBCXX}/lib -lstdc++ -stdlib=libc++"
+LDFLAGS="-L${LIBCXX}/lib -Wl,-rpath,${LIBCXX}/lib -lstdc++ -lc++ -stdlib=libc++"
 
 if [ -z $domain ]; then
      echo -e "${RED}[LART ERROR]${NC} No domain provided. Please specify a domain name."
