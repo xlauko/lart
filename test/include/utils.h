@@ -15,3 +15,10 @@ void unreachable()
 #define UNREACHABLE unreachable();
 
 #define noinline __attribute__((__noinline__))
+
+void __lart_cancel(void);
+
+void assume(int cond) {
+  if (!cond)
+    __lart_cancel();
+}
