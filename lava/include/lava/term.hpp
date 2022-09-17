@@ -62,8 +62,8 @@ namespace __lava
         return ++v;
     }
 
-    std::unique_ptr< term_state_t > __term_state;
-    unique_mapped_ptr< term_config_t > __term_cfg;
+    term_state_t *__term_state;
+    term_config_t *__term_cfg;
 
     template< template< typename > typename storage >
     struct term : storage< z3::expr >

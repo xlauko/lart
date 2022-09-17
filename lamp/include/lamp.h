@@ -184,6 +184,8 @@ __lamp_ptr __lamp_extract( __lamp_ptr a, __lamp_bw s, __lamp_bw e );
 
 // void __lamp_dealloca( void *p, __lamp_i64 size );
 void __lamp_dump( void *twin );
+void __lamp_memoize( void *twin, unsigned int line );
+void __lamp_memoize_var( unsigned int line, unsigned int count, ... );
 
 #ifdef __cplusplus
 }
@@ -192,3 +194,145 @@ void __lamp_dump( void *twin );
 #ifdef __cplusplus
     std::string __lamp_trace( void *twin );
 #endif
+
+void __lamp_stub()
+{
+    __lamp_ptr ptr;
+    __lamp_lift_i1 (0);
+    __lamp_lift_i8 (0);
+    __lamp_lift_i16(0);
+    __lamp_lift_i32(0);
+    __lamp_lift_i64(0);
+
+    __lamp_lift_si8 (0);
+    __lamp_lift_si16(0);
+    __lamp_lift_si32(0);
+    __lamp_lift_si64(0);
+
+    __lamp_lift_f32(0);
+    __lamp_lift_f64(0);
+
+    __lamp_lift_arr( __lamp_null, 0 );
+    // __lamp_lift_str( __lamp_null );
+
+    __lamp_wrap_i1 (0);
+    __lamp_wrap_i8 (0);
+    __lamp_wrap_i16(0);
+    __lamp_wrap_i32(0);
+    __lamp_wrap_i64(0);
+
+    __lamp_wrap_si8 (0);
+    __lamp_wrap_si16(0);
+    __lamp_wrap_si32(0);
+    __lamp_wrap_si64(0);
+    __lamp_wrap_f32(0);
+    __lamp_wrap_f64(0);
+
+    __lamp_wrap_ptr( __lamp_null );
+    __lamp_lift_ptr( __lamp_null );
+
+    __lamp_any_i1   ();
+    __lamp_any_i8   ();
+    __lamp_any_i16  ();
+    __lamp_any_i32  ();
+    __lamp_any_i64  ();
+    __lamp_any_f32  ();
+    __lamp_any_f64  ();
+    __lamp_any_ptr  ();
+    __lamp_any_array();
+
+    // __lamp_lower_i1 ( ptr );
+    // __lamp_lower_i8 ( ptr );
+    // __lamp_lower_i16( ptr );
+    // __lamp_lower_i32( ptr );
+    // __lamp_lower_i64( ptr );
+
+    __lamp_alloca( ptr, 0 );
+
+    __lamp_freeze( __lamp_null, __lamp_null, 0 );
+    __lamp_melt( __lamp_null, 0 );
+
+    __lamp_join( ptr, ptr );
+    __lamp_meet( ptr, ptr );
+
+    __lamp_add ( ptr, ptr );
+    __lamp_sub ( ptr, ptr );
+    __lamp_mul ( ptr, ptr );
+    __lamp_sdiv( ptr, ptr );
+    __lamp_udiv( ptr, ptr );
+    __lamp_srem( ptr, ptr );
+    __lamp_urem( ptr, ptr );
+
+    __lamp_fadd( ptr, ptr );
+    __lamp_fsub( ptr, ptr );
+    __lamp_fmul( ptr, ptr );
+    __lamp_fdiv( ptr, ptr );
+    __lamp_frem( ptr, ptr );
+
+    __lamp_shl ( ptr, ptr );
+    __lamp_ashr( ptr, ptr );
+    __lamp_lshr( ptr, ptr );
+    __lamp_and ( ptr, ptr );
+    __lamp_or  ( ptr, ptr );
+    __lamp_xor ( ptr, ptr );
+
+    __lamp_eq ( ptr, ptr );
+    __lamp_ne ( ptr, ptr );
+    __lamp_ugt( ptr, ptr );
+    __lamp_uge( ptr, ptr );
+    __lamp_ult( ptr, ptr );
+    __lamp_ule( ptr, ptr );
+    __lamp_sgt( ptr, ptr );
+    __lamp_sge( ptr, ptr );
+    __lamp_slt( ptr, ptr );
+    __lamp_sle( ptr, ptr );
+
+    __lamp_foeq( ptr, ptr );
+    __lamp_fogt( ptr, ptr );
+    __lamp_foge( ptr, ptr );
+    __lamp_folt( ptr, ptr );
+    __lamp_fole( ptr, ptr );
+    __lamp_fone( ptr, ptr );
+    __lamp_ford( ptr, ptr );
+    __lamp_funo( ptr, ptr );
+    __lamp_fueq( ptr, ptr );
+    __lamp_fugt( ptr, ptr );
+    __lamp_fuge( ptr, ptr );
+    __lamp_fult( ptr, ptr );
+    __lamp_fule( ptr, ptr );
+    __lamp_fune( ptr, ptr );
+
+    __lamp_ffalse( ptr, ptr );
+    __lamp_ftrue ( ptr, ptr );
+
+    __lamp_concat ( ptr, ptr );
+    __lamp_trunc  ( ptr, 0 );
+    __lamp_fptrunc( ptr, 0 );
+    __lamp_sitofp ( ptr, 0 );
+    __lamp_uitofp ( ptr, 0 );
+    __lamp_zext   ( ptr, 0 );
+    __lamp_sext   ( ptr, 0 );
+    __lamp_fpext  ( ptr, 0 );
+    __lamp_fptosi ( ptr, 0 );
+    __lamp_fptoui ( ptr, 0 );
+
+    __lamp_store( ptr, ptr, 0 );
+    __lamp_load( ptr, 0 );
+
+    __lamp_to_tristate( ptr );
+    __lamp_to_bool( ptr );
+
+    __lamp_assume( ptr, 0 );
+    __lamp_extract( ptr, 0, 0 );
+
+    // __lamp_dealloca( __lamp_null, 0 );
+
+    __lamp_dump( __lamp_null );
+
+    __lamp_memoize( __lamp_null, 0 );
+    __lamp_memoize_var( 0, __lamp_null );
+
+    #ifdef __cplusplus
+    // __lamp_trace( __lamp_null );
+    #endif
+}

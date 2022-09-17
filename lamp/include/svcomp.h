@@ -25,7 +25,7 @@ extern "C" {
     __lamp_i16  __lamp_any_i16_traced(const char *file, unsigned int line, const char *func);
     __lamp_i32  __lamp_any_i32_traced(const char *file, unsigned int line, const char *func);
     __lamp_i64  __lamp_any_i64_traced(const char *file, unsigned int line, const char *func);
-        
+
     __lamp_f32 __lamp_any_f32_traced(const char *file, unsigned int line, const char *func);
     __lamp_f64 __lamp_any_f64_traced(const char *file, unsigned int line, const char *func);
     void*      __lamp_any_ptr_traced(const char *file, unsigned int line, const char *func);
@@ -35,49 +35,49 @@ extern "C" {
 
     #define __VERIFIER_nondet_char() \
         __lamp_any_i8_traced(__FILE__, __LINE__, "__VERIFIER_nondet_char")
-    
+
     #define __VERIFIER_nondet_uchar() \
         __lamp_any_i8_traced(__FILE__, __LINE__, "__VERIFIER_nondet_uchar")
-    
+
     #define __VERIFIER_nondet_short() \
         __lamp_any_i16_traced(__FILE__, __LINE__, "__VERIFIER_nondet_short")
-    
+
     #define __VERIFIER_nondet_ushort() \
         __lamp_any_i16_traced(__FILE__, __LINE__, "__VERIFIER_nondet_ushort")
-    
+
     #define __VERIFIER_nondet_int() \
         __lamp_any_i32_traced(__FILE__, __LINE__, "__VERIFIER_nondet_int")
 
     #define __VERIFIER_nondet_uint() \
         __lamp_any_i32_traced(__FILE__, __LINE__, "__VERIFIER_nondet_uint")
-    
+
     #define __VERIFIER_nondet_unsigned() \
         __lamp_any_i32_traced(__FILE__, __LINE__, "__VERIFIER_nondet_unsigned")
-    
+
     #define __VERIFIER_nondet_unsigned_int() \
         __lamp_any_i32_traced(__FILE__, __LINE__, "__VERIFIER_nondet_unsigned_int")
-    
+
     #define __VERIFIER_nondet_long() \
         __lamp_any_i64_traced(__FILE__, __LINE__, "__VERIFIER_nondet_long")
-    
+
     #define __VERIFIER_nondet_ulong() \
         __lamp_any_i64_traced(__FILE__, __LINE__, "__VERIFIER_nondet_ulong")
-    
+
     #define __VERIFIER_nondet_longlong() \
         __lamp_any_i64_traced(__FILE__, __LINE__, "__VERIFIER_nondet_longlong")
-    
+
     #define __VERIFIER_nondet_ulonglong() \
         __lamp_any_i64_traced(__FILE__, __LINE__, "__VERIFIER_nondet_ulonglong")
-    
+
     #define __VERIFIER_nondet_pointer() \
         __lamp_any_ptr_traced(__FILE__, __LINE__, "__VERIFIER_nondet_pointer")
 
     #define __VERIFIER_nondet_const_char_pointer() \
         __lamp_any_ptr_traced(__FILE__, __LINE__, "__VERIFIER_nondet_const_char_pointer")
-    
+
     #define __VERIFIER_nondet_float() \
         __lamp_any_f32_traced(__FILE__, __LINE__, "__VERIFIER_nondet_float")
-    
+
     #define __VERIFIER_nondet_double() \
         __lamp_any_f64_traced(__FILE__, __LINE__, "__VERIFIER_nondet_double")
 

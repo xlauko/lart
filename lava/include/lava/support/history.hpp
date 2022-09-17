@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <vector>
+#include <utility>
 
 #include <runtime/vector.hpp>
 
@@ -61,6 +62,20 @@ namespace __lava
         static self any() { return domain::template any< type >(); }
 
         static void assume( self &a, bool expected ) { domain::assume( value(a), expected ); }
+
+        static bool memoize( sref v, void *twin, unsigned int line ) { return domain::memoize( value(v), twin, line ); }
+        /*
+        template< typename... Args >
+        static void memoize_var( unsigned int line, Args&&... args ) { domain::memoize_var( line, std::forward<Args>( args )... ); }
+        */
+        /*
+        template< typename T, typename R >
+        static void memoize_var( unsigned int line, T& twins, R& refs ) {
+            printf("in with history\n");
+            domain::memoize_var( line, twins, refs );
+        }
+        */
+        //static void dump( sref v ) { domain::dump( value(v) ); }
 
         static tristate to_tristate( sref a )
         {
