@@ -37,3 +37,7 @@ int main() {
     }
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 794a251 (test: Svcomp benchmarks for interval domain evaluation.)
