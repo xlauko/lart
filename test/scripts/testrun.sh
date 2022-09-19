@@ -1,12 +1,13 @@
 #!/bin/bash
-
+set -x
 RUNNER=$1
 OPTS="${@:2}"
 PROG=${!#}
 
 compile () {
     echo ${PWD}
-    ${RUNNER} ${OPTS} -I../../include
+    echo ${PWD}/../../../../
+    ${RUNNER} ${OPTS} -I../../../../include
 }
 
 execute () {
