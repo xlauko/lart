@@ -36,3 +36,7 @@ int main() {
         ERROR: {reach_error();abort();}
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 36dbba2defd59893e2e7b8b82773ec65d71d8861
