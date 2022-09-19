@@ -9,8 +9,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include <lamp.h>
-#include "utils.h"
+#include <svcomp.h>
 
 extern void __assert_fail(const char *, const char *, unsigned int, const char *) __attribute__ ((__nothrow__ , __leaf__)) __attribute__ ((__noreturn__));
 void reach_error() { __assert_fail("0", "nested_1b.c", 13, "reach_error"); }
