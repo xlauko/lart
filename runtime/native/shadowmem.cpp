@@ -15,37 +15,58 @@
  */
 
 #include <cstdint>
+#include <cassert>
+
+#include <memory>
+#include <vector>
 #include <string_view>
+#include <unordered_map>
 
 #include "shadowmem.hpp"
 
 namespace __lart::rt
 {
-    shadow_label_t create_shadow_label( std::string_view name, void *meta) {
-        return 0; // TODO
+    std::unordered_map< std::uintptr_t, shadow_label_t > __lart_shadows;
+
+    // TODO enable mark & sweep (clean up shadow info map)
+    std::vector< shadow_label_info > __lart_shadow_info;
+
+    shadow_label_t create_shadow_label(void *meta) {
+        __lart_shadow_info.push_back(shadow_label_info{ .userdata = meta });
+        return __lart_shadow_info.size();
     }
 
-    void set_shadow_label(shadow_label_t label, void *addr, size_t size) {}
+    void set_shadow_label(shadow_label_t label, void *addr, size_t size) {
+        for (auto offset = 0; offset < size; ++offset) {
+            __lart_shadows[uintptr_t(addr) + offset] = label;
+        }
+    }
 
+    // TODO generator?
+    // TODO use size?
     shadow_label_t read_shadow_label(const void *addr, size_t size) {
+        if (auto label = __lart_shadows.find(uintptr_t(addr)); label != __lart_shadows.end()) {
+            return label->second;
+        }
         return 0; // TODO
     }
 
-    const struct shadow_label_info* get_shadow_label_info(shadow_label_t label) {
-        return nullptr;
+    shadow_label_info get_shadow_label_info(shadow_label_t label) {
+        // assert(label <= __lart_shadow_info.size());
+        return __lart_shadow_info[label - 1];
     }
 
-    shadow_label_t has_label_with_desc(shadow_label_t label, const char *desc) {
-        return 0; // TODO
-    }
+    // shadow_label_t has_label_with_desc(shadow_label_t label, const char *desc) {
+    //     return 0; // TODO
+    // }
 
-    shadow_label_t get_shadow_label(long data) {
-        return 0; // TODO
-    }
+    // shadow_label_t get_shadow_label(long data) {
+    //     return 0; // TODO
+    // }
 
-    bool has_shadow_label(shadow_label_t label, shadow_label_t elem) {
-        return false; // TODO
-    }
+    // bool has_shadow_label(shadow_label_t label, shadow_label_t elem) {
+    //     return false; // TODO
+    // }
 
 
 

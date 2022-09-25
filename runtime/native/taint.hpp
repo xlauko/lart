@@ -26,11 +26,6 @@ namespace __lart::rt
 
     void make_tainted( void *value, unsigned bytes );
 
-    template< typename integral > bool is_tainted( integral value )
-    {
-        auto label = get_shadow_label( static_cast< std::int64_t >( value ) );
-        return label && (has_shadow_label( label, taint ) ||
-               has_label_with_desc( label, "shadow" ));
-    }
+    bool is_tainted( void *addr );
 
 } // namespace __lart::rt

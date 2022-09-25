@@ -78,7 +78,7 @@ def argument_parser():
                         const=logging.INFO)
     parser.add_argument('--version',
                         help="lart version",
-                        action='version', 
+                        action='version',
                         version='1.0.0')
     parser.add_argument('--32',
                         help="set 32-bit architecture",
@@ -125,7 +125,7 @@ def parse_config() -> config:
 
     lartcc = "./bin/lartcc"
     log.info(f"lart location: {lartcc}")
-    
+
     workdir = opts.workdir
     log.info(f"working directory: {workdir}")
 
