@@ -51,16 +51,16 @@ namespace lart::op
 
     struct base
     {
-        base( llvm::Value *what )
+        base( sc::value what )
             : base( what, llvm::cast< llvm::Instruction >( what )
                                 ->getNextNonDebugInstruction() )
         {}
 
-        base( llvm::Value *what, llvm::Instruction *where )
+        base( sc::value what, llvm::Instruction *where )
             : _what( what ), _where( where )
         {}
 
-        llvm::Value* value() { return _what; }
+        sc::value value() { return _what; }
         llvm::Instruction* location() { return _where; }
 
         std::optional< default_wrapper > default_value() const
@@ -68,10 +68,10 @@ namespace lart::op
             return abstract_pointer_default();
         }
 
-        llvm::Value *_what;
+        sc::value _what;
         llvm::Instruction *_where;
 
-        std::optional< llvm::Value* > replaces;
+        std::optional< sc::value > replaces;
 
         constexpr bool with_taints() const { return false; }
     };
@@ -92,7 +92,7 @@ namespace lart::op
 
     struct argument
     {
-        llvm::Value * value;
+        llvm::Value *value;
         argtype type;
 
         template< typename stream >
@@ -297,9 +297,9 @@ namespace lart::op
         }
     };
 
-    struct stash : without_taints_base
+    struct stash : with_taints_base
     {
-        using base = without_taints_base;
+        using base = with_taints_base;
 
         stash( llvm::Value *what, llvm::Instruction *call )
             : base( what, call )
@@ -439,22 +439,6 @@ namespace lart::op
 
         std::copy(fmt.begin(), fmt.end(), std::experimental::make_ostream_joiner(suff, "."));
         return suff.str();
-    }
-
-    inline sc::generator< llvm::Value* > duplicated_arguments(const operation &op)
-    {
-        for ( auto arg : op::arguments(op) ) {
-            switch (arg.type) {
-                case argtype::lift:
-                case argtype::abstract:
-                    co_yield arg.value;
-                    co_yield op::abstract_pointer();
-                    break;
-                case op::argtype::test:
-                case op::argtype::concrete:
-                    co_yield arg.value;
-            }
-        }
     }
 
     template< typename stream >

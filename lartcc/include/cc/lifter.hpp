@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cc/operation.hpp>
+#include <cc/shadow.hpp>
 
 namespace lart
 {
@@ -25,8 +26,8 @@ namespace lart
     {
         using operation = lart::op::operation;
 
-        explicit lifter( llvm::Module &m, operation o )
-            : module( m ), op( o )
+        explicit lifter( sc::module_ref m, operation o, const shadow_map &s )
+            : module( m ), op( o ), shadows( s )
         {
             if ( function()->empty() )
                 generate();
@@ -39,10 +40,11 @@ namespace lart
         void generate() const;
 
         mutable llvm::Function *_function = nullptr;
-        llvm::Module &module;
+        sc::module_ref module;
 
     public:
         operation op;
+        const shadow_map &shadows;
     };
 
 } // namespace lart

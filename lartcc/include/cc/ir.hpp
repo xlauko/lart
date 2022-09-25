@@ -34,8 +34,9 @@ namespace lart::ir
 
     namespace arg
     {
-        struct paired
+        struct tuple
         {
+            llvm::Use &taint;
             llvm::Use &concrete;
             llvm::Use &abstract;
         };

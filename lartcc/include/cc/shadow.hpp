@@ -1,5 +1,5 @@
 /*
- * (c) 2020 Henrich Lauko <xlauko@mail.muni.cz>
+ * (c) 2022 Henrich Lauko <xlauko@mail.muni.cz>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,10 +18,7 @@
 
 #include <cc/dfa.hpp>
 #include <cc/operation.hpp>
-#include <cc/taint.hpp>
 #include <cc/ir.hpp>
-
-#include <cc/shadow.hpp>
 
 #include <optional>
 #include <vector>
@@ -30,27 +27,42 @@ namespace lart
 {
     using operation = lart::op::operation;
 
-    struct syntactic : sc::with_context
+    enum class shadow_op_kind {
+        source, memory, forward, store, load
+    };
+
+    struct shadow_operation {
+        sc::value value;
+        shadow_op_kind kind;
+    };
+
+    struct shadow_map : sc::with_context
     {
-        explicit syntactic( sc::module_ref m, const dfa::types &t, const shadow_map &s )
-            : sc::with_context( m ), types( t ), shadows( s ), module( m )
+        explicit shadow_map( sc::module_ref &m, const dfa::types &t )
+            : sc::with_context( m ), types( t ), module( m )
         {}
 
-        std::optional< operation > make_operation( sc::value value );
+        sc::generator< shadow_operation > toprocess();
 
-        sc::generator< operation > toprocess();
-        std::optional< ir::intrinsic > process( operation op );
+        sc::value process( shadow_operation op );
+        sc::value process( sc::value op );
 
-        void propagate_identity( sc::value from );
+        sc::value process_source( shadow_operation op );
 
-        void update_places( sc::value concrete );
+        sc::value process_memory( shadow_operation op );
 
-        std::map< sc::value, sc::value > abstract;
-        std::map< sc::value, sc::value > identity;
-        std::map< sc::value, std::vector< ir::arg::tuple > > places;
+        sc::value process_forward( shadow_operation op );
+
+        sc::value process_load( shadow_operation op );
+
+        sc::value process_store( shadow_operation op );
+
+        sc::value get( sc::value op ) const;
+
+        // maps concrete value to shadow value
+        std::unordered_map< sc::value, sc::value > ops;
 
         const dfa::types &types;
-        const shadow_map &shadows;
         sc::module_ref module;
     };
 

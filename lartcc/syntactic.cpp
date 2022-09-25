@@ -16,6 +16,7 @@
 
 #include <cc/syntactic.hpp>
 
+#include <cc/arguments.hpp>
 #include <cc/assume.hpp>
 #include <cc/logger.hpp>
 #include <cc/ir.hpp>
@@ -55,14 +56,14 @@ namespace lart
         return call->getCalledFunction()->getName().startswith( "lart.test.taint" );
     }
 
-    bool is_identity_cast( llvm::Value *inst )
+    bool is_identity_cast( sc::value inst )
     {
         return util::is_one_of< llvm::BitCastInst
                               , llvm::PtrToIntInst
                               , llvm::IntToPtrInst >( inst );
     }
 
-    std::optional< operation > syntactic::make_operation( llvm::Value *val )
+    std::optional< operation > syntactic::make_operation( sc::value val )
     {
         std::optional< operation > result;
         sc::llvmcase( val,
@@ -113,12 +114,9 @@ namespace lart
             [&] ( llvm::PHINode *phi ) {
                 result = op::phi( phi );
             },
-            [&] ( llvm::Value *value ) {
+            [&] ( sc::value value ) {
                 /* fallthrough */
-                std::string buff;
-                llvm::raw_string_ostream ss(buff);
-                value->print(ss);
-                spdlog::warn( "ignore abstract: {}", ss.str() );
+                spdlog::warn( "ignore abstract: {}", sc::fmt::llvm_to_string(value) );
             }
         );
         return result;
@@ -197,20 +195,21 @@ namespace lart
         }
     }
 
-    ir::intrinsic make_intrinsic( llvm::Module &m, const operation &op )
+    ir::intrinsic make_intrinsic( const lifter &lift )
     {
+        auto op = lift.op;
         if ( op::with_taints( op ) )
-            return { taint::make_call( m, op ), op };
+            return { taint::make_call( lift ), op };
 
-        std::vector< llvm::Value * > args;
-        for (auto arg : op::duplicated_arguments(op)) {
+        std::vector< sc::value > args;
+        for (auto arg : op::duplicated_arguments(op, lift.shadows)) {
             args.push_back(arg);
         }
         auto name = "lart." + op::name(op);
         return { op::make_call( op, args, name ), op };
     }
 
-    void syntactic::propagate_identity( llvm::Value *from )
+    void syntactic::propagate_identity( sc::value from )
     {
         if ( auto id = identity.find( from ); id != identity.end() ) {
             auto &[src, dst] = *id;
@@ -223,7 +222,7 @@ namespace lart
         }
     }
 
-    void syntactic::update_places( llvm::Value *concrete )
+    void syntactic::update_places( sc::value concrete )
     {
         auto abs = abstract[concrete];
 
@@ -237,10 +236,15 @@ namespace lart
         }
     }
 
-    sc::generator< ir::arg::paired > paired_view( llvm::PHINode *concrete, llvm::PHINode *abstract )
+    sc::generator< ir::arg::tuple > paired_view( llvm::PHINode * taint, llvm::PHINode *concrete, llvm::PHINode *abstract )
     {
-        for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i )
-            co_yield { concrete->getOperandUse(i), abstract->getOperandUse(i) };
+        for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i ) {
+            co_yield {
+                taint->getOperandUse(i),
+                concrete->getOperandUse(i),
+                abstract->getOperandUse(i)
+            };
+        }
     }
 
     std::optional< ir::intrinsic > syntactic::process( operation o )
@@ -257,32 +261,32 @@ namespace lart
 
         // TODO join with taint processing
         if ( std::holds_alternative< op::phi >( o ) ) {
-            auto concrete = llvm::cast< llvm::PHINode >( op::value(o) );
-            llvm::IRBuilder<> irb( op::location(o) );
-            auto aptr = op::abstract_pointer();
+            // auto concrete = llvm::cast< llvm::PHINode >( op::value(o) );
+            // llvm::IRBuilder<> irb( op::location(o) );
+            // auto aptr = op::abstract_pointer();
 
-            auto phi = irb.CreatePHI( aptr->getType(), concrete->getNumIncomingValues() );
-            for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i ) {
-                phi->addIncoming( aptr, concrete->getIncomingBlock( i ) );
-            }
+            // auto phi = irb.CreatePHI( aptr->getType(), concrete->getNumIncomingValues() );
+            // for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i ) {
+            //     phi->addIncoming( aptr, concrete->getIncomingBlock( i ) );
+            // }
 
-            abstract[concrete] = phi;
+            // abstract[concrete] = phi;
 
-            for ( auto &arg : paired_view( concrete, phi ) ) {
-                auto &con = arg.concrete;
-                if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
-                    arg.abstract.set( abs->second );
-                else
-                    places[con].push_back( arg );
-            }
+            // for ( auto &arg : paired_view( concrete, phi ) ) {
+            //     auto &con = arg.concrete;
+            //     if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
+            //         arg.abstract.set( abs->second );
+            //     else
+            //         places[con].push_back( arg );
+            // }
 
-            update_places( concrete );
-            propagate_identity( concrete );
+            // update_places( concrete );
+            // propagate_identity( concrete );
 
             return std::nullopt;
         }
 
-        auto intr = make_intrinsic( module, o );
+        auto intr = make_intrinsic( lifter( module, o, shadows ) );
 
         if ( op::returns_value(o) ) {
             auto concrete = op::value(o);

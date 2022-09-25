@@ -48,7 +48,6 @@ namespace lart
             llvm::Value *abstract;
         };
 
-
     } // namespace arg
 
     using argument = std::variant< arg::with_taint, arg::without_taint_concrete, arg::without_taint_abstract >;
@@ -57,8 +56,8 @@ namespace lart
     {
         sc::generator< argument > arguments( const lifter &lif )
         {
+            // TODO lifters
             auto *f = lif.function();
-
             unsigned i = 0;
             for ( auto arg : op::arguments(lif.op) ) {
                 switch ( arg.type ) {
@@ -74,7 +73,7 @@ namespace lart
                     break;
                 case op::argtype::abstract:
                     co_yield arg::without_taint_abstract{ f->getArg(i), f->getArg(i + 1) };
-                    i += 2;
+                    i += 3;
                     break;
                 }
             }

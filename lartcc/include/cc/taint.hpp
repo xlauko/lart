@@ -18,6 +18,7 @@
 
 #include <cc/operation.hpp>
 #include <cc/ir.hpp>
+#include <cc/lifter.hpp>
 
 #include <llvm/IR/Module.h>
 
@@ -28,8 +29,8 @@ namespace lart::taint
 {
     using operation = lart::op::operation;
 
-    llvm::CallInst * make_call( llvm::Module &module, const operation &op );
+    llvm::CallInst * make_call( const lifter &lift );
 
-    sc::generator< ir::arg::paired > paired_view( const ir::intrinsic &test );
+    sc::generator< ir::arg::tuple > paired_view( const ir::intrinsic &test );
 
 } // namespace lart::taint

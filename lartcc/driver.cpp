@@ -18,12 +18,12 @@
 
 #include <cc/assume.hpp>
 #include <cc/dfa.hpp>
+#include <cc/shadow.hpp>
 #include <cc/syntactic.hpp>
 #include <cc/logger.hpp>
 #include <cc/preprocess.hpp>
 #include <cc/runtime.hpp>
 
-#include <cc/backend/native/shadow.hpp>
 #include <cc/backend/native/native.hpp>
 
 #include <sc/erase.hpp>
@@ -60,9 +60,17 @@ namespace lart
             }
         }
 
+        // TODO: propagate shadow from/to calls
+
+        // generate shodows
+        shadow_map shadows( module, types );
+        for (const auto &op : shadows.toprocess()) {
+            shadows.process(op);
+        }
+
         // syntactic pass
         std::vector< ir::intrinsic > intrinsics;
-        syntactic syn( module, types );
+        syntactic syn( module, types, shadows );
         for ( const auto &op : syn.toprocess() ) {
             if ( auto intr = syn.process( op ) ) {
                 intrinsics.push_back( intr.value() );
@@ -73,13 +81,8 @@ namespace lart
 
         // 7. interrupts ?
 
-        shadow instrument( module, types );
-        for (const auto &op : instrument.toprocess()) {
-            instrument.process(op);
-        }
-
         // TODO pick backend based on cmd arguments
-        auto backend = lart::backend::native( module );
+        auto backend = lart::backend::native( module, shadows );
         for ( auto intr : intrinsics ) {
             backend.lower( intr );
         }
