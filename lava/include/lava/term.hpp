@@ -18,10 +18,9 @@
 
 #include <lava/support/tristate.hpp>
 #include <lava/support/base.hpp>
+#include <lava/support/mmaped_pointer.hpp>
 
 #include <lamp/support/tracing.hpp>
-
-#include <sys/mman.h>
 
 #include <cstdio>
 #include <cstring>
@@ -32,9 +31,19 @@ using namespace std::string_literals;
 
 namespace __lava
 {
+    inline void do_trace_model();
+
     struct term_config_t
     {
         bool trace_model = false;
+
+        ~term_config_t() {
+            if (this->trace_model) {
+                do_trace_model();
+                // do not trace model multiple times
+                this->trace_model = false;
+            }
+        }
     };
 
     struct term_state_t
@@ -42,7 +51,7 @@ namespace __lava
         term_state_t()
             : solver( ctx )
         {}
-        
+
         z3::context ctx;
         z3::solver solver;
     };
@@ -53,9 +62,9 @@ namespace __lava
         return ++v;
     }
 
-    term_state_t *__term_state;
-    term_config_t *__term_cfg;
-    
+    std::unique_ptr< term_state_t > __term_state;
+    unique_mapped_ptr< term_config_t > __term_cfg;
+
     template< template< typename > typename storage >
     struct term : storage< z3::expr >
                 , domain_mixin< term< storage > >
@@ -82,24 +91,22 @@ namespace __lava
 
         template< typename type > static term any()
         {
-            constexpr auto digits = std::numeric_limits< unsigned >::digits;
-            char name[5 + digits] = {};
-            std::strncpy( name, "var_", 4 );
-            std::sprintf( name + 4, "%u", variable_counter() );
+            std::string name = "var_" + std::to_string(variable_counter());
 
-            auto &ctx = __term_state->ctx;            
+            auto &ctx = __term_state->ctx;
             if constexpr ( std::is_integral_v < type > )
             {
-                return ctx.bv_const( name, bitwidth_v< type > );
+                return ctx.bv_const( name.c_str(), bitwidth_v< type > );
             }
 
             if constexpr ( std::is_floating_point_v< type > )
             {
                 if constexpr ( bitwidth_v< type > == 32 )
-                    return ctx.fpa_const( name, 8, 24 );
+                    return ctx.fpa_const( name.c_str(), 8, 24 );
                 if constexpr ( bitwidth_v< type > == 64 )
-                    return ctx.fpa_const( name, 11, 53 );
+                    return ctx.fpa_const( name.c_str(), 11, 53 );
             }
+
             __builtin_unreachable();
         }
 
@@ -110,13 +117,13 @@ namespace __lava
             return e == __term_state->ctx.bv_val( 1, 1 );
         }
 
-        static void assume( tr t, bool expected ) 
+        static void assume( tr t, bool expected )
         {
             auto &solver = __term_state->solver;
             const auto& e = t.get();
             auto b = e.is_bool() ? e : tobool( e );
             solver.add( expected ? b : !b );
-            
+
             if ( solver.check() == z3::unsat ) {
                 __lart_cancel();
             }
@@ -155,17 +162,17 @@ namespace __lava
 
         // static term op_inttoptr( tr, bw ) { return {}; }
         // static term op_ptrtoint( tr, bw ) { return {}; }
-        static term op_sext( tr t, bw b ) { 
+        static term op_sext( tr t, bw b ) {
             auto &v = t.get();
-            return z3::sext( v, b - v.get_sort().bv_size() ); 
+            return z3::sext( v, b - v.get_sort().bv_size() );
         }
         // static term op_sitofp( tr, bw ) { return {}; }
-        static term op_trunc( tr t, bw b ) { 
+        static term op_trunc( tr t, bw b ) {
             // TODO: check
-            return t.get().extract( b - 1, 0 ); 
+            return t.get().extract( b - 1, 0 );
         }
         // static term op_uitofp( tr, bw ) { return {}; }
-        static term op_zext( tr t, bw b ) { 
+        static term op_zext( tr t, bw b ) {
             auto &v = t.get();
             return z3::zext( v, b - v.get_sort().bv_size() );
         }
@@ -201,7 +208,7 @@ namespace __lava
         return os;
     }
 
-    inline void trace_model()
+    inline void do_trace_model()
     {
         auto &solver = __term_state->solver;
         auto model = solver.get_model();
@@ -209,7 +216,7 @@ namespace __lava
         using file_stream = __lart::rt::file_stream;
         auto stream = file_stream( stderr );
 
-        for (unsigned i = 0; i < model.size(); i++) {
+        for (int i = 0; unsigned(i) < model.size(); i++) {
             const auto &v = model[i];
             auto interp = model.get_const_interp(v);
             stream << "[term model] " << v.name() << " = " << Z3_ast_to_string( __term_state->ctx, interp ) << '\n';
@@ -228,24 +235,10 @@ namespace __lava
 
     [[gnu::constructor]] void term_setup()
     {
-        __term_state = (term_state_t*)std::malloc(sizeof(term_state_t));
-        new ( __term_state ) term_state_t;
-
-        __term_cfg = (term_config_t*)mmap(NULL, sizeof(term_config_t), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        __term_state = std::make_unique< term_state_t >();
+        __term_cfg = make_mmap_unique< term_config_t >();
 
         __term_cfg->trace_model = option("TERM_TRACE_MODEL", "term trace model");
-    }
-
-    [[gnu::destructor]] void term_cleanup()
-    {
-        if ( __term_cfg->trace_model ) {
-            trace_model();
-            // do not trace model multiple times
-            __term_cfg->trace_model = false;
-        }
-
-        std::free( __term_state );
-        munmap( __term_cfg, sizeof(term_config_t) );
     }
 
 } // namespace __lava
