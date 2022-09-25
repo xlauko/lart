@@ -18,19 +18,28 @@
 
 #include "utils.hpp"
 
+#include <cstdio>
+
 namespace __lart::rt
 {
-    shadow_label_t taint;
+    // shadow_label_t taint;
 
-    constructor void init_taint()
-    {
-        taint = create_shadow_label( "taint", nullptr );
-    }
+    // constructor void init_taint()
+    // {
+    //     taint = create_shadow_label( "taint", nullptr );
+    // }
 
-    void make_tainted( void *value, unsigned bytes )
-    {
-        set_shadow_label( taint, value, bytes );
-    }
+    // void make_tainted( void *value, unsigned bytes )
+    // {
+    //     set_shadow_label( taint, value, bytes );
+    // }
 
+    // bool is_tainted( void *addr )
+    // {
+    //     return false;
+    //     // auto label = get_shadow_label( static_cast< std::int64_t >( value ) );
+    //     // return label && (has_shadow_label( label, taint ) ||
+    //     //        has_label_with_desc( label, "shadow" ));
+    // }
 
 } // namespace __lart::rt

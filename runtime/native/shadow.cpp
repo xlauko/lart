@@ -19,6 +19,8 @@
 #include <cstddef>
 #include <cstdlib>
 
+#include <memory>
+
 namespace __lart::rt
 {
     void* make_meta( void *addr, size_t bytes, void *value )
@@ -34,16 +36,15 @@ namespace __lart::rt
     void poke( void *addr, size_t bytes, void *value )
     {
         auto meta = make_meta( addr, bytes, value );
-        auto shadow = create_shadow_label( "shadow", meta );
+        auto shadow = create_shadow_label( meta );
         set_shadow_label( shadow, addr, bytes );
     }
 
     shadow_meta *peek( const void *addr )
     {
-        auto meta        = read_shadow_label( addr, 1 );
-        const auto *info = get_shadow_label_info( meta );
-        return static_cast< shadow_meta* >( info->userdata );
-        return nullptr;
+        auto meta = read_shadow_label( addr, 1 );
+        auto info = get_shadow_label_info( meta );
+        return static_cast< shadow_meta* >( info.userdata );
     }
 
 } // namespace __lart::rt

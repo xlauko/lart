@@ -87,7 +87,7 @@ static void wrap_void( const args_t & ...args ) { wrapper::wrap_void( args... );
 template< typename type >
 inline type defualt_tainted_value() {
     uint64_t value = 0;
-    __lart_set_taint( &value, sizeof( value ) );
+    // __lart_set_taint( &value, true, sizeof( value ) );
     if constexpr ( std::is_pointer_v< type > )
         return reinterpret_cast< type >( value );
     else
@@ -98,7 +98,7 @@ template< typename op_t, typename arg_t, typename... args_t >
 static arg_t lift( op_t op, arg_t arg, args_t... args )
 {
     __lart_stash( op( arg, args... ).disown() );
-    __lart_set_taint( &arg, sizeof( arg ) );
+    // __lart_set_taint( &arg, true, sizeof( arg ) );
     return arg;
 }
 
@@ -272,7 +272,7 @@ extern "C"
     bool __lamp_to_bool( __lamp_ptr v )
     {
         bool lowered = __lava::lower( tristate( __lamp_to_tristate( v ) ) );
-        __lart_set_taint( &lowered, sizeof( lowered ) );
+        // __lart_set_taint( &lowered, true, sizeof( lowered ) );
         return lowered;
     }
 
@@ -290,16 +290,16 @@ extern "C"
         return { ref( p.ptr ).clone().disown() };
     }
 
-    void __lamp_dump( void *twin )
-    {
-        if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-            auto *meta = __lart_peek( twin );
-            auto size = meta->bytes - lamp::detail::offset( meta, twin );
-            ref a( lamp::detail::melt( twin, size ).ptr );
-            return dom::dump( a ); // TODO size?
-        }
-        printf( "concrete\n" );
-    }
+    // void __lamp_dump( void *twin )
+    // {
+    //     if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
+    //         auto *meta = __lart_peek( twin );
+    //         auto size = meta->bytes - lamp::detail::offset( meta, twin );
+    //         ref a( lamp::detail::melt( twin, size ).ptr );
+    //         return dom::dump( a ); // TODO size?
+    //     }
+    //     printf( "concrete\n" );
+    // }
 }
 
 #ifdef __lart_cpp_runtime

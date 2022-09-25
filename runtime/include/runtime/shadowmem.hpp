@@ -23,28 +23,20 @@ namespace __lart::rt
 {
     using shadow_label_t = std::uint64_t;
 
-    struct shadow_label_info {
-        // Fields for union labels, set to 0 for base labels.
-        shadow_label_t l1;
-        shadow_label_t l2;
+    struct shadow_label_info { void *userdata; };
 
-        // Fields for base labels.
-        const char *desc;
-        void *userdata;
-    };
-
-    shadow_label_t create_shadow_label( std::string_view name, void *meta);
+    shadow_label_t create_shadow_label(void *meta);
 
     void set_shadow_label(shadow_label_t label, void *addr, size_t size);
 
     shadow_label_t read_shadow_label(const void *addr, size_t size);
 
-    const struct shadow_label_info* get_shadow_label_info(shadow_label_t label);
+    shadow_label_info get_shadow_label_info(shadow_label_t label);
 
-    shadow_label_t has_label_with_desc(shadow_label_t label, const char *desc);
+    // shadow_label_t has_label_with_desc(shadow_label_t label, const char *desc);
 
-    shadow_label_t get_shadow_label(long data);
+    // shadow_label_t get_shadow_label(long data);
 
-    bool has_shadow_label(shadow_label_t label, shadow_label_t elem);
+    // bool has_shadow_label(shadow_label_t label, shadow_label_t elem);
 
 } // namespace __lart::rt

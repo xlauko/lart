@@ -37,15 +37,17 @@ extern "C"
         __lart::rt::stash( val );
     }
 
-    bool __lart_test_taint( uint8_t byte )
-    {
-        return __lart::rt::is_tainted( byte );
-    }
+    // bool __lart_test_taint( void *addr )
+    // {
+    //     return __lart::rt::is_tainted( addr );
+    // }
 
-    void __lart_set_taint( void *value, unsigned bytes )
-    {
-        __lart::rt::make_tainted( value, bytes );
-    }
+    // void __lart_set_taint( void *value, bool taint, unsigned bytes )
+    // {
+    //     if (taint) {
+    //         __lart::rt::make_tainted( value, bytes );
+    //     }
+    // }
 
     int __lart_choose(int count)
     {
