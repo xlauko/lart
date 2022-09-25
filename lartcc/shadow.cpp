@@ -121,6 +121,10 @@ namespace lart
     }
 
     sc::value shadow_map::process_forward( shadow_operation op ) {
+        if (!llvm::isa< sc::instruction >( op.value )) {
+            return sc::i1( false );
+        }
+
         auto inst = as_inst( op.value );
         auto bld = sc::stack_builder( inst )
             | sc::action::push( process(inst->getOperand(0)) );
