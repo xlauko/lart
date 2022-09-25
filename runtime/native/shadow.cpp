@@ -20,31 +20,55 @@
 #include <cstdlib>
 
 #include <memory>
+#include <unordered_map>
 
 namespace __lart::rt
 {
-    void* make_meta( void *addr, size_t bytes, void *value )
-    {
-        auto meta = (shadow_meta*)malloc( sizeof(shadow_meta) );
-        meta->value = value;
-        meta->origin = addr;
-        meta->bytes = bytes;
-        return meta;
+    // TODO interval map?
+    // maps bytes to shadow identifiers
+    std::unordered_map< std::uintptr_t, shadow_label_t > shadow;
+
+    // TODO dense map
+    // maps shadow identifier to user metadata
+    std::unordered_map< shadow_label_t, shadow_label_info > shadow_info;
+
+    shadow_label_t create_shadow_label(shadow_label_info info) {
+        shadow_label_t label = shadow_info.size() + 1;
+        shadow_info.emplace(label, info);
+        return label;
     }
 
-
-    void poke( void *addr, size_t bytes, void *value )
-    {
-        auto meta = make_meta( addr, bytes, value );
-        auto shadow = create_shadow_label( meta );
-        set_shadow_label( shadow, addr, bytes );
+    void set_shadow_label(shadow_label_t label, void *addr, size_t size) {
+        for (auto offset = 0; offset < size; ++offset) {
+            shadow[uintptr_t(addr) + offset] = label;
+        }
     }
 
-    shadow_meta *peek( const void *addr )
+    void poke(void *addr, size_t bytes, void *value)
     {
-        auto meta = read_shadow_label( addr, 1 );
-        auto info = get_shadow_label_info( meta );
-        return static_cast< shadow_meta* >( info.userdata );
+        auto label = create_shadow_label(shadow_label_info{
+            .value = value, .origin = addr, .bytes = bytes
+        });
+        set_shadow_label( label, addr, bytes );
+    }
+
+    // TODO generator?
+    // TODO use size
+    shadow_label_t read_shadow_label(const void *addr, size_t size) {
+        if (auto label = shadow.find(uintptr_t(addr)); label != shadow.end()) {
+            return label->second;
+        }
+        return 0; // TODO
+    }
+
+    shadow_label_info get_shadow_label_info(shadow_label_t label) {
+        return shadow_info[label];
+    }
+
+    shadow_label_info peek( const void *addr )
+    {
+        auto label = read_shadow_label( addr, 1 );
+        return get_shadow_label_info( label );
     }
 
 } // namespace __lart::rt

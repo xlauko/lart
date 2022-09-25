@@ -17,15 +17,21 @@
 #pragma once
 
 #include "shadowmeta.h"
-#include "shadowmem.hpp"
 
 #include <cstddef>
+#include <cstdint>
 
 namespace __lart::rt
 {
+    // uniquely identifies shadow memory chunk
+    using shadow_label_t = std::uint64_t;
+
+    using shadow_label_info = __lart_shadow_meta;
+
+    // assigns value to shadow of memory range [addr, addr + bytes)
     void poke( void *addr, std::size_t bytes, void *value );
 
     using shadow_meta = __lart_shadow_meta;
 
-    shadow_meta* peek( const void *addr );
+    shadow_label_info peek( const void *addr );
 }

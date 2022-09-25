@@ -302,25 +302,25 @@ extern "C"
     // }
 }
 
-#ifdef __lart_cpp_runtime
-    std::string __lamp_trace( void *twin )
-    {
-        if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-            auto *meta = __lart_peek( twin );
-            auto size = meta->bytes - lamp::detail::offset( meta, twin );
-            ref a( lamp::detail::melt( twin, size ).ptr );
-            return dom::trace( a ); // TODO size?
-        }
-        return "concrete";
-    }
-#endif
+// #ifdef __lart_cpp_runtime
+//     std::string __lamp_trace( void *twin )
+//     {
+//         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
+//             auto meta = __lart_peek( twin );
+//             auto size = meta->bytes - lamp::detail::offset( meta, twin );
+//             ref a( lamp::detail::melt( twin, size ).ptr );
+//             return dom::trace( a ); // TODO size?
+//         }
+//         return "concrete";
+//     }
+// #endif
 
 
 namespace lamp::detail
 {
-    size_t offset( shadow_meta *meta, void *addr )
+    size_t offset( shadow_meta meta, void *addr )
     {
-        return uintptr_t(addr) - uintptr_t(meta->origin);
+        return uintptr_t(addr) - uintptr_t(meta.origin);
     }
 
     void freeze( __lamp_ptr val, void *addr, size_t bytes )
@@ -330,19 +330,19 @@ namespace lamp::detail
 
     __lamp_ptr melt( void *addr, size_t bytes )
     {
-        auto *meta = __lart_peek( addr );
+        auto meta = __lart_peek( addr );
 
         auto off = offset( meta, addr );
 
         if (off == 0) {
-            if (meta->bytes == bytes) {
+            if (meta.bytes == bytes) {
                 // trivial case
-                return { meta->value };
+                return { meta.value };
             }
 
             // truncate
-            if (meta->bytes > bytes) {
-                return __lamp_trunc( { meta->value }, bw(bytes * 8) );
+            if (meta.bytes > bytes) {
+                return __lamp_trunc( { meta.value }, bw(bytes * 8) );
             }
 
             // todo concat multiple values

@@ -65,17 +65,13 @@ extern "C" {
 
     __lart_export void* __lart_unstash();
 
-    // __lart_export bool __lart_test_taint( uint8_t *byte );
-
-    // __lart_export void __lart_set_taint( void *value, bool taint, unsigned bytes );
-
     __lart_export int __lart_choose( int count );
 
     __lart_export void __lart_cancel();
 
     __lart_export void __lart_poke( void *addr, size_t bytes, void* value );
 
-    __lart_export struct __lart_shadow_meta *__lart_peek( const void *addr );
+    __lart_export struct __lart_shadow_meta __lart_peek( const void *addr );
 
 #ifdef __cplusplus
 }

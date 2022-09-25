@@ -11,9 +11,7 @@ add_library( native
     config.cpp
     choose.cpp
     shadow.cpp
-    shadowmem.cpp
     stash.cpp
-    taint.cpp
     lart.cpp
     trace.cpp
     fault.cpp
