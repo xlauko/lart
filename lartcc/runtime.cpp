@@ -50,11 +50,30 @@ namespace lart::runtime
         });
 
         std::array binary = {
-            "add", "sub", "mul", "sdiv", "udiv", "srem", "urem"
+            "add", "sub", "mul", "sdiv", "udiv", "srem", "urem",
+
+            "fadd", "fsub", "fmul", "fdiv", "frem",
+
+            "shl", "ashr", "lshr", "and", "or", "xor",
+
+            "eq", "ne", "ugt", "uge", "ult", "ule", "sgt", "sge", "slt", "sle",
+
+            "foeq", "fogt", "foge", "folt", "fole", "fone", "ford", "funo",
+            "fueq", "fugt", "fuge", "fult", "fule", "fune", "ffalse", "ftrue"
+
+            "concat"
         };
 
         for (const auto &bin : binary) {
             runtime.register_binary(bin);
+        }
+
+        std::array casts = {
+            "trunc", "fptrunc", "sitofp", "uitofp", "zext", "sext", "fpext", "fptosi", "fptoui"
+        };
+
+        for (const auto &cast : casts) {
+            runtime.register_cast(cast);
         }
 
         runtime.register_operation("freeze", sc::void_t(), {
@@ -73,13 +92,25 @@ namespace lart::runtime
             runtime.abstract_type(), runtime.bitwidth()
         });
 
-        std::array casts = {
-            "trunc", "fptrunc", "sitofp", "uitofp", "zext", "sext", "fpext", "fptosi", "fptoui"
-        };
+        runtime.register_operation("to_tristate", sc::i8(), {
+            runtime.abstract_type()
+        });
 
-        for (const auto &cast : casts) {
-            runtime.register_cast(cast);
-        }
+        runtime.register_operation("to_bool", sc::i1(), {
+            runtime.abstract_type()
+        });
+
+        runtime.register_operation("assume", sc::void_t(), {
+            runtime.abstract_type(), sc::i1()
+        });
+
+        runtime.register_operation("extract", runtime.abstract_type(), {
+            runtime.abstract_type(), runtime.bitwidth(), runtime.bitwidth()
+        });
+
+        runtime.register_operation("dump", sc::void_t(), {
+            sc::i8p()
+        });
 
         runtime.register_lart_api("unstash", sc::i8p(), {});
         runtime.register_lart_api("stash", sc::void_t(), { sc::i8p() });
