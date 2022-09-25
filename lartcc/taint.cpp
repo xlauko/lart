@@ -14,6 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cc/arguments.hpp>
 #include <cc/taint.hpp>
 #include <cc/lifter.hpp>
 
@@ -28,12 +29,13 @@ namespace lart::taint
             return "lart.test.taint." + op::name(op) + "." + op::unique_name_suffix(op);
         }
 
-        sc::generator< llvm::Value* > arguments( const lart::lifter &lifter, const operation &op )
+        sc::generator< sc::value > arguments( const lart::lifter &lifter )
         {
             co_yield lifter.function();
 
-            for ( auto arg : op::duplicated_arguments(op) )
+            for ( auto arg : op::duplicated_arguments(lifter.op, lifter.shadows) ) {
                 co_yield arg;
+            }
         }
 
         sc::generator< unsigned > paired_indices( const ir::intrinsic &intr )
@@ -44,10 +46,10 @@ namespace lart::taint
 
             for ( auto arg : op::arguments(op) ) {
                 switch ( arg.type ) {
-                case op::argtype::lift:
                 case op::argtype::abstract:
+                case op::argtype::lift:
                     co_yield pos;
-                    pos += 2;
+                    pos += 3;
                     break;
                 case op::argtype::test:
                 case op::argtype::concrete:
@@ -59,21 +61,25 @@ namespace lart::taint
 
     } // namespace detail
 
-    llvm::CallInst * make_call( llvm::Module &module, const operation &op )
+    llvm::CallInst * make_call( const lifter &lift )
     {
-        lart::lifter lifter( module, op );
-        std::vector< llvm::Value * > args;
-        for (auto arg : detail::arguments( lifter, op )) {
+        std::vector< sc::value > args;
+        for (auto arg : detail::arguments( lift )) {
             args.push_back(arg);
         }
-        return op::make_call( op, args, detail::name( op ) );
+        return op::make_call( lift.op, args, detail::name( lift.op ) );
     }
 
-    sc::generator< ir::arg::paired > paired_view( const ir::intrinsic &test )
+    sc::generator< ir::arg::tuple > paired_view( const ir::intrinsic &test )
     {
         auto call = test.call;
-        for ( auto i : detail::paired_indices( test ) )
-            co_yield { call->getOperandUse(i), call->getOperandUse(i + 1) };
+        for ( auto i : detail::paired_indices( test ) ) {
+            co_yield {
+                call->getOperandUse(i),
+                call->getOperandUse(i + 1),
+                call->getOperandUse(i + 2)
+            };
+        }
     }
 
 } // namespace lart::taint

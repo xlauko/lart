@@ -36,29 +36,6 @@ namespace lart::backend
             | sc::action::function{ fn }
             | sc::action::create_block{ "entry" };
 
-        auto test = [&] ( auto arg ) -> llvm::Value* {
-            if ( arg->getType()->isIntegerTy() ) {
-                bld = std::move(bld)
-                    | sc::action::zfit( arg, sc::i8() )
-                    | sc::action::call( testtaint_fn, { std::nullopt } );
-                return bld.stack.back();
-            }
-            else if ( arg->getType()->isFloatingPointTy() ) {
-                bld = std::move(bld)
-                    | sc::action::fptoui( arg, sc::i8() )
-                    | sc::action::call( testtaint_fn, { std::nullopt } );
-                return bld.stack.back();
-            }
-            else if ( arg->getType()->isPointerTy() ) {
-                bld = std::move(bld)
-                    | sc::action::ptrtoint( arg, sc::i8() )
-                    | sc::action::call( testtaint_fn, { std::nullopt } );
-                return bld.stack.back();
-
-            }
-            return arg;
-        };
-
         std::vector< llvm::Value* > args;
         // skip lifter argument
         unsigned pos = 1;
@@ -66,9 +43,9 @@ namespace lart::backend
         for ( auto arg : op::arguments( i.op ) ) {
             switch (arg.type) {
                 case op::argtype::lift: {
-                    auto concrete = fn->getArg(pos);
-                    auto abstract = fn->getArg(pos + 1);
-                    auto taint = test( concrete );
+                    auto taint    = fn->getArg(pos);
+                    auto concrete = fn->getArg(pos + 1);
+                    auto abstract = fn->getArg(pos + 2);
 
                     bld = std::move(bld) | sc::action::or_{ tainted, taint };
                     tainted = bld.stack.back();
@@ -76,11 +53,11 @@ namespace lart::backend
                     args.push_back( taint );
                     args.push_back( concrete );
                     args.push_back( abstract );
-                    pos += 2;
+                    pos += 3;
                     break;
                 }
                 case op::argtype::test: {
-                    auto taint = test( fn->getArg(pos) );
+                    auto taint = fn->getArg(pos);
                     bld = std::move(bld) | sc::action::or_{ tainted, taint };
                     tainted = bld.stack.back();
                     pos += 1;
@@ -92,7 +69,7 @@ namespace lart::backend
                     break;
                 }
                 case op::argtype::abstract: {
-                    args.push_back( fn->getArg(pos) );
+                    // skip concrete argument
                     args.push_back( fn->getArg(pos + 1) );
                     pos += 2;
                     break;

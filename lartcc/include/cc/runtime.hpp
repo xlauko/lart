@@ -41,9 +41,9 @@ namespace lart::runtime
         return attribute::get(sc::context(), "lamp-pointer-value");
     }
 
-    struct lamp_runtime_generator : sc::with_context {
+    struct runtime_generator : sc::with_context {
 
-        lamp_runtime_generator(sc::module_ref m)
+        runtime_generator(sc::module_ref m)
             : sc::with_context(m), mod(m)
         {}
 
@@ -59,19 +59,28 @@ namespace lart::runtime
             return fn;
         }
 
-        sc::function insert_operation(const std::string &name, function_type fty) {
+        sc::function insert_operation(const std::string &pref, const std::string &name, function_type fty) {
             return llvm::cast< llvm::Function >(
-                mod.getOrInsertFunction("__lamp_" + name, fty).getCallee()
+                mod.getOrInsertFunction(pref + name, fty).getCallee()
             );
         }
 
+
+        sc::function insert_lart_operation(const std::string &name, function_type fty) {
+            return insert_operation("__lart_", name, fty);
+        }
+
+        sc::function insert_lamp_operation(const std::string &name, function_type fty) {
+            return insert_operation("__lamp_", name, fty);
+        }
+
         sc::function insert_and_annotate_operation(const std::string &name, function_type fty) {
-            return set_abstract_return_attr(insert_operation(name, fty));
+            return set_abstract_return_attr(insert_lamp_operation(name, fty));
         }
 
         sc::function register_binary(const std::string &name) {
             auto fty = llvm::FunctionType::get( abstract_type(), args(2), false );
-            return insert_operation(name, fty);
+            return insert_lamp_operation(name, fty);
         }
 
         sc::function register_any(const std::string &name, sc::type to) {
@@ -81,22 +90,27 @@ namespace lart::runtime
 
         sc::function register_lift(const std::string &name, sc::type from) {
             auto fty = llvm::FunctionType::get( abstract_type(), { from }, false );
-            return insert_operation("lift_" + name, fty);
+            return insert_lamp_operation("lift_" + name, fty);
         }
 
         sc::function register_wrap(const std::string &name, sc::type from) {
             auto fty = llvm::FunctionType::get( abstract_type(), { from }, false );
-            return insert_operation("wrap_" + name, fty);
+            return insert_lamp_operation("wrap_" + name, fty);
         }
 
         sc::function register_operation(const std::string &name, sc::type rty, const std::vector< sc::type > &args) {
             auto fty = llvm::FunctionType::get( rty, args, false );
-            return insert_operation(name, fty);
+            return insert_lamp_operation(name, fty);
         }
 
         sc::function register_cast(const std::string &name) {
             auto fty = llvm::FunctionType::get( abstract_type(), { abstract_type(), bitwidth() }, false );
-            return insert_operation(name, fty);
+            return insert_lamp_operation(name, fty);
+        }
+
+        sc::function register_lart_api(const std::string &name, sc::type rty, const std::vector< sc::type > &args) {
+            auto fty = llvm::FunctionType::get( rty, args, false );
+            return insert_lart_operation(name, fty);
         }
 
         sc::module_ref mod;

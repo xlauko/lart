@@ -20,7 +20,7 @@
 namespace lart::runtime
 {
     void initialize(sc::module_ref &mod) {
-        lamp_runtime_generator lamp(mod);
+        runtime_generator runtime(mod);
 
         using primitive = std::pair< std::string, sc::type >;
         std::array primitives = {
@@ -38,15 +38,15 @@ namespace lart::runtime
         };
 
         register_for_primitives([&] (const auto &name, auto to) {
-            lamp.register_any(name, to);
+            runtime.register_any(name, to);
         });
 
         register_for_primitives([&] (const auto &name, auto from) {
-            lamp.register_lift(name, from);
+            runtime.register_lift(name, from);
         });
 
         register_for_primitives([&] (const auto &name, auto from) {
-            lamp.register_wrap(name, from);
+            runtime.register_wrap(name, from);
         });
 
         std::array binary = {
@@ -54,23 +54,23 @@ namespace lart::runtime
         };
 
         for (const auto &bin : binary) {
-            lamp.register_binary(bin);
+            runtime.register_binary(bin);
         }
 
-        lamp.register_operation("freeze", sc::void_t(), {
-            lamp.abstract_type(), lamp.abstract_type(), lamp.bitwidth()
+        runtime.register_operation("freeze", sc::void_t(), {
+            runtime.abstract_type(), runtime.abstract_type(), runtime.bitwidth()
         });
 
-        lamp.register_operation("melt", lamp.abstract_type(), {
-            lamp.abstract_type(), lamp.bitwidth()
+        runtime.register_operation("melt", runtime.abstract_type(), {
+            runtime.abstract_type(), runtime.bitwidth()
         });
 
-        lamp.register_operation("store", sc::void_t(), {
-            lamp.abstract_type(), lamp.abstract_type(), lamp.bitwidth()
+        runtime.register_operation("store", sc::void_t(), {
+            runtime.abstract_type(), runtime.abstract_type(), runtime.bitwidth()
         });
 
-        lamp.register_operation("load", lamp.abstract_type(), {
-            lamp.abstract_type(), lamp.bitwidth()
+        runtime.register_operation("load", runtime.abstract_type(), {
+            runtime.abstract_type(), runtime.bitwidth()
         });
 
         std::array casts = {
@@ -78,9 +78,11 @@ namespace lart::runtime
         };
 
         for (const auto &cast : casts) {
-            lamp.register_cast(cast);
+            runtime.register_cast(cast);
         }
 
+        runtime.register_lart_api("unstash", sc::i8p(), {});
+        runtime.register_lart_api("stash", sc::void_t(), { sc::i8p() });
     }
 
 } // namespace lart::runtime

@@ -75,13 +75,13 @@ add_library( lartcc
     lifter.cpp
     pass.cpp
     preprocess.cpp
+    shadow.cpp
     syntactic.cpp
     runtime.cpp
     taint.cpp
 
     backend/base.cpp
 
-    backend/native/shadow.cpp
     backend/native/native.cpp
 )
 
