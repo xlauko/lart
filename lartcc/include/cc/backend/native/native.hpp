@@ -45,10 +45,6 @@ namespace lart::backend
             unstash_fn = getfunction( "__lart_unstash",
                 llvm::FunctionType::get( sc::i8p(), {}, false )
             );
-
-            testtaint_fn = getfunction( "__lart_test_taint",
-                llvm::FunctionType::get( sc::i1(), { sc::i8() }, false )
-            );
         }
 
         using base::lower;
@@ -60,7 +56,6 @@ namespace lart::backend
         void lower( callinst c, op::stash s ) override;
 
     private:
-        llvm::Function *testtaint_fn;
         llvm::Function *stash_fn;
         llvm::Function *unstash_fn;
 

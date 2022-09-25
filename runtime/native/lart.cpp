@@ -16,11 +16,8 @@
 
 #include "fault.hpp"
 #include "stash.hpp"
-#include "taint.hpp"
 #include "shadow.hpp"
 #include "choose.hpp"
-
-#include "shadowmeta.h"
 
 #include <cstdlib>
 
@@ -37,18 +34,6 @@ extern "C"
         __lart::rt::stash( val );
     }
 
-    // bool __lart_test_taint( void *addr )
-    // {
-    //     return __lart::rt::is_tainted( addr );
-    // }
-
-    // void __lart_set_taint( void *value, bool taint, unsigned bytes )
-    // {
-    //     if (taint) {
-    //         __lart::rt::make_tainted( value, bytes );
-    //     }
-    // }
-
     int __lart_choose(int count)
     {
         return __lart::rt::choose(count);
@@ -64,7 +49,7 @@ extern "C"
         __lart::rt::poke( addr, bytes, value );
     }
 
-    __lart_shadow_meta *__lart_peek( const void *addr )
+    __lart_shadow_meta __lart_peek( const void *addr )
     {
         return __lart::rt::peek( addr );
     }

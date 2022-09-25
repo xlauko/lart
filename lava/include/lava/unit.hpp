@@ -105,7 +105,6 @@ namespace __lava
         static unit op_ffalse( ur, ur ) { return {}; }
         static unit op_ftrue( ur, ur ) { return {}; }
 
-
         static unit op_fpext( ur, bw ) { return {}; }
         static unit op_fptosi( ur, bw ) { return {}; }
         static unit op_fptoui( ur, bw ) { return {}; }
