@@ -54,7 +54,6 @@ namespace __lart::rt
         set_shadow_label( label, addr, bytes );
     }
 
-    // TODO generator?
     // TODO use size
     sc::generator< shadow_label_t > read_shadow_label(const void *addr, size_t size) {
         if (auto label = shadow.find(uintptr_t(addr)); label != shadow.end()) {
