@@ -1,5 +1,5 @@
 /*
- * (c) 2021 Henrich Lauko <xlauko@mail.muni.cz>
+ * (c) 2022 Henrich Lauko <xlauko@mail.muni.cz>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,19 +16,25 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
+#include <cstdint>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-    struct __lart_shadow_meta
+#include <sc/generator.hpp>
+
+namespace __lart::rt
+{
+    struct shadow_label_info
     {
         void *value;
         void *origin;
         size_t bytes;
     };
 
-#ifdef __cplusplus
+    // uniquely identifies shadow memory chunk
+    using shadow_label_t = std::uint64_t;
+
+    // assigns value to shadow of memory range [addr, addr + bytes)
+    void poke( void *addr, std::size_t bytes, void *value );
+
+    sc::generator< shadow_label_info > peek( const void *addr );
 }
-#endif

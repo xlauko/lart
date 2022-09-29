@@ -20,8 +20,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "shadowmeta.h"
-
 #define __lart_annotate( x )  __attribute__(( __annotate__( #x ) ))
 #define __lart_inline         __attribute__(( __always_inline__ ))
 #define __lart_noinline       __attribute__(( __noinline__ ))
@@ -70,8 +68,6 @@ extern "C" {
     __lart_export void __lart_cancel();
 
     __lart_export void __lart_poke( void *addr, size_t bytes, void* value );
-
-    __lart_export struct __lart_shadow_meta __lart_peek( const void *addr );
 
 #ifdef __cplusplus
 }

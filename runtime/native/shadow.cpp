@@ -14,7 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "shadow.hpp"
+#include <shadow.hpp>
+
+#include <sc/generator.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -54,21 +56,21 @@ namespace __lart::rt
 
     // TODO generator?
     // TODO use size
-    shadow_label_t read_shadow_label(const void *addr, size_t size) {
+    sc::generator< shadow_label_t > read_shadow_label(const void *addr, size_t size) {
         if (auto label = shadow.find(uintptr_t(addr)); label != shadow.end()) {
-            return label->second;
+            co_yield label->second;
         }
-        return 0; // TODO
     }
 
     shadow_label_info get_shadow_label_info(shadow_label_t label) {
         return shadow_info[label];
     }
 
-    shadow_label_info peek( const void *addr )
+    sc::generator< shadow_label_info > peek( const void *addr )
     {
-        auto label = read_shadow_label( addr, 1 );
-        return get_shadow_label_info( label );
+        for (auto label : read_shadow_label( addr, 1 )) {
+            co_yield get_shadow_label_info( label );
+        }
     }
 
 } // namespace __lart::rt
