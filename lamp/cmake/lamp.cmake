@@ -12,24 +12,10 @@ macro( register_domain domain )
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
-    # dataflow sanitized domain options
-    add_library( ${domain}-dfs INTERFACE )
-
-    # # domain source
-    # add_library( ${domain}-src STATIC ${domain}.cpp )
-    # target_link_libraries( ${domain}-src
-    #   PUBLIC ${domain}-prop
-    #   PRIVATE lava runtime
-    # )
-
-    # set_property( TARGET ${domain}-src PROPERTY POSITION_INDEPENDENT_CODE ON )
-    # set_property( TARGET ${domain}-src PROPERTY CXX_STANDARD 20 )
-
-    # sanitized domain library
     add_library( ${domain} STATIC ${domain}.cpp )
     target_link_libraries( ${domain}
-      PUBLIC ${domain}-dfs ${domain}-prop
-      PRIVATE lava runtime
+      PUBLIC ${domain}-prop
+      PRIVATE lava runtime llvmsc::llvmsc
     )
 
     set_property( TARGET ${domain} PROPERTY POSITION_INDEPENDENT_CODE ON )
