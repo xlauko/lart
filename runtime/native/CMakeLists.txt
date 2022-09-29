@@ -28,10 +28,13 @@ target_include_directories( native
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+set_property( TARGET llvmsc PROPERTY POSITION_INDEPENDENT_CODE ON )
+
 target_link_libraries( native
   PRIVATE
     project_warnings
     project_options
+    llvmsc::llvmsc
 )
 
 install (TARGETS native

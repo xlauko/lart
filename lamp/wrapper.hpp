@@ -25,6 +25,7 @@
 #include <lava/constant.hpp>
 
 #include <runtime/lart.h>
+#include <runtime/shadow.hpp>
 
 #ifdef __lart_cpp_runtime
     #include <string>
@@ -34,8 +35,6 @@ typedef struct { void *ptr; } __lamp_ptr;
 
 using dom = __lamp::meta_domain;
 using bw  = __lava::bitwidth_t;
-
-using shadow_meta = __lart_shadow_meta;
 
 using namespace __lava; /* iN */
 
@@ -117,7 +116,7 @@ static auto any()
 
 namespace lamp::detail
 {
-    size_t offset( shadow_meta *meta, void *addr );
+    size_t offset( __lart::rt::shadow_label_info *meta, void *addr );
 
     void freeze( __lamp_ptr val, void *addr, size_t bytes );
 
@@ -318,37 +317,39 @@ extern "C"
 
 namespace lamp::detail
 {
-    size_t offset( shadow_meta meta, void *addr )
+    size_t offset( __lart::rt::shadow_label_info meta, void *addr )
     {
         return uintptr_t(addr) - uintptr_t(meta.origin);
     }
 
     void freeze( __lamp_ptr val, void *addr, size_t bytes )
     {
-        __lart_poke( addr, bytes, val.ptr );
+        __lart::rt::poke( addr, bytes, val.ptr );
     }
 
     __lamp_ptr melt( void *addr, size_t bytes )
     {
-        auto meta = __lart_peek( addr );
+        for (auto meta : __lart::rt::peek( addr )) {
+            auto off = offset( meta, addr );
 
-        auto off = offset( meta, addr );
+            if (off == 0) {
+                if (meta.bytes == bytes) {
+                    // trivial case
+                    return { meta.value };
+                }
 
-        if (off == 0) {
-            if (meta.bytes == bytes) {
-                // trivial case
-                return { meta.value };
+                // truncate
+                if (meta.bytes > bytes) {
+                    return __lamp_trunc( { meta.value }, bw(bytes * 8) );
+                }
+
+                // todo concat multiple values
+                __builtin_unreachable();
             }
-
-            // truncate
-            if (meta.bytes > bytes) {
-                return __lamp_trunc( { meta.value }, bw(bytes * 8) );
-            }
-
-            // todo concat multiple values
+            // todo deal with concrete prefix
             __builtin_unreachable();
         }
-        // todo deal with concrete prefix
+
         __builtin_unreachable();
     }
 }
