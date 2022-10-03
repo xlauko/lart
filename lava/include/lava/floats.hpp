@@ -378,11 +378,6 @@ namespace __lava
             __builtin_unreachable();
         }
 
-        static void dump( fr a )
-        {
-            printf( "%s\n", str( a ) );
-        }
-
         static std::string trace( fr a ) { return str( a ); }
 
         template< typename stream >

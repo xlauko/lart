@@ -24,7 +24,7 @@
 
 namespace __lava
 {
-    struct [[gnu::packed]] expr_storage 
+    struct [[gnu::packed]] expr_storage
     {
         expr_storage() = default;
         expr_storage(const expr_storage &) = default;
@@ -44,9 +44,9 @@ namespace __lava
 
         smt_expr< __lart::rt::vector > rpn;
     };
-    
+
     template< template< typename > typename storage >
-    struct expr : storage< expr_storage > 
+    struct expr : storage< expr_storage >
                 , domain_mixin< expr< storage > >
     {
         using base = storage< expr_storage >;
@@ -96,8 +96,8 @@ namespace __lava
         }
 
         template< typename size >
-        static expr op_alloca( const size&, bw w ) 
-        { 
+        static expr op_alloca( const size&, bw w )
+        {
             using array = smt_array_type;
 
             // TODO get type as argument
@@ -176,12 +176,11 @@ namespace __lava
         static ev op_fptosi ( er a, bw w ) { return cast( a->rpn, w, op::fp_tosbv ); }
         static ev op_fptoui ( er a, bw w ) { return cast( a->rpn, w, op::fp_toubv ); }
 
-        static void dump( er ) { printf( "expr\n" ); }
         static std::string trace( er ) { return "expr"; }
-        
+
         template< typename stream >
         friend stream& operator<<( stream &os, er e )
-        { 
+        {
             return os << e->rpn;
         }
     };

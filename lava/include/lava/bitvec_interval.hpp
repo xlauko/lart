@@ -113,10 +113,9 @@ namespace __lava
         static bitvec_interval op_zext( bitvec_interval_ref, bw ) { return {}; }
         static bitvec_interval op_zfit( bitvec_interval_ref, bw ) { return {}; }
 
-        static void dump( bitvec_interval_ref ) { printf( "bitvec_interval\n" ); }
         static std::string trace( bitvec_interval_ref ) { return "bitvec_interval"; }
 
         template< typename stream >
-        friend stream& operator<<( stream &os, bitvec_interval_ref ) { return os << "bitvec_interval"; }
+        friend stream& operator<<( stream &os, bitvec_interval_ref i ) { return os << trace( i ); }
     };
 } // namespace __lava

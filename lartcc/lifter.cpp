@@ -62,6 +62,7 @@ namespace lart
                 switch ( arg.type ) {
                 case op::argtype::test:
                     break; // ignore test arguments in lifter
+                case op::argtype::unpack:
                 case op::argtype::with_taint:
                     co_yield arg::with_taint{ f->getArg(i), f->getArg(i + 1), f->getArg(i + 2) };
                     i += 3;
@@ -132,6 +133,7 @@ namespace lart
             switch ( arg.type ) {
             case op::argtype::test:
                 break; // ignore test arguments in lifters
+            case op::argtype::unpack:
             case op::argtype::with_taint:
                 args.push_back(sc::i1()); // dummy false
                 args.push_back(arg.value->getType());

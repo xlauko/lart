@@ -118,7 +118,6 @@ namespace __lava
         static unit op_zext( ur, bw ) { return {}; }
         static unit op_zfit( ur, bw ) { return {}; }
 
-        static void dump( ur ) { printf( "unit\n" ); }
         static std::string trace( ur ) { return "unit"; }
 
         template< typename stream >

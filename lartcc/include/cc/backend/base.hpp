@@ -39,6 +39,8 @@ namespace lart::backend
         virtual void lower( callinst c, op::unstash u ) = 0;
         virtual void lower( callinst c, op::unstash_taint u ) = 0;
         virtual void lower( callinst c, op::stash s ) = 0;
+
+        virtual void lower( callinst c, op::dump s ) = 0;
     };
 
 } // namespace lart::backend

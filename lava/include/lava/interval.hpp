@@ -386,11 +386,6 @@ namespace __lava
             a.get() = r.get(); // TODO
         }
 
-        static void dump( ir i )
-        {
-            printf( "%s\n", trace(i).c_str() );
-        }
-
         static std::string trace( ir i )
         {
             std::stringstream ss;
