@@ -1,0 +1,15 @@
+#!/bin/bash
+
+RUNNER=$1
+OPTS="${@:2}"
+PROG=${!#}
+
+compile () {
+    ${RUNNER} ${OPTS} -I@CMAKE_CURRENT_BINARY_DIR@/include
+}
+
+execute () {
+    ${PROG} 2>&1
+}
+
+compile; execute

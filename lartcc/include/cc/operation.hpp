@@ -98,7 +98,7 @@ namespace lart::op
         using base::base;
     };
 
-    enum class argtype { test, with_taint, concrete, abstract };
+    enum class argtype { test, with_taint, concrete, abstract, unpack };
 
     struct argument
     {
@@ -400,12 +400,31 @@ namespace lart::op
         }
     };
 
+    struct dump : with_taints_base< false /* do not emit test taint */ >
+    {
+        using base = with_taints_base< false >;
+        using base::base;
+
+        std::string name() const { return "dump"; }
+        std::string impl() const { return  "__lamp_unpacked_dump"; }
+        args_t arguments() const
+        {
+            return {{ _what, argtype::unpack }};
+        }
+
+        std::optional< default_wrapper > default_value() const
+        {
+            return std::nullopt;
+        }
+    };
+
     using operation = std::variant<
         melt, freeze,
         binary, cast, cmp,
         tobool, assume,
         alloc, store, load,
-        stash, unstash, unstash_taint, identity, phi
+        stash, unstash, unstash_taint, identity, phi,
+        dump
     >;
 
     namespace detail

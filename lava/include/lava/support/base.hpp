@@ -236,7 +236,6 @@ namespace __lava
 
         static void op_dealloca( sr s ) { s.~self_t(); }
 
-        static void dump( sr ) { printf( "dump not implemented" ); }
         static std::string trace( sr ) { return "trace is not implemented"; }
 
         static void report( const char * op )

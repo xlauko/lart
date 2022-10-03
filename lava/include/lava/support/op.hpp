@@ -32,7 +32,7 @@ namespace __lava
     };
 
     template< template< typename > typename storage >
-    struct optag : storage< op_tag_storage > 
+    struct optag : storage< op_tag_storage >
                 , domain_mixin< optag< storage > >
     {
         using base = storage< op_tag_storage >;
@@ -124,9 +124,8 @@ namespace __lava
         static optag op_zext  ( ref, bw ) { return tag::zext; }
         static optag op_zfit  ( ref, bw ) { return tag::zfit; }
 
-        static void dump( ref op ) { printf("%s\n", op::to_string(op->value).data()); }
         static std::string trace( ref op ) { return op::to_string(op->value); }
-        
+
         template< typename stream >
         friend stream& operator<<( stream &os, ref op ) { return os << op::to_string(op->value); }
 

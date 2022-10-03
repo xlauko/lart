@@ -47,6 +47,13 @@ namespace lart
         return call->getCalledFunction()->getName().startswith( "__lamp" );
     }
 
+    bool is_dump_call( llvm::CallBase *call )
+    {
+        if ( !call->getCalledFunction()->hasName() )
+            return false;
+        return call->getCalledFunction()->getName() == "__lamp_dump";
+    }
+
     bool is_testtaint( llvm::CallBase *call )
     {
         if ( call->isIndirectCall() || !call->getCalledFunction() )
@@ -101,7 +108,7 @@ namespace lart
                     result = op::cast{ val };
             },
             [&] ( llvm::CallInst * ) {
-                /* allthrough, call unstash is processed behore shadow pass */
+                /* otherwise fallthrough, call unstash is processed behore shadow pass */
             },
             [&] ( llvm::Argument * ) {
                 /* fallthrough */
@@ -141,9 +148,7 @@ namespace lart
         }
 
         for ( auto call : sc::query::filter_llvm< llvm::CallInst >( module ) ) {
-            call->dump();
             if ( is_abstract(call) ) {
-                llvm::errs() << "is abstract\n";
                 co_yield op::unstash(call);
                 co_yield op::unstash_taint(call);
             }
@@ -195,6 +200,10 @@ namespace lart
                     for (auto &arg : call->arg_operands())
                         co_yield op::stash(arg.get(), call);
                 }
+            }
+
+            if ( is_dump_call(call) ) {
+                co_yield op::dump( call->getArgOperand(0) );
             }
         }
 
@@ -300,10 +309,6 @@ namespace lart
         auto intr = make_intrinsic( lifter( module, o, shadows ) );
 
         if ( std::holds_alternative< op::unstash_taint >( o ) ) {
-            spdlog::debug("[shadow] set unstash shadow {} for {}"
-                , sc::fmt::llvm_to_string(intr.call)
-                , sc::fmt::llvm_to_string( op::value(o) )
-            );
             shadows.ops[ op::value( o ) ] = intr.call;
         }
 

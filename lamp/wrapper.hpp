@@ -285,31 +285,28 @@ extern "C"
     {
         return { ref( p.ptr ).clone().disown() };
     }
+} // extern "C"
 
-    // void __lamp_dump( void *twin )
-    // {
-    //     if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-    //         auto *meta = __lart_peek( twin );
-    //         auto size = meta->bytes - lamp::detail::offset( meta, twin );
-    //         ref a( lamp::detail::melt( twin, size ).ptr );
-    //         return dom::dump( a ); // TODO size?
-    //     }
-    //     printf( "concrete\n" );
-    // }
-}
+    std::string __lamp_trace( bool *taint, void *concrete, void * /* abstract */ )
+    {
+        if ( *taint ) {
+            auto abstract = lamp::detail::melt( concrete, 0 );
+            ref value( abstract.ptr );
+            return dom::trace( value );
+        } else {
+            return "concrete";
+        }
+    }
 
-// #ifdef __lart_cpp_runtime
-//     std::string __lamp_trace( void *twin )
-//     {
-//         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-//             auto meta = __lart_peek( twin );
-//             auto size = meta->bytes - lamp::detail::offset( meta, twin );
-//             ref a( lamp::detail::melt( twin, size ).ptr );
-//             return dom::trace( a ); // TODO size?
-//         }
-//         return "concrete";
-//     }
-// #endif
+extern "C" {
+
+    void __lamp_unpacked_dump( bool *taint, void *concrete, void *abstract )
+    {
+        std::fprintf( stdout, "%s\n", __lamp_trace( taint, concrete, abstract ).c_str() );
+    }
+
+} // extern "C"
+
 
 #include "memory.hpp"
 
@@ -331,7 +328,7 @@ namespace lamp::detail
             auto off = offset( meta, addr );
 
             if (off == 0) {
-                if (meta.bytes == bytes) {
+                if (meta.bytes == bytes || bytes == 0) {
                     // trivial case
                     return { meta.value };
                 }

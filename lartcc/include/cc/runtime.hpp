@@ -65,7 +65,6 @@ namespace lart::runtime
             );
         }
 
-
         sc::function insert_lart_operation(const std::string &name, function_type fty) {
             return insert_operation("__lart_", name, fty);
         }

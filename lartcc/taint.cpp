@@ -66,6 +66,7 @@ namespace lart::taint
                 };
                 pos += 2;
                 break;
+            case op::argtype::unpack:
             case op::argtype::with_taint:
                 co_yield ir::arg::with_taint{
                     call->getOperandUse(pos),

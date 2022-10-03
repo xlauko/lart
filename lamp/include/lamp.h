@@ -183,7 +183,6 @@ void __lamp_assume( __lamp_ptr a, __lamp_bool c );
 __lamp_ptr __lamp_extract( __lamp_ptr a, __lamp_bw s, __lamp_bw e );
 
 // void __lamp_dealloca( void *p, __lamp_i64 size );
-
 void __lamp_dump( void *twin );
 
 #ifdef __cplusplus

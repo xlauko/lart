@@ -17,14 +17,12 @@ configure_file( "${LART_TEST_SITE_CFG_INPUT}"
   "${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg.py" @ONLY
 )
 
-file( COPY "scripts" DESTINATION "."
-    FILE_PERMISSIONS
-        OWNER_READ OWNER_WRITE OWNER_EXECUTE
-        GROUP_READ GROUP_EXECUTE
-        WORLD_READ WORLD_EXECUTE
+configure_file( "scripts/testrun.sh.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/scripts/testrun.sh" @ONLY
+    FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
-file(COPY "include" DESTINATION "." )
+file( COPY "include" DESTINATION "." )
 
 add_test(
     NAME lit

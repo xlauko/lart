@@ -49,6 +49,10 @@ namespace lart::backend
             unstash_taint_fn = getfunction( "__lart_unstash_taint",
                 llvm::FunctionType::get( sc::i1(), {}, false )
             );
+
+            dump_fn = getfunction( "__lamp_unpacked_dump",
+                llvm::FunctionType::get( sc::void_t(), { sc::i1p(), sc::i8p(), sc::i8p() }, false )
+            );
         }
 
         using base::lower;
@@ -56,14 +60,18 @@ namespace lart::backend
         using base::callinst;
 
         void lower_test_taint( ir::intrinsic ) override;
+
         void lower( callinst c, op::unstash u ) override;
         void lower( callinst c, op::unstash_taint u ) override;
         void lower( callinst c, op::stash s ) override;
+
+        void lower( callinst c, op::dump s ) override;
 
     private:
         llvm::Function *stash_fn;
         llvm::Function *unstash_fn;
         llvm::Function *unstash_taint_fn;
+        llvm::Function *dump_fn;
 
         llvm::Module &module;
 
