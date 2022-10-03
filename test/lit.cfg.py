@@ -31,17 +31,12 @@ config.test_exec_root = os.path.join(config.my_obj_root, 'test')
 config.excludes = []
 
 tool_substitutions = [
-    ToolSubst('%lartcc', os.path.join(config.lart_install_dir, 'lartcc')),
-    ToolSubst('%lartcc++', os.path.join(config.lart_install_dir, '@CMAKE_INSTALL_PREFIX@/bin/lartcc')),
+    ToolSubst('%lartcc', os.path.join(config.lart_binary_dir, 'Debug/lartcc')),
+    ToolSubst('%lartcc++', os.path.join(config.lart_binary_dir, 'Debug/lartcc')),
     ToolSubst('%testrun', os.path.join(config.my_obj_root, 'scripts/testrun.sh'))
 ]
 
 llvm_config.add_tool_substitutions(tool_substitutions)
-
-# The list of tools required for testing - prepend them with the path specified
-# during configuration (i.e. LLVM_TOOLS_DIR/bin)
-tools = ["opt", "lli", "not", "FileCheck", "clang"]
-llvm_config.add_tool_substitutions(tools, config.llvm_tools_dir)
 
 # The LIT variable to hold the file extension for shared libraries (this is
 # platform dependent)
