@@ -29,9 +29,15 @@ extern "C"
         return __lart::rt::unstash< void * >();
     }
 
-    void __lart_stash( void *val )
+    bool __lart_unstash_taint()
+    {
+        return __lart::rt::unstash_taint();
+    }
+
+    void __lart_stash( bool taint, void *val )
     {
         __lart::rt::stash( val );
+        __lart::rt::stash_taint( taint );
     }
 
     int __lart_choose(int count)

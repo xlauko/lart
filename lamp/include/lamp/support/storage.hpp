@@ -76,9 +76,6 @@ namespace __lamp
 
         template< typename ...args >
         storage( args &&...a ) : kind( std::forward< args >(a)... ) {}
-
-        void* operator new( size_t s ) { return std::malloc(s); }
-        void  operator delete( void* m ) { std::free(m); }
     };
 
     template< typename storage >

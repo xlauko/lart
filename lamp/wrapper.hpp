@@ -27,9 +27,7 @@
 #include <runtime/lart.h>
 #include <runtime/shadow.hpp>
 
-#ifdef __lart_cpp_runtime
-    #include <string>
-#endif
+#include <string>
 
 typedef struct { void *ptr; } __lamp_ptr;
 
@@ -96,15 +94,14 @@ inline type defualt_tainted_value() {
 template< typename op_t, typename arg_t, typename... args_t >
 static arg_t lift( op_t op, arg_t arg, args_t... args )
 {
-    __lart_stash( op( arg, args... ).disown() );
-    // __lart_set_taint( &arg, true, sizeof( arg ) );
+    __lart_stash( true, op( arg, args... ).disown() );
     return arg;
 }
 
 template< typename dom, typename type >
 static auto any()
 {
-    __lart_stash( dom::template any< type >().disown() );
+    __lart_stash( true, dom::template any< type >().disown() );
     return defualt_tainted_value< type >();
 }
 
@@ -314,6 +311,7 @@ extern "C"
 //     }
 // #endif
 
+#include "memory.hpp"
 
 namespace lamp::detail
 {
@@ -352,4 +350,4 @@ namespace lamp::detail
 
         __builtin_unreachable();
     }
-}
+} // namespace lamp::detail

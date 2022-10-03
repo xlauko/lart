@@ -1,5 +1,5 @@
 /*
- * (c) 2020 Henrich Lauko <xlauko@mail.muni.cz>
+ * (c) 2022 Henrich Lauko <xlauko@mail.muni.cz>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,23 +14,28 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "stash.hpp"
+#include <vector>
 
-namespace __lart::rt
-{
-    thread_local std::uint8_t stash_stack_top = 0;
-    thread_local stash_stack_value_t stash_stack[abstract_stack_size] = {};
+namespace lart {
 
-    thread_local std::uint8_t taint_stack_top = 0;
-    thread_local bool taint_stack[abstract_stack_size] = {};
+    struct frame_t {
+        std::vector< dom > values;
+    };
 
-    void stash_taint( bool taint )
-    {
-        taint_stack[ taint_stack_top++ ] = taint;
-    }
+    std::vector< frame_t > frames;
+    std::vector< dom > globs;
 
-    bool unstash_taint()
-    {
-        return taint_stack[ --taint_stack_top ];
-    }
-} // namespace __lart::rt
+    void push_frame() { frames.push_back({}); }
+
+    void pop_frame() { frames.pop_back(); }
+
+} // namespace lart
+
+
+extern "C" {
+
+    void __lart_push_frame() { lart::push_frame(); }
+    void __lart_pop_frame() { lart::pop_frame(); }
+
+    // TODO make global
+}

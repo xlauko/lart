@@ -59,9 +59,11 @@ extern "C" {
     * TODO The second problem might have to be tackled in the verification
     * algorithm anyway, since there might be other ways to trigger the same
     * problem. */
-    __lart_export void __lart_stash( void* abstract );
+    __lart_export void __lart_stash( bool taint, void* abstract );
 
     __lart_export void* __lart_unstash();
+
+    __lart_export bool  __lart_unstash_taint();
 
     __lart_export int __lart_choose( int count );
 
