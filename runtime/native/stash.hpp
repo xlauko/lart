@@ -21,12 +21,15 @@
 
 namespace __lart::rt
 {
-    constexpr std::size_t stash_stack_size = 256;
-    
+    constexpr std::size_t abstract_stack_size = 256;
+
     using stash_stack_value_t = std::uint64_t;
-    
+
     extern thread_local std::uint8_t stash_stack_top;
     extern thread_local stash_stack_value_t stash_stack[];
+
+    extern thread_local std::uint8_t taint_stack_top;
+    extern thread_local bool taint_stack[];
 
     template< typename T > void stash( T value )
     {
@@ -44,5 +47,8 @@ namespace __lart::rt
         else
             return static_cast< T >( stash_stack[ --stash_stack_top ] );
     }
+
+    void stash_taint( bool taint );
+    bool unstash_taint();
 
 } // namespace __lart::rt
