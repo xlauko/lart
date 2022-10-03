@@ -32,12 +32,13 @@ namespace lart
 
     struct syntactic : sc::with_context
     {
-        explicit syntactic( sc::module_ref m, const dfa::types &t, const shadow_map &s )
+        explicit syntactic( sc::module_ref m, const dfa::types &t, shadow_map &s )
             : sc::with_context( m ), types( t ), shadows( s ), module( m )
         {}
 
         std::optional< operation > make_operation( sc::value value );
 
+        sc::generator< operation > unstash_toprocess();
         sc::generator< operation > toprocess();
         std::optional< ir::intrinsic > process( operation op );
 
@@ -47,10 +48,10 @@ namespace lart
 
         std::map< sc::value, sc::value > abstract;
         std::map< sc::value, sc::value > identity;
-        std::map< sc::value, std::vector< ir::arg::tuple > > places;
+        std::map< sc::value, std::vector< ir::argument > > places;
 
         const dfa::types &types;
-        const shadow_map &shadows;
+        shadow_map &shadows;
         sc::module_ref module;
     };
 

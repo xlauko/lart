@@ -29,7 +29,7 @@ namespace lart::op {
                     co_yield arg.value;
                     co_yield op::abstract_pointer();
                     break;
-                case argtype::lift:
+                case argtype::with_taint:
                     co_yield shadows.get(arg.value);
                     co_yield arg.value;
                     co_yield op::abstract_pointer();

@@ -28,7 +28,7 @@ namespace lart
     using operation = lart::op::operation;
 
     enum class shadow_op_kind {
-        source, memory, forward, store, load
+        source, memory, forward, store, load, arg, ret
     };
 
     struct shadow_operation {
@@ -56,6 +56,10 @@ namespace lart
         sc::value process_load( shadow_operation op );
 
         sc::value process_store( shadow_operation op );
+
+        sc::value process_argument( shadow_operation op );
+
+        sc::value process_return( shadow_operation op );
 
         sc::value get( sc::value op ) const;
 

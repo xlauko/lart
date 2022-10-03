@@ -39,11 +39,15 @@ namespace lart::backend
 
             // TODO unify with operation impl
             stash_fn = getfunction( "__lart_stash",
-                llvm::FunctionType::get( sc::void_t(), { sc::i8p() }, false )
+                llvm::FunctionType::get( sc::void_t(), { sc::i1(), sc::i8p() }, false )
             );
 
             unstash_fn = getfunction( "__lart_unstash",
                 llvm::FunctionType::get( sc::i8p(), {}, false )
+            );
+
+            unstash_taint_fn = getfunction( "__lart_unstash_taint",
+                llvm::FunctionType::get( sc::i1(), {}, false )
             );
         }
 
@@ -53,11 +57,13 @@ namespace lart::backend
 
         void lower_test_taint( ir::intrinsic ) override;
         void lower( callinst c, op::unstash u ) override;
+        void lower( callinst c, op::unstash_taint u ) override;
         void lower( callinst c, op::stash s ) override;
 
     private:
         llvm::Function *stash_fn;
         llvm::Function *unstash_fn;
+        llvm::Function *unstash_taint_fn;
 
         llvm::Module &module;
 

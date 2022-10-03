@@ -113,7 +113,8 @@ namespace lart::runtime
         });
 
         runtime.register_lart_api("unstash", sc::i8p(), {});
-        runtime.register_lart_api("stash", sc::void_t(), { sc::i8p() });
+        runtime.register_lart_api("unstash_taint", sc::i1(), {});
+        runtime.register_lart_api("stash", sc::void_t(), { sc::i1(), sc::i8p() });
     }
 
 } // namespace lart::runtime

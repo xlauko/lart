@@ -38,6 +38,7 @@
 namespace lart::op
 {
     struct abstract_pointer_default {};
+    struct concrete_value { sc::value value; };
     struct concrete_argument_default { unsigned index; };
 
     inline auto abstract_pointer()
@@ -46,9 +47,10 @@ namespace lart::op
     }
 
     using default_wrapper = std::variant<
-        abstract_pointer_default, concrete_argument_default
+        abstract_pointer_default, concrete_value, concrete_argument_default
     >;
 
+    template< bool _emit_test_taint >
     struct base
     {
         base( sc::value what )
@@ -73,22 +75,30 @@ namespace lart::op
 
         std::optional< sc::value > replaces;
 
+        constexpr bool emit_test_taint() const { return _emit_test_taint; }
+
         constexpr bool with_taints() const { return false; }
     };
 
-    struct with_taints_base : base
+    template< bool emit_test_taint >
+    struct with_taints_base : base< emit_test_taint >
     {
-        using base::base;
+        using base< emit_test_taint >::base;
 
         constexpr bool with_taints() const { return true; }
     };
 
-    struct without_taints_base : base
+    struct with_test_taints_base : with_taints_base< true > {
+        using base = with_taints_base< true >;
+        using base::base;
+    };
+
+    struct without_taints_base : base< false /* do not emit test taint */ >
     {
         using base::base;
     };
 
-    enum class argtype { test, lift, concrete, abstract };
+    enum class argtype { test, with_taint, concrete, abstract };
 
     struct argument
     {
@@ -101,7 +111,7 @@ namespace lart::op
             auto lift = [a] {
                 switch (a.type) {
                     case argtype::test: return "test";
-                    case argtype::lift: return "lift";
+                    case argtype::with_taint: return "taint";
                     case argtype::concrete: return "concrete";
                     case argtype::abstract: return "abstract";
                     default: llvm_unreachable( "unknown arg type" );
@@ -119,9 +129,9 @@ namespace lart::op
 
     using args_t = std::vector< argument >;
 
-    struct melt : with_taints_base
+    struct melt : with_test_taints_base
     {
-        using base = with_taints_base;
+        using base = with_test_taints_base;
         using base::with_taints;
 
         std::string name() const { return "melt"; }
@@ -140,7 +150,7 @@ namespace lart::op
         }
     };
 
-    struct freeze : with_taints_base
+    struct freeze : with_test_taints_base
     {
         std::string name() const { return "freeze"; }
         std::string impl() const { return "__lamp_freeze"; }
@@ -152,7 +162,7 @@ namespace lart::op
             auto elem = ptr->getType()->getPointerElementType();
             auto dl   = sc::data_layout( store );
             return {
-                { store->getValueOperand(), argtype::lift },
+                { store->getValueOperand(), argtype::with_taint },
                 { ptr, argtype::concrete },
                 { sc::i32( sc::bytes( elem, dl ) ), argtype::concrete }
             };
@@ -164,7 +174,7 @@ namespace lart::op
         }
     };
 
-    struct binary : with_taints_base
+    struct binary : with_test_taints_base
     {
         std::string name() const
         {
@@ -177,13 +187,13 @@ namespace lart::op
         {
             auto bin = llvm::cast< llvm::BinaryOperator >( _what );
             return {
-                { bin->getOperand( 0 ), argtype::lift },
-                { bin->getOperand( 1 ), argtype::lift },
+                { bin->getOperand( 0 ), argtype::with_taint },
+                { bin->getOperand( 1 ), argtype::with_taint },
             };
         }
     };
 
-    struct cast : with_taints_base
+    struct cast : with_test_taints_base
     {
         std::string name() const
         {
@@ -197,13 +207,13 @@ namespace lart::op
             auto c = llvm::cast< llvm::CastInst >( _what );
             auto dst = uint8_t( sc::bits( c ) );
             return {
-                { c->getOperand( 0 ), argtype::lift },
+                { c->getOperand( 0 ), argtype::with_taint },
                 { sc::i8( dst ), argtype::concrete }
             };
         }
     };
 
-    struct cmp : with_taints_base
+    struct cmp : with_test_taints_base
     {
         std::string name() const
         {
@@ -217,16 +227,16 @@ namespace lart::op
         {
             auto c = llvm::cast< llvm::CmpInst >( _what );
             return {
-                { c->getOperand( 0 ), argtype::lift },
-                { c->getOperand( 1 ), argtype::lift },
+                { c->getOperand( 0 ), argtype::with_taint },
+                { c->getOperand( 1 ), argtype::with_taint },
             };
         }
     };
 
-    struct assume : with_taints_base
+    struct assume : with_test_taints_base
     {
         assume( llvm::Value *what, llvm::Instruction *where, llvm::Constant *exp )
-            : with_taints_base( what, where ), expected( exp )
+            : with_test_taints_base( what, where ), expected( exp )
         {}
 
         std::string name() const { return "assume"; }
@@ -235,7 +245,7 @@ namespace lart::op
         args_t arguments() const
         {
             return {
-                { _what, argtype::lift },
+                { _what, argtype::with_taint },
                 { expected, argtype::concrete },
             };
         }
@@ -248,14 +258,14 @@ namespace lart::op
         llvm::Constant *expected;
     };
 
-    struct alloc : with_taints_base
+    struct alloc : with_test_taints_base
     {
         std::string name() const { return "alloca"; }
         std::string impl() const { return "__lamp_alloca"; }
         args_t arguments() const { return {}; }
     };
 
-    struct store : with_taints_base
+    struct store : with_test_taints_base
     {
         std::string name() const { return "store"; }
         std::string impl() const { return "__lamp_store"; }
@@ -267,8 +277,8 @@ namespace lart::op
             auto elem = ptr->getType()->getPointerElementType();
             auto dl   = sc::data_layout( what );
             return {
-                { ptr, argtype::lift },
-                { val, argtype::lift },
+                { ptr, argtype::with_taint },
+                { val, argtype::with_taint },
                 { sc::i8( uint8_t( sc::bytes( elem, dl ) ) ), argtype::concrete }
             };
         }
@@ -279,7 +289,7 @@ namespace lart::op
         }
     };
 
-    struct load : with_taints_base
+    struct load : with_test_taints_base
     {
         std::string name() const { return "load"; }
         std::string impl() const { return "__lamp_load"; }
@@ -290,16 +300,16 @@ namespace lart::op
             auto elem = ptr->getType()->getPointerElementType();
             auto dl   = sc::data_layout( what );
             return {
-                { ptr, argtype::lift },
+                { ptr, argtype::with_taint },
                 { sc::i8( static_cast< uint8_t >( sc::bytes( elem, dl ) ) )
                 , argtype::concrete }
             };
         }
     };
 
-    struct stash : with_taints_base
+    struct stash : with_taints_base< false /* do not emit test taint */ >
     {
-        using base = with_taints_base;
+        using base = with_taints_base< false >;
 
         stash( llvm::Value *what, llvm::Instruction *call )
             : base( what, call )
@@ -309,11 +319,12 @@ namespace lart::op
         {
             return "stash." + sc::fmt::llvm_to_string(_what->getType());
         }
+
         std::string impl() const { return "__lart_stash"; }
 
         args_t arguments() const
         {
-            return {{ _what, argtype::abstract }};
+            return {{ _what, argtype::with_taint }};
         }
 
         std::optional< default_wrapper > default_value() const
@@ -332,10 +343,25 @@ namespace lart::op
         args_t arguments() const { return {}; }
     };
 
-    struct tobool : with_taints_base
+    struct unstash_taint : without_taints_base
+    {
+        using base = without_taints_base;
+        using base::base;
+
+        std::string name() const { return "unstash_taint"; }
+        std::string impl() const { return  "__lart_unstash_taint"; }
+        args_t arguments() const { return {}; }
+
+        std::optional< default_wrapper > default_value() const
+        {
+            return concrete_value{ sc::i1(false) };
+        }
+    };
+
+    struct tobool : with_test_taints_base
     {
         explicit tobool( llvm::BranchInst *br )
-            : with_taints_base( br, br )
+            : with_test_taints_base( br, br )
         {
             replaces = br->getCondition();
         }
@@ -346,7 +372,7 @@ namespace lart::op
         args_t arguments() const
         {
             auto br = llvm::cast< llvm::BranchInst >( _what );
-            return { { br->getCondition(), argtype::lift } };
+            return { { br->getCondition(), argtype::with_taint } };
         }
 
         std::optional< default_wrapper > default_value() const
@@ -379,7 +405,8 @@ namespace lart::op
         binary, cast, cmp,
         tobool, assume,
         alloc, store, load,
-        stash, unstash, identity, phi >;
+        stash, unstash, unstash_taint, identity, phi
+    >;
 
     namespace detail
     {
@@ -393,6 +420,7 @@ namespace lart::op
     static auto arguments = detail::invoke( [] (const auto &o) { return o.arguments(); } );
     static auto default_value = detail::invoke( [] (const auto &o) { return o.default_value(); } );
     static auto with_taints = detail::invoke( [] (const auto &o) { return o.with_taints(); } );
+    static auto emit_test_taint = detail::invoke( [] (const auto &o) { return o.emit_test_taint(); } );
     static auto replaces = detail::invoke( [] (const auto &o) { return o.replaces; } );
 
     inline bool with_abstract_arg( const operation &o )
@@ -405,20 +433,24 @@ namespace lart::op
         return default_value(o).has_value();
     }
 
-    inline auto extract_default( default_wrapper def, const std::vector< llvm::Value* > &args )
-        -> llvm::Value*
+    inline auto extract_default( default_wrapper def, const std::vector< sc::value > &args )
+        -> sc::value
     {
         if ( std::holds_alternative< abstract_pointer_default >( def ) )
             return abstract_pointer();
+        if ( std::holds_alternative< concrete_value >( def ) )
+            return std::get< concrete_value >( def ).value;
         auto idx = std::get< concrete_argument_default >( def ).index;
         return args[ idx ];
     }
 
-    inline auto extract_default( default_wrapper def, const std::vector< llvm::Type* > &types )
-        -> llvm::Type*
+    inline auto extract_default( default_wrapper def, const std::vector< sc::type > &types )
+        -> sc::type
     {
         if ( std::holds_alternative< abstract_pointer_default >( def ) )
             return abstract_pointer()->getType();
+        if ( std::holds_alternative< concrete_value >( def ) )
+            return std::get< concrete_value >( def ).value->getType();
         auto idx = std::get< concrete_argument_default >( def ).index;
         return types[ idx ];
     }

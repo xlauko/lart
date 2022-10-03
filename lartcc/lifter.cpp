@@ -56,14 +56,13 @@ namespace lart
     {
         sc::generator< argument > arguments( const lifter &lif )
         {
-            // TODO lifters
             auto *f = lif.function();
             unsigned i = 0;
             for ( auto arg : op::arguments(lif.op) ) {
                 switch ( arg.type ) {
                 case op::argtype::test:
                     break; // ignore test arguments in lifter
-                case op::argtype::lift:
+                case op::argtype::with_taint:
                     co_yield arg::with_taint{ f->getArg(i), f->getArg(i + 1), f->getArg(i + 2) };
                     i += 3;
                     break;
@@ -133,7 +132,7 @@ namespace lart
             switch ( arg.type ) {
             case op::argtype::test:
                 break; // ignore test arguments in lifters
-            case op::argtype::lift:
+            case op::argtype::with_taint:
                 args.push_back(sc::i1()); // dummy false
                 args.push_back(arg.value->getType());
                 args.push_back(aptr);

@@ -100,13 +100,8 @@ namespace lart
                 else
                     result = op::cast{ val };
             },
-            [&] ( llvm::CallInst *call ) {
-                if ( is_lamp_call(call) ) {
-                    // TODO does return nonvoid
-                    result = op::unstash{ call };
-                } else {
-                    // TODO
-                }
+            [&] ( llvm::CallInst * ) {
+                /* allthrough, call unstash is processed behore shadow pass */
             },
             [&] ( llvm::Argument * ) {
                 /* fallthrough */
@@ -122,9 +117,41 @@ namespace lart
         return result;
     }
 
+    sc::generator< operation > syntactic::unstash_toprocess()
+    {
+        auto is_abstract = [&] (auto value) {
+            return types.count(value) && types[value].maybe_abstract();
+        };
+
+        auto function_has_abstract_arg = [&] (llvm::Function &fn) {
+            for (auto &arg : fn.args())
+                if (is_abstract(&arg))
+                    return true;
+            return false;
+        };
+
+        for ( auto &fn : module ) {
+            if (function_has_abstract_arg(fn)) {
+                for (auto &arg : fn.args()) {
+                    auto point = fn.getEntryBlock().getFirstNonPHIOrDbg();
+                    co_yield op::unstash(&arg, point);
+                    co_yield op::unstash_taint(&arg, point);
+                }
+            }
+        }
+
+        for ( auto call : sc::query::filter_llvm< llvm::CallInst >( module ) ) {
+            call->dump();
+            if ( is_abstract(call) ) {
+                llvm::errs() << "is abstract\n";
+                co_yield op::unstash(call);
+                co_yield op::unstash_taint(call);
+            }
+        }
+    }
+
     sc::generator< operation > syntactic::toprocess()
     {
-        // TODO: rangeify
         auto is_abstract = [&] (auto value) {
             return types.count(value) && types[value].maybe_abstract();
         };
@@ -168,9 +195,6 @@ namespace lart
                     for (auto &arg : call->arg_operands())
                         co_yield op::stash(arg.get(), call);
                 }
-
-                if ( is_abstract(call) )
-                    co_yield op::unstash(call);
             }
         }
 
@@ -179,26 +203,12 @@ namespace lart
             if ( is_abstract(val) )
                 co_yield op::stash(val, ret);
         }
-
-        auto function_has_abstract_arg = [&] (llvm::Function &fn) {
-            for (auto &arg : fn.args())
-                if (is_abstract(&arg))
-                    return true;
-            return false;
-        };
-
-        for ( auto &fn : module ) {
-            if (function_has_abstract_arg(fn)) {
-                for (auto &arg : fn.args())
-                    co_yield op::unstash(&arg, fn.getEntryBlock().getFirstNonPHIOrDbg() );
-            }
-        }
     }
 
     ir::intrinsic make_intrinsic( const lifter &lift )
     {
         auto op = lift.op;
-        if ( op::with_taints( op ) )
+        if ( op::emit_test_taint( op ) )
             return { taint::make_call( lift ), op };
 
         std::vector< sc::value > args;
@@ -230,20 +240,21 @@ namespace lart
         // should be used instead. That are arguments of already
         // abstracted users of concrete variant of the operation.
         if ( auto args = places.find( concrete ); args != places.end() ) {
-            for ( auto &place : args->second )
-                place.abstract.set( abs );
-            places.erase(args);
-        }
-    }
+            for ( auto &place : args->second ) {
+                std::visit( util::overloaded {
+                    [&] (ir::arg::with_taint arg) {
+                        arg.abstract.set( abs );
 
-    sc::generator< ir::arg::tuple > paired_view( llvm::PHINode * taint, llvm::PHINode *concrete, llvm::PHINode *abstract )
-    {
-        for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i ) {
-            co_yield {
-                taint->getOperandUse(i),
-                concrete->getOperandUse(i),
-                abstract->getOperandUse(i)
-            };
+                    },
+                    [&] (ir::arg::without_taint_abstract arg) {
+                        arg.abstract.set( abs );
+                    },
+                    [] (ir::arg::without_taint_concrete /* arg */) {
+                        spdlog::error("placing abstract value to concrete argument");
+                    }
+                }, place);
+            }
+            places.erase(args);
         }
     }
 
@@ -288,10 +299,18 @@ namespace lart
 
         auto intr = make_intrinsic( lifter( module, o, shadows ) );
 
-        if ( op::returns_value(o) ) {
+        if ( std::holds_alternative< op::unstash_taint >( o ) ) {
+            spdlog::debug("[shadow] set unstash shadow {} for {}"
+                , sc::fmt::llvm_to_string(intr.call)
+                , sc::fmt::llvm_to_string( op::value(o) )
+            );
+            shadows.ops[ op::value( o ) ] = intr.call;
+        }
+
+        // update places of abstract values, i.e., skip taint returning operations
+        if ( op::returns_value(o) && !std::holds_alternative< op::unstash_taint >( o ) ) {
             auto concrete = op::value(o);
             abstract[concrete] = intr.call;
-
             update_places( concrete );
             propagate_identity( concrete );
         }
@@ -300,12 +319,21 @@ namespace lart
             // Update placeholders of this instruction. If the abstract
             // instruction does not exist yet, store the placeholder
             // to quickly find it when abstract value is generated later.
-            for ( auto arg : taint::paired_view( intr ) ) {
-                auto &con = arg.concrete;
-                if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
-                    arg.abstract.set( abs->second );
-                else
+
+            auto set_or_store_place = [&] (auto &con, auto &place, auto arg) {
+                if ( auto abs = abstract.find( con.get() ); abs != abstract.end() ) {
+                    place.set( abs->second );
+                } else {
                     places[con].push_back( arg );
+                }
+            };
+
+            for ( auto paired_arg : taint::paired_view( intr ) ) {
+                std::visit( util::overloaded{
+                    [&] (ir::arg::with_taint arg) { set_or_store_place(arg.concrete, arg.abstract, arg); },
+                    [&] (ir::arg::without_taint_abstract arg) { set_or_store_place(arg.concrete, arg.abstract, arg); },
+                    [] (ir::arg::without_taint_concrete /* arg */) { /* nothing to update */ }
+                }, paired_arg);
             }
         }
 
