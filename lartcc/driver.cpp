@@ -60,17 +60,24 @@ namespace lart
             }
         }
 
-        // TODO: propagate shadow from/to calls
+        std::vector< ir::intrinsic > intrinsics;
+
+        shadow_map shadows( module, types );
+        syntactic syn( module, types, shadows );
+
+        // generate unstash before shadow pass to use unstashed values as shadows
+        for ( const auto &op : syn.unstash_toprocess() ) {
+            if ( auto intr = syn.process( op ) ) {
+                intrinsics.push_back( intr.value() );
+            }
+        }
 
         // generate shodows
-        shadow_map shadows( module, types );
         for (const auto &op : shadows.toprocess()) {
             shadows.process(op);
         }
 
         // syntactic pass
-        std::vector< ir::intrinsic > intrinsics;
-        syntactic syn( module, types, shadows );
         for ( const auto &op : syn.toprocess() ) {
             if ( auto intr = syn.process( op ) ) {
                 intrinsics.push_back( intr.value() );
@@ -78,6 +85,7 @@ namespace lart
         }
 
         // 6. release ?
+        // create/destroy frames
 
         // 7. interrupts ?
 
@@ -86,6 +94,7 @@ namespace lart
         for ( auto intr : intrinsics ) {
             backend.lower( intr );
         }
+
         spdlog::info("lartcc finished");
         return llvm::PreservedAnalyses::none();
     }

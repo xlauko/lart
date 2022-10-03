@@ -37,6 +37,7 @@ namespace lart::backend
         virtual void lower_test_taint( ir::intrinsic ) = 0;
 
         virtual void lower( callinst c, op::unstash u ) = 0;
+        virtual void lower( callinst c, op::unstash_taint u ) = 0;
         virtual void lower( callinst c, op::stash s ) = 0;
     };
 

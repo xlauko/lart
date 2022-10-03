@@ -31,6 +31,10 @@ namespace lart
                 return "store";
             case shadow_op_kind::load:
                 return "load";
+            case shadow_op_kind::arg:
+                return "argument";
+            case shadow_op_kind::ret:
+                return "return";
         }
 
         __builtin_unreachable();
@@ -48,6 +52,8 @@ namespace lart
             if ( fn->hasName() && fn->getName().startswith("__lamp" ) ) {
                 return shadow_op_kind::source;
             }
+        } else if ( llvm::isa< llvm::Argument >(val) ) {
+            return shadow_op_kind::arg;
         }
         return shadow_op_kind::forward;
     }
@@ -90,6 +96,10 @@ namespace lart
                     return process_store(o);
                 case shadow_op_kind::load:
                     return process_load(o);
+                case shadow_op_kind::arg:
+                    return process_argument(o);
+                case shadow_op_kind::ret:
+                    return process_return(o);
             }
 
             __builtin_unreachable();
@@ -107,8 +117,9 @@ namespace lart
         return llvm::cast< sc::instruction >(value);
     }
 
-    sc::value shadow_map::process_source( shadow_operation /* op */ ) {
-        return sc::i1( true );
+    sc::value shadow_map::process_source( shadow_operation op ) {
+        // is filled in syntactic pass
+        return ops[op.value];
     }
 
     sc::value shadow_map::process_memory( shadow_operation op ) {
@@ -156,6 +167,16 @@ namespace lart
 
         std::move(bld) | sc::action::store( process(val), process(ptr) );
         return nullptr; // store does not return any value
+    }
+
+    sc::value shadow_map::process_argument( shadow_operation /* op */ ) {
+        // is filled in syntactic pass
+        return sc::i1( false );
+    }
+
+    sc::value shadow_map::process_return( shadow_operation /* op */ ) {
+        // is filled in syntactic pass
+        return sc::i1( false );
     }
 
     sc::value shadow_map::get( sc::value op ) const {

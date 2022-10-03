@@ -38,27 +38,6 @@ namespace lart::taint
             }
         }
 
-        sc::generator< unsigned > paired_indices( const ir::intrinsic &intr )
-        {
-            auto op = intr.op;
-            // skip lifter argument
-            unsigned pos = op::with_taints(op) ? 1 : 0;
-
-            for ( auto arg : op::arguments(op) ) {
-                switch ( arg.type ) {
-                case op::argtype::abstract:
-                case op::argtype::lift:
-                    co_yield pos;
-                    pos += 3;
-                    break;
-                case op::argtype::test:
-                case op::argtype::concrete:
-                    pos += 1;
-                    break;
-                }
-            }
-        }
-
     } // namespace detail
 
     llvm::CallInst * make_call( const lifter &lift )
@@ -70,15 +49,40 @@ namespace lart::taint
         return op::make_call( lift.op, args, detail::name( lift.op ) );
     }
 
-    sc::generator< ir::arg::tuple > paired_view( const ir::intrinsic &test )
+    sc::generator< ir::argument > paired_view( const ir::intrinsic &intr )
     {
-        auto call = test.call;
-        for ( auto i : detail::paired_indices( test ) ) {
-            co_yield {
-                call->getOperandUse(i),
-                call->getOperandUse(i + 1),
-                call->getOperandUse(i + 2)
-            };
+        auto call = intr.call;
+
+        auto op = intr.op;
+        // skip lifter argument
+        unsigned pos = op::emit_test_taint(op) ? 1 : 0;
+
+        for ( auto arg : op::arguments(op) ) {
+            switch ( arg.type ) {
+            case op::argtype::abstract:
+                co_yield ir::arg::without_taint_abstract{
+                    call->getOperandUse(pos),
+                    call->getOperandUse(pos + 1)
+                };
+                pos += 2;
+                break;
+            case op::argtype::with_taint:
+                co_yield ir::arg::with_taint{
+                    call->getOperandUse(pos),
+                    call->getOperandUse(pos + 1),
+                    call->getOperandUse(pos + 2),
+                };
+                pos += 3;
+                break;
+            case op::argtype::test:
+                // TODO ??
+            case op::argtype::concrete:
+                co_yield ir::arg::without_taint_concrete{
+                    call->getOperandUse(pos),
+                };
+                pos += 1;
+                break;
+            }
         }
     }
 

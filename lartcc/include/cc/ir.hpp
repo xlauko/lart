@@ -34,13 +34,27 @@ namespace lart::ir
 
     namespace arg
     {
-        struct tuple
+        struct with_taint
         {
             llvm::Use &taint;
             llvm::Use &concrete;
             llvm::Use &abstract;
         };
+
+        struct without_taint_concrete
+        {
+            llvm::Use &value;
+        };
+
+        struct without_taint_abstract
+        {
+            llvm::Use &concrete;
+            llvm::Use &abstract;
+        };
+
     } // namespace arg
+
+    using argument = std::variant< arg::with_taint, arg::without_taint_concrete, arg::without_taint_abstract >;
 
     namespace detail
     {

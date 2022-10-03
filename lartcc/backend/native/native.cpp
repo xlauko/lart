@@ -42,7 +42,7 @@ namespace lart::backend
 
         for ( auto arg : op::arguments( i.op ) ) {
             switch (arg.type) {
-                case op::argtype::lift: {
+                case op::argtype::with_taint: {
                     auto taint    = fn->getArg(pos);
                     auto concrete = fn->getArg(pos + 1);
                     auto abstract = fn->getArg(pos + 2);
@@ -112,11 +112,17 @@ namespace lart::backend
         call->setCalledFunction( unstash_fn );
     }
 
+    void native::lower( callinst call, op::unstash_taint )
+    {
+        call->setCalledFunction( unstash_taint_fn );
+    }
+
     void native::lower( callinst call, op::stash )
     {
-        auto abstract = call->getArgOperand( 1 );
+        auto taint    = call->getArgOperand( 0 );
+        auto abstract = call->getArgOperand( 2 );
         auto bld = sc::builder_t( call );
-        bld.call( stash_fn, { abstract } );
+        bld.call( stash_fn, { taint, abstract } );
         call->eraseFromParent();
     }
 
