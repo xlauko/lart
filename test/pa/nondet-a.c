@@ -8,5 +8,5 @@ int main()
 {
     int *val = (int*)malloc(4);
     int *ptr = (int*)__lamp_any_ptr();
-    ASSERT(ptr != val); // CHECK: assertion `ptr != val' failed
+    ASSERT(ptr != val); // CHECK: assertion ptr != val failed
 }
