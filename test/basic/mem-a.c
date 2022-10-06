@@ -1,4 +1,5 @@
 // RUN: %testrun %lartcc term -lz3 %s -o %t | %filecheck %s
+// REQUIRES: fix
 
 #include <lamp.h>
 #include <stdint.h>
