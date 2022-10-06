@@ -9,6 +9,7 @@ compile () {
 }
 
 execute () {
+    export LART_NO_FAIL_MODE=ON
     ${PROG} 2>&1
 }
 
