@@ -126,9 +126,6 @@ namespace __lart::rt
                 symbol = symbol.substr(from + 1, to - from - 1);
             }
 
-            if (symbol.starts_with("dfs$"))
-                symbol.remove_prefix(sizeof("dfs$") - 1);
-
             return symbol.empty() ? "unknown" : symbol;
         }
     };
@@ -138,7 +135,9 @@ namespace __lart::rt
     [[noreturn]] void fault( const fault_event &event ) noexcept
     {
         handler.handle(event);
-        std::exit(EXIT_FAILURE);
+        if ( config->no_fail_mode )
+            std::exit( EXIT_SUCCESS );
+        std::exit( EXIT_FAILURE );
     }
 
     static void handle_abort(int) noexcept
