@@ -18,6 +18,35 @@
                 "VCPKG_OVERLAY_PORTS": "${sourceDir}/ports",
                 "LLVM_INSTALL_DIR": "$env{LLVM_INSTALL_DIR}"
             }
+        },
+        {
+            "name": "ninja-devcontainer",
+            "displayName": "Ninja Multi-Config devcontainer",
+            "binaryDir": "${sourceDir}/builds/${presetName}",
+            "generator": "Ninja Multi-Config",
+            "inherits": "ninja-multi-default",
+            "environment": {
+                "VCPKG_ROOT": "/usr/local/vcpkg",
+                "Z3_DIR": "/usr/opt/z3-4.11.2-x64-glibc-2.31/",
+                "LLVM_INSTALL_DIR": "/usr/lib/llvm-13/"
+            }
+        },
+        {
+            "name": "ninja-surveyor",
+            "displayName": "Ninja Config for surveyor",
+            "binaryDir": "${sourceDir}/builds/${presetName}",
+            "generator": "Ninja",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "environment": {
+                "VCPKG_ROOT": "/usr/local/vcpkg",
+                "Z3_DIR": "/usr/opt/z3-4.11.2-x64-glibc-2.31/",
+                "LLVM_INSTALL_DIR": "/usr/lib/llvm-13/"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "VCPKG_OVERLAY_PORTS": "${sourceDir}/ports",
+                "LLVM_INSTALL_DIR": "$env{LLVM_INSTALL_DIR}"
+            }
         }
     ],
     "buildPresets": [
@@ -38,13 +67,31 @@
             "configurePreset": "ninja-multi-default",
             "displayName": "Build ninja-multi-deb",
             "configuration": "Debug"
+        },
+        {
+            "name": "ninja-rel-devcontainer",
+            "configurePreset": "ninja-devcontainer",
+            "displayName": "Build ninja-multi-rel-devcontainer",
+            "configuration": "Release"
+        }
+        ,
+        {
+            "name": "ninja-rel-with-deb-devcontainer",
+            "configurePreset": "ninja-devcontainer",
+            "displayName": "Build ninja-multi-rel-with-deb-devcontainer",
+            "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "ninja-deb-devcontainer",
+            "configurePreset": "ninja-devcontainer",
+            "displayName": "Build ninja-multi-deb-devcontainer",
+            "configuration": "Debug"
         }
     ],
     "testPresets": [
         {
             "name": "test-base",
             "hidden": true,
-            "configurePreset": "ninja-multi-default",
             "output": {
               "outputOnFailure": true,
               "verbosity": "default"
@@ -68,6 +115,22 @@
         {
             "name": "ninja-deb", "inherits": "default",
             "displayName": "Test ninja-deb",
+            "configuration": "Debug"
+        },
+        {
+            "name": "devcontainer",
+            "hidden": true,
+            "configurePreset": "ninja-devcontainer",
+            "inherits": "test-base"
+        },
+        {
+            "name": "ninja-rel-devcontainer", "inherits": "devcontainer",
+            "displayName": "Test ninja-rel-devcontainer",
+            "configuration": "Release"
+        },
+        {
+            "name": "ninja-deb-devcontainer", "inherits": "devcontainer",
+            "displayName": "Test ninja-deb-devcontainer",
             "configuration": "Debug"
         }
     ]
