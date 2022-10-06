@@ -3,6 +3,7 @@
 
 #include <lamp.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include "utils.h"
 
@@ -12,6 +13,6 @@ int main() {
 
     y = 0;
 
-    ASSERT( y == 0 );
-    ASSERT( x != y ); // CHECK: assertion x != y failed
+    assert( y == 0 );
+    assert( x != y ); // CHECK: assertion x != y failed
 }

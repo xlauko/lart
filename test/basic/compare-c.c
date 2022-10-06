@@ -3,6 +3,7 @@
 
 #include <lamp.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include "utils.h"
 
@@ -10,5 +11,5 @@ int foo() { return 0; }
 
 int main() {
     uint64_t x = __lamp_any_i64();
-    ASSERT( x != foo() ); // CHECK: assertion x != foo() failed
+    assert( x != foo() ); // CHECK: assertion x != foo() failed
 }

@@ -4,6 +4,7 @@
 #include <lamp.h>
 #include "utils.h"
 
+#include <assert.h>
 #include <stdbool.h>
 
 int main()
@@ -12,5 +13,5 @@ int main()
     bool b = __lamp_any_i1();
     int test = (int)a == b;
     test += 1;
-    ASSERT( test == 2 ); // CHECK: assertion test == 2 failed
+    assert( test == 2 ); // CHECK: assertion test == 2 failed
 }
