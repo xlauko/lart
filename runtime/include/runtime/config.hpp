@@ -32,6 +32,8 @@ namespace __lart::rt
 
         bool error_found = false;
 
+        bool no_fail_mode = false;
+
         std::FILE *trace_file = nullptr;
     };
 

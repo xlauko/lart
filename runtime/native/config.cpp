@@ -30,7 +30,7 @@
 namespace __lart::rt
 {
     config_t *config = NULL;
-    
+
     bool option( std::string_view option, std::string_view msg )
     {
         auto is_set = [] ( auto opt ) { return opt && strcmp( opt, "ON" ) == 0; };
@@ -48,11 +48,13 @@ namespace __lart::rt
         config->ask_choices   = option( "LART_ASK_CHOICES", "ask choices" );
         config->choose_increasing = option( "LART_INC_CHOOSE", "increasing choices" );
 
+        config->no_fail_mode = option( "LART_NO_FAIL_MODE", "run in no fail mode (useful for testing)" );
+
         if ( auto opt = std::getenv( "LART_CHOOSE_BOUND" ); opt ) {
             fprintf( stderr, "[lart config] choose bound = %s\n", opt );
             config->choose_bound = std::atoi( opt );
         }
-        
+
         if ( auto opt = std::getenv( "LART_TRACE_FILE" ); opt ) {
             fprintf( stderr, "[lart config] trace file = %s\n", opt );
             config->trace_file = std::fopen( opt, "w" );
@@ -73,7 +75,7 @@ namespace __lart::rt
         if ( config->trace_file ) {
             std::fclose( config->trace_file );
         }
-        
+
         munmap( config, sizeof(config_t) );
     }
 
