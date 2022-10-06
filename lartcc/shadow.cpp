@@ -35,25 +35,29 @@ namespace lart
                 return "argument";
             case shadow_op_kind::ret:
                 return "return";
+            case shadow_op_kind::global:
+                return "global";
         }
 
         __builtin_unreachable();
     }
 
     shadow_op_kind operation_kind( sc::value val ) {
-        if ( llvm::isa< llvm::AllocaInst >(val) )
+        if ( llvm::isa< llvm::AllocaInst >(val) ) {
             return shadow_op_kind::memory;
-        else if ( llvm::isa< llvm::StoreInst >(val) )
+        } else if ( llvm::isa< llvm::StoreInst >(val) ) {
             return shadow_op_kind::store;
-        else if ( llvm::isa< llvm::LoadInst >(val) )
+        } else if ( llvm::isa< llvm::LoadInst >(val) ) {
             return shadow_op_kind::load;
-        else if ( auto call = llvm::dyn_cast< llvm::CallInst >(val) ) {
+        } else if ( auto call = llvm::dyn_cast< llvm::CallInst >(val) ) {
             auto fn = call->getCalledFunction();
             if ( fn->hasName() && fn->getName().startswith("__lamp" ) ) {
                 return shadow_op_kind::source;
             }
         } else if ( llvm::isa< llvm::Argument >(val) ) {
             return shadow_op_kind::arg;
+        } else if ( llvm::isa< llvm::GlobalVariable >(val) ) {
+            return shadow_op_kind::global;
         }
         return shadow_op_kind::forward;
     }
@@ -100,6 +104,8 @@ namespace lart
                     return process_argument(o);
                 case shadow_op_kind::ret:
                     return process_return(o);
+                case shadow_op_kind::global:
+                    return process_global(o);
             }
 
             __builtin_unreachable();
@@ -177,6 +183,16 @@ namespace lart
     sc::value shadow_map::process_return( shadow_operation /* op */ ) {
         // is filled in syntactic pass
         return sc::i1( false );
+    }
+
+    sc::value shadow_map::process_global( shadow_operation op ) {
+        auto glob = llvm::cast< llvm::GlobalVariable >( op.value );
+        auto name = glob->getName() + ".lart.taint";
+        return module.getOrInsertGlobal(name.str(), sc::i1(), [&] {
+            return new llvm::GlobalVariable(
+                module, sc::i1(), false, glob->getLinkage(), sc::i1(false), name
+            );
+        });
     }
 
     sc::value shadow_map::get( sc::value op ) const {
