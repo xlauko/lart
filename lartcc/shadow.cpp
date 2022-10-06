@@ -196,6 +196,9 @@ namespace lart
     }
 
     sc::value shadow_map::get( sc::value op ) const {
+        if ( !ops.count(op) ) {
+            return sc::i1(false);
+        }
         return ops.at(op);
     }
 
