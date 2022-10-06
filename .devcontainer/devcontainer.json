@@ -1,24 +1,26 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/cpp
 {
-	"name": "LART Developement",
+	"name": "C++",
+	// to run local build of devcontainer
+	"build": { "dockerfile": "./Dockerfile" },
+	"runArgs": ["--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"],
 
-	"context": "..",
-
-	"dockerFile": "./Dockerfile",
-
-	"settings": {
-		"terminal.integrated.shell.linux": "/bin/bash",
-		"cmake.cmakePath": "/usr/opt/cmake/bin/cmake"
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-vscode.cpptools",
+				"ms-vscode.cmake-tools"
+			]
+		}
 	},
 
-	"extensions": [
-		"ms-vscode.cpptools", // C++
-		"matepek.vscode-catch2-test-adapter", // Test explorer
-		"ms-vscode.cmake-tools" // CMake
-	],
-
-	"runArgs": [
-		"--cap-add=SYS_PTRACE",
-		"--security-opt",
-		"seccomp=unconfined"
-	]
+	"remoteUser": "vscode",
+	"features": {
+		"git": "os-provided",
+		"python": "os-provided"
+	}
 }
