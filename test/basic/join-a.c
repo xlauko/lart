@@ -1,7 +1,9 @@
 // RUN: %testrun %lartcc trivial %s -o %t | %filecheck %s
 // RUN: %testrun %lartcc unit %s -o %t | %filecheck %s
+// REQUIRES: fix
 
 #include <lamp.h>
+#include <stdint.h>
 #include <assert.h>
 #include "utils.h"
 
