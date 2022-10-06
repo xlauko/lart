@@ -18,7 +18,7 @@ void unreachable()
     do {                                                                      \
             if ( !( expr ) ) {                                                \
                     fprintf( stderr,                                          \
-                             "file %s: line %d (%s): assertion %s failed.", \
+                             "file %s: line %d (%s): assertion %s failed.\n", \
                              __FILE__,                                        \
                              __LINE__,                                        \
                              __PRETTY_FUNCTION__,                             \
