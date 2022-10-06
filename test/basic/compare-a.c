@@ -9,5 +9,5 @@
 int main() {
     uint64_t x = __lamp_any_i64();
     uint64_t y = 0;
-    ASSERT( x != y ); // CHECK: assertion `x != y' failed
+    ASSERT( x != y ); // CHECK: assertion x != y failed
 }

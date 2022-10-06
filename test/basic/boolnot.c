@@ -5,12 +5,11 @@
 #include "utils.h"
 
 #include <stdbool.h>
-#include <assert.h>
 
 int main()
 {
     bool a = __lamp_any_i1();
     bool b = !a;
 
-    assert( a == b ); // CHECK: assertion a == b failed
+    ASSERT( a == b ); // CHECK: assertion a == b failed
 }

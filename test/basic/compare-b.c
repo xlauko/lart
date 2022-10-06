@@ -13,5 +13,5 @@ int main() {
     y = 0;
 
     ASSERT( y == 0 );
-    ASSERT( x != y ); // CHECK: assertion `x != y' failed
+    ASSERT( x != y ); // CHECK: assertion x != y failed
 }
