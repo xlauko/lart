@@ -1,13 +1,15 @@
-// RUN: %testrun %lartcc unit %s -o %t | %filecheck %s
+// RUN: %testrun %lartcc term -lz3 %s -o %t | %filecheck %s
 
 #include <lamp.h>
 #include "utils.h"
 
 void fn(int i, int j) {
-    if (i)
+    if (i) {
         REACHABLE
-    if (j)
+    }
+    if (j) {
         REACHABLE
+    }
 }
 
 int main() {
