@@ -9,5 +9,5 @@ int arr[] = {1, 2, 3};
 
 int main() {
     int * ptr = (int*)__lamp_any_ptr();
-    ASSERT(ptr != arr); // CHECK: assertion ptr != val failed
+    assert(ptr != arr); // CHECK: assertion ptr != val failed
 }
