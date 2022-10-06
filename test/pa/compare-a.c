@@ -1,4 +1,5 @@
 // RUN: %testrun %lartcc pa -lz3 %s -o %t | %filecheck %s
+// REQUIRES: pa
 
 #include <lamp-pointers.h>
 #include <assert.h>
@@ -10,6 +11,6 @@ int main()
     int *p = (int*)__lamp_lift_objid( arr );
     int *a = p;
     int *b = p + 1;
-    assert( a != b ); 
+    assert( a != b );
     REACHABLE // CHECK: lart-reachable
 }
