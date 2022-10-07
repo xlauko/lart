@@ -74,6 +74,11 @@ namespace __lart::rt
             out << "[lart fault] assertion " << event.report << " failed at: "
                 << event.location << "\n";
 
+            if ( config->trace_file ) {
+                file_stream trc( config->trace_file );
+                trc << "assertion failed\n";
+            }
+
             config->error_found = true;
             if ( config->backtrace ) {
                 print_backtrace(out);
