@@ -90,7 +90,7 @@ namespace lart
         // 7. interrupts ?
 
         // TODO pick backend based on cmd arguments
-        auto backend = lart::backend::native( module, shadows );
+        auto backend = lart::backend::native( module );
         for ( auto intr : intrinsics ) {
             backend.lower( intr );
         }

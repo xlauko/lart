@@ -29,7 +29,7 @@ namespace lart::backend
 {
     struct native : base
     {
-        native( llvm::Module &m, const shadow_map &s ) : module( m ), shadows(s)
+        native( llvm::Module &m ) : module( m )
         {
             auto getfunction = [&] ( auto name, auto fty ) {
                 return llvm::cast< llvm::Function >(
@@ -74,7 +74,5 @@ namespace lart::backend
         llvm::Function *dump_fn;
 
         llvm::Module &module;
-
-        const shadow_map &shadows;
     };
 }

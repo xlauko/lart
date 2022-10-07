@@ -132,7 +132,7 @@ namespace lart
         return as_inst( sc::stack_builder( as_inst( op.value ) )
             | sc::action::alloc( sc::i1() )
             | sc::action::keep_stack()
-            | sc::action::store( sc::i1( false ), {} )
+            | sc::action::store{ sc::i1( false ), {} }
             | sc::action::last()
         );
     }
@@ -144,10 +144,10 @@ namespace lart
 
         auto inst = as_inst( op.value );
         auto bld = sc::stack_builder( inst )
-            | sc::action::push( process(inst->getOperand(0)) );
+            | sc::action::push{ process(inst->getOperand(0)) };
 
         for (unsigned i = 1; i < inst->getNumOperands(); i++) {
-            bld = std::move(bld) | sc::action::or_( {}, process(inst->getOperand(i)) );
+            bld = std::move(bld) | sc::action::or_{ {}, process(inst->getOperand(i)) };
         }
 
         return bld.back();
@@ -171,7 +171,7 @@ namespace lart
         auto val = store->getValueOperand();
         auto ptr = store->getPointerOperand();
 
-        std::move(bld) | sc::action::store( process(val), process(ptr) );
+        std::move(bld) | sc::action::store{ process(val), process(ptr) };
         return nullptr; // store does not return any value
     }
 

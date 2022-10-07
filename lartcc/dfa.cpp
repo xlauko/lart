@@ -50,7 +50,7 @@ namespace lart::dfa::detail
 
     void dataflow_analysis::push( edge &&e ) noexcept
     {
-        spdlog::debug( "[dfa] push {}", e );
+        // spdlog::debug( "[dfa] push {}", e );
         worklist.push( e );
     }
 
@@ -70,7 +70,7 @@ namespace lart::dfa::detail
     {
         auto e = worklist.front();
         worklist.pop();
-        spdlog::debug( "[dfa] pop {}", e );
+        // spdlog::debug( "[dfa] pop {}", e );
         return e;
     }
 
@@ -282,7 +282,7 @@ namespace lart::dfa::detail
             }
         } ();
 
-        spdlog::debug( "[dfa] {} v {} = {}", from, to, joined );
+        // spdlog::debug( "[dfa] {} v {} = {}", from, to, joined );
         push_change( e.to, joined );
     }
 
