@@ -52,7 +52,7 @@ namespace __lart::rt
         int status;
         pid_t done = wait(&status);
 
-        check_terminate( status ); 
+        check_terminate( status );
         return choose( count - 1 );
     }
 
@@ -74,7 +74,7 @@ namespace __lart::rt
     {
         int result = 0;
         if ( config->ask_choices ) {
-            std::scanf( "%d", &result );
+            int ret = std::scanf( "%d", &result );
         // TODO: remove unnecessary condition
         } else if ( config->choose_increasing ) {
             result = fork_choose_inc( count );
