@@ -73,8 +73,7 @@
             "configurePreset": "ninja-devcontainer",
             "displayName": "Build ninja-multi-rel-devcontainer",
             "configuration": "Release"
-        }
-        ,
+        },
         {
             "name": "ninja-rel-with-deb-devcontainer",
             "configurePreset": "ninja-devcontainer",

@@ -11,7 +11,7 @@ function( enable_sanitizers project_name )
 
     set(SANITIZERS "")
 
-    option(ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" ON)
+    option(ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" OFF)
     if(ENABLE_SANITIZER_ADDRESS)
       list(APPEND SANITIZERS "address")
     endif()
@@ -22,7 +22,7 @@ function( enable_sanitizers project_name )
     endif()
 
     option(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR
-           "Enable undefined behavior sanitizer" ON)
+           "Enable undefined behavior sanitizer" OFF)
     if(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR)
       list(APPEND SANITIZERS "undefined")
     endif()
