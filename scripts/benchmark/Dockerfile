@@ -51,4 +51,5 @@ RUN cmake --preset ninja-surveyor \
 
 RUN cmake --build ./builds/ninja-surveyor
 
-ENV PATH="/usr/src/lart/scripts/benchmark:/usr/src/lart/builds/surveyor/bin/:${PATH}"
+ENV PATH="/usr/src/lart/scripts/benchmark:${PATH}"
+ENV PATH="/usr/src/lart/builds/ninja-surveyor/lartcc:${PATH}"
