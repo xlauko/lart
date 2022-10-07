@@ -283,7 +283,7 @@ namespace __lamp
     template< typename domain, typename value_t >
     struct keyvalue
     {
-        keyvalue(std::string_view k, const value_t &v ) : key( k ), value( v ) {}
+        keyvalue( std::string_view k, const value_t &v ) : key( k ), value( v ) {}
         std::string_view key;
         const value_t &value;
 
@@ -305,6 +305,7 @@ namespace __lamp
         }
     };
 
+
     template< typename domain, typename outstream >
     struct json_stream : tracing_stream_base< domain >, outstream
     {
@@ -317,6 +318,11 @@ namespace __lamp
         using traced_cast   = typename base::traced_cast;
         using traced_unary  = typename base::traced_unary;
         using traced_binary = typename base::traced_binary;
+
+        template< typename value_t >
+        static auto get_keyvalue( std::string_view key, const value_t &val ) {
+            return keyvalue< domain, value_t >( key, val );
+        }
 
         struct value_with_address
         {
@@ -331,9 +337,9 @@ namespace __lamp
             template< typename stream >
             friend stream& operator<<( stream &os, const value_with_address &v )
             {
-                return os << keyvalue( v.name, std::tuple(
-                    keyvalue( "value", v.value ),
-                    keyvalue( "addr", std::string_view( v.addr.data() ) )
+                return os << json_stream::get_keyvalue( v.name, std::tuple(
+                    json_stream::get_keyvalue( "value", v.value ),
+                    json_stream::get_keyvalue( "addr", std::string_view( v.addr.data() ) )
                 ));
             }
 
@@ -381,7 +387,7 @@ namespace __lamp
         json_stream& operator<<(const traced_result &r) noexcept
         {
             return self() << std::tuple(
-                keyvalue( "operation", r.op ),
+                get_keyvalue( "operation", r.op ),
                 value_with_address( "result", r.result )
             );
         }
@@ -389,28 +395,28 @@ namespace __lamp
         json_stream& operator<<(const traced_assume &a) noexcept
         {
             return self() << std::tuple(
-                keyvalue( "type", "assume"sv ),
+                get_keyvalue( "type", "assume"sv ),
                 value_with_address( "arg", a.arg ),
-                keyvalue( "expected", (a.expected ? "true" : "false") )
+                get_keyvalue( "expected", (a.expected ? "true" : "false") )
             );
         }
 
         json_stream& operator<<(const traced_cast &c) noexcept
         {
             return self() << std::tuple(
-                keyvalue( "operation", c.op ),
-                keyvalue( "type", "cast"sv ),
+                get_keyvalue( "operation", c.op ),
+                get_keyvalue( "type", "cast"sv ),
                 value_with_address( "result", c.result ),
                 value_with_address( "arg", c.arg ),
-                keyvalue( "bitwidth", c.bitwidth )
+                get_keyvalue( "bitwidth", c.bitwidth )
             );
         }
 
         json_stream& operator<<(const traced_unary &u) noexcept
         {
             return self() << std::tuple(
-                keyvalue( "operation", u.op ),
-                keyvalue( "type", "unary"sv ),
+                get_keyvalue( "operation", u.op ),
+                get_keyvalue( "type", "unary"sv ),
                 value_with_address( "result", u.result ),
                 value_with_address( "arg", u.arg )
             );;
@@ -419,8 +425,8 @@ namespace __lamp
         json_stream& operator<<(const traced_binary &b) noexcept
         {
             return self() << std::tuple(
-                keyvalue( "operation", b.op ),
-                keyvalue( "type", "binary"sv ),
+                get_keyvalue( "operation", b.op ),
+                get_keyvalue( "type", "binary"sv ),
                 value_with_address( "result", b.result ),
                 value_with_address( "left", b.left ),
                 value_with_address( "right", b.right )
