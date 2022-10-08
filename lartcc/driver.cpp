@@ -77,8 +77,26 @@ namespace lart
             shadows.process(op);
         }
 
+        std::set< sc::function > seen;
+
+        auto function = [&] (auto op) -> sc::function {
+            if ( auto inst = llvm::dyn_cast< llvm::Instruction >( op::value( op ) ) ) {
+                return sc::get_function(inst);
+            }
+
+            if ( auto arg = llvm::dyn_cast< llvm::Argument >( op::value( op ) ) ) {
+                return sc::get_function(arg);
+            }
+
+            return nullptr;
+        };
+
         // syntactic pass
         for ( const auto &op : syn.toprocess() ) {
+            if (auto fn = function(op)) {
+                seen.insert(fn);
+            }
+
             if ( auto intr = syn.process( op ) ) {
                 intrinsics.push_back( intr.value() );
             }
@@ -94,6 +112,12 @@ namespace lart
         for ( auto intr : intrinsics ) {
             backend.lower( intr );
         }
+
+        for (auto fn : seen) {
+            make_shadow_frame(fn);
+        }
+
+        module.getFunction("main")->dump();
 
         spdlog::info("lartcc finished");
         return llvm::PreservedAnalyses::none();

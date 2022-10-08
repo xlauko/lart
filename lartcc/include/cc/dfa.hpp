@@ -297,4 +297,9 @@ namespace detail
 
         detail::dataflow_analysis impl;
     };
+
+    bool is_abstract( const dfa::types::type &type );
+
+    bool is_abstract_pointer( const dfa::types::type &type );
+
 } // namespace lart::dfa
