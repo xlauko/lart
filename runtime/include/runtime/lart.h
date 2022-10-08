@@ -71,6 +71,9 @@ extern "C" {
 
     __lart_export bool __lart_test_taint( void* addr );
 
+    __lart_export void __lart_entry_frame();
+
+    __lart_export void __lart_exit_frame();
 
 #ifdef __cplusplus
 }

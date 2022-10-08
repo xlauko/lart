@@ -239,4 +239,15 @@ namespace lart
         return ops.at(op);
     }
 
+    void make_shadow_frame( sc::function fn ) {
+        auto entry_frame = fn->getParent()->getFunction( "__lart_entry_frame" );
+        auto exit_frame = fn->getParent()->getFunction( "__lart_exit_frame" );
+
+        sc::builder_t( fn->getEntryBlock().getFirstNonPHIOrDbgOrLifetime() ).CreateCall( entry_frame );
+
+        for ( auto ret : sc::query::filter_llvm< llvm::ReturnInst >( fn ) ) {
+            sc::builder_t( ret ).CreateCall( exit_frame );
+        }
+    }
+
 } // namespace lart
