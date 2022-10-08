@@ -58,6 +58,8 @@ namespace __lart::rt
     sc::generator< shadow_label_t > read_shadow_label(const void *addr, size_t size) {
         if (auto label = shadow.find(uintptr_t(addr)); label != shadow.end()) {
             co_yield label->second;
+        } else {
+            fprintf( stderr, "[lart fault] missing shadow\n" );
         }
     }
 
@@ -68,8 +70,17 @@ namespace __lart::rt
     sc::generator< shadow_label_info > peek( const void *addr )
     {
         for (auto label : read_shadow_label( addr, 1 )) {
-            co_yield get_shadow_label_info( label );
+            if ( !shadow_info.count(label) ) {
+                fprintf( stderr, "[lart fault] missing shadow info\n" );
+            } else {
+                co_yield get_shadow_label_info( label );
+            }
         }
+    }
+
+    bool test_taint( void *addr )
+    {
+        return shadow.find( uintptr_t(addr) ) != shadow.end();
     }
 
 } // namespace __lart::rt

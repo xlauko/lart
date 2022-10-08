@@ -13,9 +13,9 @@
             "generator": "Ninja Multi-Config",
             "inherits": "ninja-multi-default",
             "environment": {
-                "VCPKG_ROOT": "<TODO FILL USER SYSTEM PATH>",
-                "Z3_DIR": "<TODO FILL USER SYSTEM PATH>",
-                "LLVM_INSTALL_DIR": "<TODO FILL USER SYSTEM PATH>"
+                "VCPKG_ROOT": "/home/xlauko1/src/vcpkg",
+                "Z3_DIR": "/home/xlauko1/opt/z3",
+                "LLVM_INSTALL_DIR": "/usr/lib/llvm-13/"
             }
         }
     ],

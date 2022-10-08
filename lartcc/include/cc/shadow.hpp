@@ -28,7 +28,7 @@ namespace lart
     using operation = lart::op::operation;
 
     enum class shadow_op_kind {
-        source, memory, global, forward, store, load, arg, ret
+        source, memory, global, forward, store, load, freeze, melt, arg, ret
     };
 
     struct shadow_operation {
@@ -57,6 +57,10 @@ namespace lart
 
         sc::value process_store( shadow_operation op );
 
+        sc::value process_freeze( shadow_operation op );
+
+        sc::value process_melt( shadow_operation op );
+
         sc::value process_argument( shadow_operation op );
 
         sc::value process_return( shadow_operation op );
@@ -65,11 +69,15 @@ namespace lart
 
         sc::value get( sc::value op ) const;
 
+        std::optional< shadow_op_kind > operation_kind( sc::value val );
+
         // maps concrete value to shadow value
         std::unordered_map< sc::value, sc::value > ops;
 
         const dfa::types &types;
         sc::module_ref module;
     };
+
+    void make_shadow_frame(sc::function fn);
 
 } // namespace lart

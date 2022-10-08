@@ -69,7 +69,8 @@ extern "C" {
 
     __lart_export void __lart_cancel();
 
-    __lart_export void __lart_poke( void *addr, size_t bytes, void* value );
+    __lart_export bool __lart_test_taint( void* addr );
+
 
 #ifdef __cplusplus
 }

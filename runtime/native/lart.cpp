@@ -50,6 +50,11 @@ extern "C"
         std::exit( EXIT_SUCCESS );
     }
 
+    bool __lart_test_taint( void *addr )
+    {
+        return __lart::rt::test_taint( addr );
+    }
+
     void __assert_fail(const char *assertion, const char *file, unsigned int line, const char *func)
     {
         using fault_event = __lart::rt::fault_event;
