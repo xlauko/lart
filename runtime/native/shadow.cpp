@@ -22,6 +22,7 @@
 #include <cstdlib>
 
 #include <memory>
+#include <vector>
 #include <unordered_map>
 
 namespace __lart::rt
@@ -34,20 +35,62 @@ namespace __lart::rt
     // maps shadow identifier to user metadata
     std::unordered_map< shadow_label_t, shadow_label_info > shadow_info;
 
+    struct frame_t { std::vector< std::uintptr_t > addrs; };
+
+    std::vector< frame_t > frames;
+
+    std::unordered_map< std::uintptr_t, frame_t* > allocated;
+
+    frame_t& current_frame() { return frames.back(); }
+
+} // namespace __lart::rt
+
+extern "C" {
+    void __lart_setup_shadow();
+
+    void __lart_entry_frame()
+    {
+        __lart::rt::frames.push_back({});
+    }
+
+    void __lart_exit_frame()
+    {
+        for (auto addr : __lart::rt::current_frame().addrs) {
+            __lart::rt::shadow.erase(addr);
+            __lart::rt::allocated.erase(addr);
+        }
+        __lart::rt::frames.pop_back();
+    }
+
+}
+
+namespace __lart::rt {
+
+    [[gnu::constructor]] void setup_shadow() {
+        __lart_entry_frame(); // setup global frame
+    }
+
     shadow_label_t create_shadow_label(shadow_label_info info) {
         shadow_label_t label = shadow_info.size() + 1;
+
         shadow_info.emplace(label, info);
         return label;
     }
 
     void set_shadow_label(shadow_label_t label, void *addr, size_t size) {
         for (auto offset = 0; offset < size; ++offset) {
-            shadow[uintptr_t(addr) + offset] = label;
+            // TODO intervals
+            auto byte = uintptr_t(addr) + offset;
+            if (!allocated.count(byte)) {
+                current_frame().addrs.push_back(byte);
+                allocated[byte] = &current_frame();
+            }
+
+            shadow[byte] = label;
         }
     }
 
-    void poke(void *addr, size_t bytes, void *value)
-    {
+    void poke(void *addr, size_t bytes, void *value) {
         auto label = create_shadow_label(shadow_label_info{
             .value = value, .origin = addr, .bytes = bytes
         });
