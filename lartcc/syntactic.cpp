@@ -28,16 +28,6 @@
 
 namespace lart
 {
-    bool is_abstract( const dfa::types::type &type )
-    {
-        return static_cast< bool >( type.back().abstract );
-    }
-
-    bool is_abstract_pointer( const dfa::types::type &type )
-    {
-        return static_cast< bool >( type.back().pointer ) && is_abstract( type );
-    }
-
     bool is_lamp_call( llvm::CallBase *call )
     {
         if ( call->isIndirectCall() || !call->getCalledFunction() )
@@ -75,23 +65,23 @@ namespace lart
         std::optional< operation > result;
         sc::llvmcase( val,
             [&] ( llvm::AllocaInst * ) {
-                if ( is_abstract_pointer( types[val] ) )
+                if ( dfa::is_abstract_pointer( types[val] ) )
                     result = op::alloc{ val };
             },
             [&] ( llvm::LoadInst *load ) {
                 auto p = load->getPointerOperand();
-                if ( types.count(p) && is_abstract_pointer( types[p] ) )
+                if ( types.count(p) && dfa::is_abstract_pointer( types[p] ) )
                     result = op::load{ val };
-                else
+                else if ( dfa::is_abstract( types[load] ) )
                     result = op::melt{ val };
             },
             [&] ( llvm::StoreInst *store ) {
                 auto p = store->getPointerOperand();
                 auto v = store->getValueOperand();
 
-                if ( types.count(p) && is_abstract_pointer( types[p] ) ) {
+                if ( types.count(p) && dfa::is_abstract_pointer( types[p] ) ) {
                     result = op::store{ val };
-                } else if ( types.count(v) &&  is_abstract( types[v] ) ) {
+                } else if ( types.count(v) &&  dfa::is_abstract( types[v] ) ) {
                     result = op::freeze{ val };
                 }
             },

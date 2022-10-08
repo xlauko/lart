@@ -37,4 +37,6 @@ namespace __lart::rt
     void poke( void *addr, std::size_t bytes, void *value );
 
     sc::generator< shadow_label_info > peek( const void *addr );
+
+    bool test_taint( void *addr );
 }

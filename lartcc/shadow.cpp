@@ -31,6 +31,10 @@ namespace lart
                 return "store";
             case shadow_op_kind::load:
                 return "load";
+            case shadow_op_kind::freeze:
+                return "freeze";
+            case shadow_op_kind::melt:
+                return "melt";
             case shadow_op_kind::arg:
                 return "argument";
             case shadow_op_kind::ret:
@@ -42,13 +46,29 @@ namespace lart
         __builtin_unreachable();
     }
 
-    shadow_op_kind operation_kind( sc::value val ) {
+    std::optional< shadow_op_kind > shadow_map::operation_kind( sc::value val ) {
         if ( llvm::isa< llvm::AllocaInst >(val) ) {
             return shadow_op_kind::memory;
-        } else if ( llvm::isa< llvm::StoreInst >(val) ) {
-            return shadow_op_kind::store;
-        } else if ( llvm::isa< llvm::LoadInst >(val) ) {
-            return shadow_op_kind::load;
+        } else if ( auto store = llvm::dyn_cast< llvm::StoreInst >(val) ) {
+            auto p = store->getPointerOperand();
+            auto v = store->getValueOperand();
+
+            if ( types.count(p) ) {
+                return shadow_op_kind::store;
+            } else if ( types.count(v) && dfa::is_abstract( types[v] ) ) {
+                return shadow_op_kind::freeze;
+            } else {
+                return std::nullopt;
+            }
+        } else if ( auto load = llvm::dyn_cast< llvm::LoadInst >(val) ) {
+             auto p = load->getPointerOperand();
+            if ( types.count(p) && dfa::is_abstract_pointer( types[p] ) ) {
+                return shadow_op_kind::load;
+            } else if ( dfa::is_abstract( types[load] ) ) {
+                return shadow_op_kind::melt;
+            } else {
+                return std::nullopt;
+            }
         } else if ( auto call = llvm::dyn_cast< llvm::CallInst >(val) ) {
             auto fn = call->getCalledFunction();
             if ( fn->hasName() && fn->getName().startswith("__lamp" ) ) {
@@ -65,14 +85,16 @@ namespace lart
     sc::generator< shadow_operation > shadow_map::toprocess()
     {
         for ( auto &[val, type] : types ) {
-            co_yield { val, operation_kind(val) };
+            if ( dfa::is_abstract( type ) ) {
+                if ( auto kind = operation_kind(val) ) {
+                    co_yield { val, kind.value() };
+                }
+            }
         }
 
         for ( auto store : sc::query::filter_llvm< llvm::StoreInst >( module ) ) {
-            auto ptr = store->getPointerOperand();
-            // TODO deal with melt/store
-            if ( types.count(ptr) ) {
-                co_yield { store, shadow_op_kind::store };
+            if ( auto kind = operation_kind(store) ) {
+                co_yield { store, kind.value() };
             }
         }
     }
@@ -100,6 +122,10 @@ namespace lart
                     return process_store(o);
                 case shadow_op_kind::load:
                     return process_load(o);
+                case shadow_op_kind::freeze:
+                    return process_freeze(o);
+                case shadow_op_kind::melt:
+                    return process_melt(o);
                 case shadow_op_kind::arg:
                     return process_argument(o);
                 case shadow_op_kind::ret:
@@ -116,7 +142,10 @@ namespace lart
     }
 
     sc::value shadow_map::process( sc::value op ) {
-        return process({op, operation_kind(op)});
+        if (auto kind = operation_kind(op)) {
+            return process({ op, kind.value() });
+        }
+        return sc::i1( false );
     }
 
     static sc::instruction* as_inst( sc::value value ) {
@@ -153,18 +182,26 @@ namespace lart
         return bld.back();
     }
 
-    sc::value shadow_map::process_load( shadow_operation op ) {
+    sc::value shadow_map::process_store( shadow_operation /* op */ ) {
+        // TODO
+        return nullptr; // store does not return any value
+    }
+
+    sc::value shadow_map::process_load( shadow_operation /* op */ ) {
+        // TODO
+        return sc::i1( false );
+    }
+
+    sc::value shadow_map::process_melt( shadow_operation op ) {
         auto load = llvm::cast< llvm::LoadInst >( op.value );
-        auto bld = sc::stack_builder( load );
-
-        auto ptr = load->getPointerOperand();
-
-        return std::move(bld)
-            | sc::action::load_ptr( sc::i1(), process(ptr) )
+        auto test = module.getFunction( "__lart_test_taint" );
+        // TODO size?
+        return sc::stack_builder( load )
+            | sc::action::call( test, { load->getPointerOperand() } )
             | sc::action::last();
     }
 
-    sc::value shadow_map::process_store( shadow_operation op ) {
+    sc::value shadow_map::process_freeze( shadow_operation op ) {
         auto store = llvm::cast< llvm::StoreInst >( op.value );
 
         auto bld = sc::stack_builder( store );

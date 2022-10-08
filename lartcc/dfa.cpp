@@ -30,6 +30,20 @@
 
 #include <llvm/IR/IntrinsicInst.h>
 
+namespace lart::dfa {
+
+    bool is_abstract( const dfa::types::type &type )
+    {
+        return static_cast< bool >( type.back().abstract );
+    }
+
+    bool is_abstract_pointer( const dfa::types::type &type )
+    {
+        return static_cast< bool >( type.back().pointer ) && is_abstract( type );
+    }
+
+} // namespace lart::dfa
+
 namespace lart::dfa::detail
 {
     bool ignore_function( llvm::Function *fn )
