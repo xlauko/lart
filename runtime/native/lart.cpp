@@ -55,16 +55,6 @@ extern "C"
         return __lart::rt::test_taint( addr );
     }
 
-    void __lart_entry_frame()
-    {
-        fprintf( stderr, "entry frame\n" );
-    }
-
-    void __lart_exit_frame()
-    {
-        fprintf( stderr, "exit frame\n" );
-    }
-
     void __assert_fail(const char *assertion, const char *file, unsigned int line, const char *func)
     {
         using fault_event = __lart::rt::fault_event;
