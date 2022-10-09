@@ -36,4 +36,3 @@ int main() {
         ERROR: {reach_error();abort();}
     }
 }
-

@@ -166,8 +166,13 @@ namespace lart
                 co_yield op.value();
             }
         }
+<<<<<<< HEAD
 
         for ( auto store : sc::query::filter_llvm< llvm::StoreInst >( module ) ) {
+=======
+
+        for ( auto store : sv::filter< llvm::StoreInst >( module ) ) {
+>>>>>>> 0226cdb9b8cf15db8bc725cdf780d5460a5db8f2
             if ( is_abstract( store->getPointerOperand() ) )
                 if ( auto op = make_operation(store); op.has_value() )
                     co_yield op.value();
@@ -267,6 +272,12 @@ namespace lart
         }
     }
 
+    sc::generator< ir::arg::paired > paired_view( llvm::PHINode *concrete, llvm::PHINode *abstract )
+    {
+        for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i )
+            co_yield { concrete->getOperandUse(i), abstract->getOperandUse(i) };
+    }
+
     std::optional< ir::intrinsic > syntactic::process( operation o )
     {
         spdlog::debug( "[syntactic] process {}", op::name(o) );
@@ -281,6 +292,7 @@ namespace lart
 
         // TODO join with taint processing
         if ( std::holds_alternative< op::phi >( o ) ) {
+<<<<<<< HEAD
             // auto concrete = llvm::cast< llvm::PHINode >( op::value(o) );
             // llvm::IRBuilder<> irb( op::location(o) );
             // auto aptr = op::abstract_pointer();
@@ -302,15 +314,42 @@ namespace lart
 
             // update_places( concrete );
             // propagate_identity( concrete );
+=======
+            auto concrete = llvm::cast< llvm::PHINode >( op::value(o) );
+            llvm::IRBuilder<> irb( op::location(o) );
+            auto aptr = op::abstract_pointer();
+
+            auto phi = irb.CreatePHI( aptr->getType(), concrete->getNumIncomingValues() );
+            for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i ) {
+                phi->addIncoming( aptr, concrete->getIncomingBlock( i ) );
+            }
+
+            abstract[concrete] = phi;
+
+            for ( auto &arg : paired_view( concrete, phi ) ) {
+                auto &con = arg.concrete;
+                if ( auto abs = abstract.find( con.get() ); abs != abstract.end() )
+                    arg.abstract.set( abs->second );
+                else
+                    places[con].push_back( arg );
+            }
+
+            update_places( concrete );
+            propagate_identity( concrete );
+>>>>>>> 0226cdb9b8cf15db8bc725cdf780d5460a5db8f2
 
             return std::nullopt;
         }
 
+<<<<<<< HEAD
         auto intr = make_intrinsic( lifter( module, o, shadows ) );
 
         if ( std::holds_alternative< op::unstash_taint >( o ) ) {
             shadows.ops[ op::value( o ) ] = intr.call;
         }
+=======
+        auto intr = make_intrinsic( module, o );
+>>>>>>> 0226cdb9b8cf15db8bc725cdf780d5460a5db8f2
 
         // update places of abstract values, i.e., skip taint returning operations
         if ( op::returns_value(o) && !std::holds_alternative< op::unstash_taint >( o ) ) {

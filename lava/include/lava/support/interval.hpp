@@ -315,10 +315,6 @@ namespace sup
             : low( b ), high( b )
         {}
 
-        explicit constexpr interval( bool b )
-            : low( b ), high( b )
-        {}
-
         constexpr interval() = default;
 
         constexpr size_t size() const
