@@ -1,5 +1,4 @@
 include( ${PROJECT_SOURCE_DIR}/cmake/project_settings.cmake )
-include(/home/xmisenko/opt/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
 add_library( lart_project_options INTERFACE )
 target_compile_features( lart_project_options INTERFACE cxx_std_20 )
