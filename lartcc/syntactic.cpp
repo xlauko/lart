@@ -259,12 +259,6 @@ namespace lart
         }
     }
 
-    sc::generator< ir::arg::paired > paired_view( llvm::PHINode *concrete, llvm::PHINode *abstract )
-    {
-        for ( unsigned i = 0; i < concrete->getNumIncomingValues(); ++i )
-            co_yield { concrete->getOperandUse(i), abstract->getOperandUse(i) };
-    }
-
     std::optional< ir::intrinsic > syntactic::process( operation o )
     {
         spdlog::debug( "[syntactic] process {}", op::name(o) );
