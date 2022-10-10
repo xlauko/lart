@@ -1,5 +1,4 @@
 // RUN: %testrun %lartcc term -lz3 %s -o %t | %filecheck %s
-// REQUIRES: fix
 
 #include <lamp.h>
 #include <stdint.h>
@@ -18,5 +17,5 @@ int main() {
     a = &x;
     int r = plus(a);
     assert( x == r );
-    REACHABLE // CHECK-COUNT: lart-reachable
+    REACHABLE // CHECK-COUNT-1: lart-reachable
 }
