@@ -88,8 +88,8 @@ namespace lart::runtime
         }
 
         sc::function register_lift(const std::string &name, sc::type from) {
-            auto fty = llvm::FunctionType::get( abstract_type(), { from }, false );
-            return insert_lamp_operation("lift_" + name, fty);
+            auto fty = llvm::FunctionType::get( from, { from }, false );
+            return insert_and_annotate_operation("lift_" + name, fty);
         }
 
         sc::function register_wrap(const std::string &name, sc::type from) {
