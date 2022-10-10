@@ -64,7 +64,7 @@ namespace lart
              auto p = load->getPointerOperand();
             if ( types.count(p) && dfa::is_abstract_pointer( types[p] ) ) {
                 return shadow_op_kind::load;
-            } else if ( dfa::is_abstract( types[load] ) ) {
+            } else if ( types.count(load) && dfa::is_abstract( types[load] ) ) {
                 return shadow_op_kind::melt;
             } else {
                 return std::nullopt;
