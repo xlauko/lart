@@ -28,29 +28,30 @@
 
 namespace lart
 {
+    namespace detail {
+        bool is_call_with_prefix( const std::string &prefix, llvm::CallBase *call ) {
+            if ( call->isIndirectCall() || !call->getCalledFunction() )
+                return false;
+            if ( !call->getCalledFunction()->hasName() )
+                return false;
+            return call->getCalledFunction()->getName().startswith( prefix );
+        }
+    } // namespace detail
+
     bool is_lamp_call( llvm::CallBase *call )
     {
-        if ( call->isIndirectCall() || !call->getCalledFunction() )
-            return false;
-        if ( !call->getCalledFunction()->hasName() )
-            return false;
-        return call->getCalledFunction()->getName().startswith( "__lamp" );
+        return detail::is_call_with_prefix( "__lamp_", call );
+    }
+
+    bool is_lart_call( llvm::CallBase *call )
+    {
+        return detail::is_call_with_prefix( "__lart_", call ) ||
+               detail::is_call_with_prefix( "lart.", call );
     }
 
     bool is_dump_call( llvm::CallBase *call )
     {
-        if ( !call->getCalledFunction()->hasName() )
-            return false;
-        return call->getCalledFunction()->getName() == "__lamp_dump";
-    }
-
-    bool is_testtaint( llvm::CallBase *call )
-    {
-        if ( call->isIndirectCall() || !call->getCalledFunction() )
-            return false;
-        if ( !call->getCalledFunction()->hasName() )
-            return false;
-        return call->getCalledFunction()->getName().startswith( "lart.test.taint" );
+        return detail::is_call_with_prefix( "__lamp_dump", call );
     }
 
     bool is_identity_cast( sc::value inst )
@@ -184,7 +185,7 @@ namespace lart
         };
 
         for ( auto call : sc::query::filter_llvm< llvm::CallInst >( module ) ) {
-            if ( !is_testtaint(call) && !is_lamp_call(call) ) {
+            if ( !is_lart_call(call) && !is_lamp_call(call) ) {
                 // TODO stash only possibly abstract arguments
                 if ( has_abstract_arg(call) ) {
                     for (auto &arg : call->arg_operands())
