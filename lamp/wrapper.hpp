@@ -287,9 +287,9 @@ extern "C"
     }
 } // extern "C"
 
-    std::string __lamp_trace( bool *taint, void *concrete, void * /* abstract */ )
+    std::string __lamp_trace( void *concrete )
     {
-        if ( *taint ) {
+        if ( __lart_test_taint( concrete ) ) {
             auto abstract = lamp::detail::melt( concrete, 0 );
             ref value( abstract.ptr );
             return dom::trace( value );
@@ -300,9 +300,9 @@ extern "C"
 
 extern "C" {
 
-    void __lamp_unpacked_dump( bool *taint, void *concrete, void *abstract )
+    void __lamp_dump( void *concrete )
     {
-        std::fprintf( stdout, "%s\n", __lamp_trace( taint, concrete, abstract ).c_str() );
+        std::fprintf( stdout, "%s\n", __lamp_trace( concrete ).c_str() );
     }
 
 } // extern "C"
