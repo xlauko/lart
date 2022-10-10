@@ -50,12 +50,19 @@ namespace lart::op
         abstract_pointer_default, concrete_value, concrete_argument_default
     >;
 
+    static inline llvm::Instruction* get_insertion_point( sc::value what ) {
+        if ( auto arg = llvm::dyn_cast< llvm::Argument >( what ) ) {
+            return arg->getParent()->getEntryBlock().getFirstNonPHIOrDbgOrLifetime();
+        }
+
+        return llvm::cast< llvm::Instruction >( what )->getNextNonDebugInstruction();
+    }
+
     template< bool _emit_test_taint >
     struct base
     {
         base( sc::value what )
-            : base( what, llvm::cast< llvm::Instruction >( what )
-                                ->getNextNonDebugInstruction() )
+            : base( what, get_insertion_point( what ) )
         {}
 
         base( sc::value what, llvm::Instruction *where )
@@ -100,32 +107,39 @@ namespace lart::op
 
     enum class argtype { test, with_taint, concrete, abstract, unpack };
 
+    static inline std::string to_string( argtype type ) {
+        switch (type) {
+            case argtype::test: return "test";
+            case argtype::with_taint: return "tainted";
+            case argtype::concrete: return "concrete";
+            case argtype::abstract: return "abstract";
+            case argtype::unpack: return "unpack";
+        }
+
+        llvm_unreachable( "unknown arg type" );
+    }
+
     struct argument
     {
         llvm::Value *value;
         argtype type;
-
-        template< typename stream >
-        friend auto operator<<( stream &s, argument a ) -> decltype( s << "" )
-        {
-            auto lift = [a] {
-                switch (a.type) {
-                    case argtype::test: return "test";
-                    case argtype::with_taint: return "taint";
-                    case argtype::concrete: return "concrete";
-                    case argtype::abstract: return "abstract";
-                    default: llvm_unreachable( "unknown arg type" );
-                }
-            } ();
-
-            return s << sc::fmt::llvm_name( a.value ) << ":" << lift;
-        }
 
         static inline constexpr bool is_abstract(const argument & arg)
         {
             return arg.type == argtype::abstract;
         }
     };
+
+    static inline std::string to_string( argument a ) {
+        return sc::fmt::llvm_name( a.value ) + ":" + to_string(a.type);
+    }
+
+    template< typename stream >
+    auto operator<<( stream &s, argument a ) -> decltype( s << "" )
+    {
+        return s << to_string( a );
+    }
+
 
     using args_t = std::vector< argument >;
 
@@ -400,16 +414,16 @@ namespace lart::op
         }
     };
 
-    struct dump : with_taints_base< false /* do not emit test taint */ >
+    struct dump : without_taints_base
     {
-        using base = with_taints_base< false >;
+        using base = without_taints_base;
         using base::base;
 
         std::string name() const { return "dump"; }
-        std::string impl() const { return  "__lamp_unpacked_dump"; }
+        std::string impl() const { return  "__lamp_dump"; }
         args_t arguments() const
         {
-            return {{ _what, argtype::unpack }};
+            return {{ _what, argtype::concrete }};
         }
 
         std::optional< default_wrapper > default_value() const

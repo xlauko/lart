@@ -108,9 +108,7 @@ namespace lart::runtime
             runtime.abstract_type(), runtime.bitwidth(), runtime.bitwidth()
         });
 
-        runtime.register_operation("unpacked_dump", sc::void_t(), {
-            sc::i1p(), sc::i8p(), runtime.abstract_type()
-        });
+        runtime.register_operation("dump", sc::void_t(), { sc::i8p() } );
 
         runtime.register_lart_api("unstash", sc::i8p(), {});
         runtime.register_lart_api("unstash_taint", sc::i1(), {});

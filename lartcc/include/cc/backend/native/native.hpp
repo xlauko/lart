@@ -50,8 +50,8 @@ namespace lart::backend
                 llvm::FunctionType::get( sc::i1(), {}, false )
             );
 
-            dump_fn = getfunction( "__lamp_unpacked_dump",
-                llvm::FunctionType::get( sc::void_t(), { sc::i1p(), sc::i8p(), sc::i8p() }, false )
+            dump_fn = getfunction( "__lamp_dump",
+                llvm::FunctionType::get( sc::void_t(), { sc::i8p() }, false )
             );
         }
 
