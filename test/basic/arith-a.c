@@ -12,7 +12,7 @@ int main() {
     int b = plus( a, 10 );
     assert( b == a + 10 );
 
-    int c = plus( 10,  a );
+    int c = plus( 10, a );
     assert( c == 10 + a );
 
     // CHECK-NOT: assertion {{.*}} failed
