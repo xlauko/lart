@@ -207,8 +207,9 @@ namespace lart
     ir::intrinsic make_intrinsic( const lifter &lift )
     {
         auto op = lift.op;
-        if ( op::emit_test_taint( op ) )
+        if ( op::emit_test_taint( op ) ) {
             return { taint::make_call( lift ), op };
+        }
 
         std::vector< sc::value > args;
         for (auto arg : op::duplicated_arguments(op, lift.shadows)) {
@@ -327,7 +328,7 @@ namespace lart
                 std::visit( util::overloaded{
                     [&] (ir::arg::with_taint arg) { set_or_store_place(arg.concrete, arg.abstract, arg); },
                     [&] (ir::arg::without_taint_abstract arg) { set_or_store_place(arg.concrete, arg.abstract, arg); },
-                    [] (ir::arg::without_taint_concrete /* arg */) { /* nothing to update */ }
+                    []  (ir::arg::without_taint_concrete /* arg */) { /* nothing to update */ }
                 }, paired_arg);
             }
         }
