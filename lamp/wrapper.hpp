@@ -305,22 +305,12 @@ extern "C"
             return "concrete";
         }
     }
-    /*
+
+    /* ORIGINAL MEMOIZE
     void __lamp_memoize( void *twin, unsigned int line )
     {
         if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-            auto *meta = __lart_peek( twin );
-            auto size = meta->bytes - lamp::detail::offset( meta, twin );
-            ref a( lamp::detail::melt( twin, size ).ptr );
-            return dom::memoize( a, twin, line ); // TODO size?
-        }
-        printf( "concrete memoize\n" );
-    }
-    */
-   void __lamp_memoize( void *twin, unsigned int line )
-    {
-        if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-            auto *meta = __lart_peek( twin );
+            auto *meta = __lart::rt::peek( twin );
             auto size = meta->bytes - lamp::detail::offset( meta, twin );
             ref a( lamp::detail::melt( twin, size ).ptr );
             if ( dom::memoize( a, twin, line ) ) { // TODO size?
@@ -339,7 +329,7 @@ extern "C"
         for ( int i = 0; i < count; i++ ) {
             void* twin = va_arg( args, void* );
             if ( twin && __lart_test_taint( *static_cast< uint8_t* >( twin ) ) ) {
-                auto *meta = __lart_peek( twin );
+                auto *meta = __lart::rt::peek( twin );
                 auto size = meta->bytes - lamp::detail::offset( meta, twin );
                 ref a( lamp::detail::melt( twin, size ).ptr );
                 twins.push_back( twin );
@@ -353,7 +343,6 @@ extern "C"
         printf( "concrete memoize_var\n" );
     }
 
-    /*
     void __lamp_memoize( unsigned int line, ... )
     {
         va_list args;
@@ -361,7 +350,6 @@ extern "C"
         return dom::memoize_var( line, args );
     }
     */
-}
 
 extern "C" {
 

@@ -243,11 +243,21 @@ namespace __lava
             fprintf( stderr, "[lamp warning]: unsupported bop %s\n", op );
         }
 
+        /*ORIGINAL MEMOIZE
         static bool memoize( sr, void*, unsigned int )
         {
             fprintf( stderr, "[lamp warning]: unsupported memoize \n" );
             return false;
         }
+
+        template< typename T, typename R >
+        static void memoize_var( unsigned int, T&, R& )
+        {
+            fprintf( stderr, "[lamp warning]: unsupported memoize_var \n" );
+        }
+        */
+
+
         /*
         template< typename... Args >
         static void memoize_var( unsigned int, Args... args )
@@ -256,11 +266,7 @@ namespace __lava
         }
         */
 
-        template< typename T, typename R >
-        static void memoize_var( unsigned int, T&, R& )
-        {
-            fprintf( stderr, "[lamp warning]: unsupported memoize_var \n" );
-        }
+
 
         // backward operations
         static void bop_not ( sr, sr ) { report( "not" ); }

@@ -79,21 +79,25 @@ namespace __lava
             backward_propagate( a );
         }
 
+        /* ORIGINAL MEMOIZE
         static bool memoize( sref v, void* twin, unsigned int line ) {
             //printf("in relational\n");
             return base::memoize( v, twin, line );
         }
+
+        template < typename T, typename R >
+        static void memoize_var( unsigned int line, T& twins, R& refs ) {
+            printf("in relational\n");
+            base::memoize_var( line, twins, refs );
+        }
+        */
+
         /*
         template< typename... Args >
         static void memoize_var( unsigned int line, Args&&... args ) {
             base::memoize_var( line, std::forward<Args>( args )... );
         }
         */
-        template < typename T, typename R >
-        static void memoize_var( unsigned int line, T& twins, R& refs ) {
-            printf("in relational\n");
-            base::memoize_var( line, twins, refs );
-        }
 
         //static void dump( sref v ) {
         //    base::dump( v );
