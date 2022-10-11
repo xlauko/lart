@@ -98,7 +98,6 @@ namespace __lava
         interval( tristate t )  : interval_storage( t ) {}
 
         interval( bool t )  : interval_storage( t ) {}
-
         interval clone() const {
             auto const &self = static_cast< const interval& > ( *this );
             return interval( self->low, self->high );
