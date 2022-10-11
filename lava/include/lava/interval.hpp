@@ -449,7 +449,7 @@ namespace __lava
         {
             return os << trace(i);
         }
-
+        /* ORIGINAL MEMOIZE
         static bool memoize( ir iref, void* twin, unsigned int line )
         {
             printf("Memoize (%s, %p, %u, %zu)\n", trace(iref).c_str(), twin, line, __interval_states->size);
@@ -487,6 +487,9 @@ namespace __lava
             printf("Exit (%s, %p, %u, %zu)\n\n", trace(iref).c_str(), twin, line, __interval_states->size);
             return false; // memoized
         }
+        */
+
+
 
         /*
         void memoize_var( unsigned int line ){

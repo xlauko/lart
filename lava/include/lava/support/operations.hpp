@@ -238,8 +238,10 @@ namespace __lava::op
     };
 
     static constexpr auto assume = []( const auto &a ) { return std::decay_t< decltype( a ) >::assume; };
+    /* ORIGINAL MEMOIZE
     static constexpr auto memoize = []( const auto &a ) { return std::decay_t< decltype( a ) >::memoize; };
     static constexpr auto memoize_var = []( const auto &a ) { return std::decay_t< decltype( a ) >::memoize_var; };
+    */
     //static constexpr auto dump = []( const auto &a ) { return std::decay_t< decltype( a ) >::dump; };
     static constexpr auto to_tristate = []( const auto &a ) { return std::decay_t< decltype( a ) >::to_tristate; };
 

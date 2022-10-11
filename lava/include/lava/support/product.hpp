@@ -260,6 +260,7 @@ namespace __lava
             op( a->second );
         }
 
+        /* ORIGINAL MEMOIZE
         static bool memoize( pr v, void* twin, unsigned int line )
         {
             //printf("in product\n");
@@ -269,14 +270,6 @@ namespace __lava
             //return op( v->second );
         }
 
-        /*
-        template< typename... Args >
-        static void memoize_var( unsigned int line, Args&&... args )
-        {
-            auto op = op::wrap( op::memoize_var, line, std::forward<Args>(args)... );
-        }
-        */
-
         template< typename T, typename R >
         static void memoize_var( unsigned int line, T& twins, R& refs )
         {
@@ -285,6 +278,15 @@ namespace __lava
             //op( v->first );
             //op( v->second );
         }
+        */
+
+        /*
+        template< typename... Args >
+        static void memoize_var( unsigned int line, Args&&... args )
+        {
+            auto op = op::wrap( op::memoize_var, line, std::forward<Args>(args)... );
+        }
+        */
 
         static void dump( pr a )
         {

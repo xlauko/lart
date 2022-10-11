@@ -63,7 +63,9 @@ namespace __lava
 
         static void assume( self &a, bool expected ) { domain::assume( value(a), expected ); }
 
+        /* ORIGINAL MEMOIZE
         static bool memoize( sref v, void *twin, unsigned int line ) { return domain::memoize( value(v), twin, line ); }
+        */
         /*
         template< typename... Args >
         static void memoize_var( unsigned int line, Args&&... args ) { domain::memoize_var( line, std::forward<Args>( args )... ); }

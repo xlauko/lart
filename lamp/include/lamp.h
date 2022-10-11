@@ -184,9 +184,10 @@ __lamp_ptr __lamp_extract( __lamp_ptr a, __lamp_bw s, __lamp_bw e );
 
 // void __lamp_dealloca( void *p, __lamp_i64 size );
 void __lamp_dump( void *twin );
+/* ORIGINAL MEMOIZE
 void __lamp_memoize( void *twin, unsigned int line );
 void __lamp_memoize_var( unsigned int line, unsigned int count, ... );
-
+*/
 #ifdef __cplusplus
 }
 #endif
@@ -329,9 +330,10 @@ void __lamp_stub()
 
     __lamp_dump( __lamp_null );
 
+    /*ORIGINAL MEMOIZE
     __lamp_memoize( __lamp_null, 0 );
     __lamp_memoize_var( 0, __lamp_null );
-
+    */
     #ifdef __cplusplus
     // __lamp_trace( __lamp_null );
     #endif
