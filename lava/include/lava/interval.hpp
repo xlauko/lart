@@ -236,13 +236,13 @@ namespace __lava
 
             // lower bound correction
             if ( diff_low > bound ( 0 ) && diff_low <= bound ( __interval_cfg->choose_bound ) ) {
-                auto i = __lart_choose( bound_type( diff_low + 1 ) );
+                auto i = __lart_choose( static_cast< int > ( bound_type( diff_low + 1 ) ) );
                 a->meet_low( a.low() + i );
                 b->meet_low( b.low() + diff_low - i );
             }
             // upper bound correction
             if ( diff_high > bound( 0 ) && diff_high <= bound( __interval_cfg->choose_bound ) ) {
-                auto i = __lart_choose( bound_type( diff_high + 1 ) );
+                auto i = __lart_choose( static_cast< int > ( bound_type( diff_high + 1 ) ) );
                 a->meet_high( a.high() - i );
                 b->meet_high( b.high() - diff_high + i );
             }
@@ -258,13 +258,13 @@ namespace __lava
 
             // lower bound correction
             if ( diff_low > bound ( 0 ) && diff_low <= bound ( __interval_cfg->choose_bound ) ) {
-                auto i = __lart_choose( bound_type( diff_low + 1 ) );
+                auto i = __lart_choose( static_cast< int > ( bound_type( diff_low + 1 ) ) );
                 a->meet_low( a.low() + i );
                 b->meet_high( b.high() - diff_low + i );
             }
             // upper bound correction
             if ( diff_high > bound( 0 ) && diff_high <= bound( __interval_cfg->choose_bound ) ) {
-                auto i = __lart_choose( bound_type( diff_high + 1 ) );
+                auto i = __lart_choose( static_cast< int > ( bound_type( diff_high + 1 ) ) );
                 a->meet_high( a.high() - i );
                 b->meet_low( b.low() + diff_high - i );
             }
@@ -290,7 +290,7 @@ namespace __lava
                 auto new_high = div_up( r.low(), b.low() );
                 auto new_low = div_up( r.low(), b.high() );
                 a->meet_low( new_low );
-                auto i = __lart_choose( int(bound_type( new_high - new_low + 1 )) );
+                auto i = __lart_choose( static_cast< int > ( bound_type( new_high - new_low + 1 ) ) );
                 a->meet_low( new_high - i );
                 b->meet_low( div_up( r.low(), ( new_high - i ) ) );
                 if ( a.is_bottom() || b.is_bottom() )
@@ -300,7 +300,7 @@ namespace __lava
             // upper bound correction
             if ( diff_high > bound( 0 ) && diff_high <= bound( __interval_cfg->choose_bound ) ) {
                 auto new_low = std::max( r.high() / b.high(), a.low() );
-                auto i = __lart_choose( int(bound_type( a.high() - new_low + 1 )) );
+                auto i = __lart_choose( static_cast< int > ( bound_type( a.high() - new_low + 1 ) ) );
                 a->meet_high( new_low + i );
                 b->meet_high( r.high() / ( new_low + i ) );
                 if ( a.is_bottom() || b.is_bottom() )
@@ -357,7 +357,7 @@ namespace __lava
             b.intersect( a.get() );
             auto interval_size = a.high() - a.low();
             if ( interval_size > bound( 0 ) && interval_size <= bound( __interval_cfg->choose_bound ) ) {
-                auto i = __lart_choose( bound_type( interval_size ) );
+                auto i = __lart_choose( static_cast< int > ( bound_type( interval_size ) ) );
                 a.intersect( { a.low() + i, a.low() + i } );
                 b.intersect( { b.low() + i, b.low() + i } );
             }
@@ -388,7 +388,7 @@ namespace __lava
             if ( intersection.empty() )
                 return;
 
-            int size = intersection.size();
+            int size = static_cast< int > ( intersection.size() );
             if ( __interval_cfg->choose_bound < static_cast< const bound >( size ) )
                 return;
 
@@ -427,7 +427,7 @@ namespace __lava
         static void bop_ult( ir r, ir a, ir b ) { bop_slt( r, a, b ); }
         static void bop_ule( ir r, ir a, ir b ) { bop_sle( r, a, b ); }
 
-        static void bop_zext( ir r, ir a ) { /* noop */ }
+        static void bop_zext( ir /*r*/, ir /*a*/ ) { /* noop */ }
 
         static void bop_zfit( ir r, ref a )
         {
@@ -520,6 +520,7 @@ namespace __lava
         }
         */
 
+        /*ORIGINAL MEMOIZE
         static void add_state( ir iref, void* twin, unsigned int line )
         {
             printf("Insert state (%s, %p, %u)\n", trace(iref).c_str(), twin, line);
@@ -548,8 +549,11 @@ namespace __lava
                 printf("\tState (%s, %p, %u)\n", trace(state.interval).c_str(), state.twin, state.line);
             }
         }
+
+    */
     };
 
+    /*
     [[gnu::constructor]] void interval_setup()
     {
         __interval_cfg = (interval_config_t*)mmap(NULL, sizeof(interval_config_t), PROT_READ |
@@ -573,4 +577,5 @@ namespace __lava
 
         //new ( __interval_state ) interval_state_t;
     }
+    */
 }
