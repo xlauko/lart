@@ -14,8 +14,8 @@ lartcc interval $file -o abstracted
 ./abstracted
 
 if [ -s $trace_file ]; then
-	echo  {\"result\": \"error\", \"error_description\": \"`cat $trace_file`\"} > /artefact/results.json
+	echo  {\"result\": \"error\", \"error_description\": \"`cat $trace_file`\"} | tee /artefact/results.json
 else
-	echo  {\"result\": \"no-error\"} > /artefact/results.json
+	echo  {\"result\": \"no-error\"} | tee /artefact/results.json
 fi
 
