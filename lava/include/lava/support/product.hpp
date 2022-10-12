@@ -288,7 +288,7 @@ namespace __lava
         }
         */
 
-        static void dump( pr a )
+        static void dump( pr /* a */ )
         {
             __builtin_unreachable();
             //auto op = op::wrap( op::dump );
