@@ -117,7 +117,6 @@ namespace lart
             make_shadow_frame(fn);
         }
 
-
         spdlog::info("lartcc finished");
         return llvm::PreservedAnalyses::none();
     }

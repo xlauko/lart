@@ -108,6 +108,16 @@ namespace lart::backend
         }
     }
 
+    void native::lower( callinst call, op::freeze )
+    {
+        auto abstract = call->getArgOperand( 2 );
+        auto addr = call->getArgOperand( 3 );
+        auto size = call->getArgOperand( 4 );
+        auto bld = sc::builder_t( call );
+        bld.call( freeze_fn, { abstract, addr, size } );
+        call->eraseFromParent();
+    }
+
     void native::lower( callinst call, op::unstash )
     {
         call->setCalledFunction( unstash_fn );

@@ -50,9 +50,9 @@ extern "C"
         std::exit( EXIT_SUCCESS );
     }
 
-    bool __lart_test_taint( void *addr )
+    bool __lart_test_taint( void *addr, size_t bytes )
     {
-        return __lart::rt::test_taint( addr );
+        return __lart::rt::test_taint( addr, bytes );
     }
 
     void __assert_fail(const char *assertion, const char *file, unsigned int line, const char *func)

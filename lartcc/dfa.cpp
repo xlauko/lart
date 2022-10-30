@@ -46,6 +46,10 @@ namespace lart::dfa {
 
 namespace lart::dfa::detail
 {
+    static auto unif_edge =  [] ( auto l, auto r ) { return edge{ l, r, edge::type::uniform }; };
+    static auto load_edge =  [] ( auto l, auto r ) { return edge{ l, r, edge::type::load }; };
+    static auto store_edge = [] ( auto l, auto r ) { return edge{ l, r, edge::type::store }; };
+
     bool ignore_function( llvm::Function *fn )
     {
         if ( fn->getName().startswith( "__lamp" ) )
@@ -168,11 +172,11 @@ namespace lart::dfa::detail
         };*/
 
         auto uses = [&] ( auto val ) {
-            // if ( auto s = llvm::dyn_cast< llvm::StoreInst >(val) ) {
-            //     for ( auto p : aliases.pointsto( s->getPointerOperand() ) ) {
-            //         push( store_edge( v, p ) );
-            //     }
-            // }
+            if ( auto s = llvm::dyn_cast< llvm::StoreInst >(val) ) {
+                for ( auto p : aliases.pointsto( s->getPointerOperand() ) ) {
+                    push( store_edge( v, p ) );
+                }
+            }
             /*if ( auto aml = dfg.gv_to_aml( node ) )
                 return query::query( aml->succs )
                     .filter( std::not_fn( in_abstractable_function ) )
@@ -190,12 +194,6 @@ namespace lart::dfa::detail
 
     edges_t dataflow_analysis::induced_edges( llvm::Value * lhs, llvm::Value * rhs )
     {
-        using type = edge::type;
-
-        auto unif_edge =  [] ( auto l, auto r ) { return edge{ l, r, type::uniform }; };
-        auto load_edge =  [] ( auto l, auto r ) { return edge{ l, r, type::load }; };
-        auto store_edge = [] ( auto l, auto r ) { return edge{ l, r, type::store }; };
-
         edges_t edges;
 
         auto push = [&] ( auto e ) { edges.push_back( e ); };
