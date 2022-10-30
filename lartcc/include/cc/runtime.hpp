@@ -48,7 +48,7 @@ namespace lart::runtime
         {}
 
         sc::type abstract_type() { return sc::i8p(); }
-        sc::type bitwidth() { return sc::i8(); }
+        sc::type bitwidth() { return sc::i64(); }
 
         std::vector< sc::type > args(std::size_t n) {
             return std::vector(n, abstract_type());

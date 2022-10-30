@@ -50,6 +50,10 @@ namespace lart::backend
                 llvm::FunctionType::get( sc::i1(), {}, false )
             );
 
+            freeze_fn = getfunction( "__lamp_freeze",
+                llvm::FunctionType::get( sc::void_t(), { sc::i8p(), sc::i8p(), sc::i64() }, false )
+            );
+
             dump_fn = getfunction( "__lamp_dump",
                 llvm::FunctionType::get( sc::void_t(), { sc::i8p() }, false )
             );
@@ -61,6 +65,7 @@ namespace lart::backend
 
         void lower_test_taint( ir::intrinsic ) override;
 
+        void lower( callinst c, op::freeze f ) override;
         void lower( callinst c, op::unstash u ) override;
         void lower( callinst c, op::unstash_taint u ) override;
         void lower( callinst c, op::stash s ) override;
@@ -71,6 +76,7 @@ namespace lart::backend
         llvm::Function *stash_fn;
         llvm::Function *unstash_fn;
         llvm::Function *unstash_taint_fn;
+        llvm::Function *freeze_fn;
         llvm::Function *dump_fn;
 
         llvm::Module &module;

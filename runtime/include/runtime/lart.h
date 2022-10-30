@@ -69,7 +69,7 @@ extern "C" {
 
     __lart_export void __lart_cancel();
 
-    __lart_export bool __lart_test_taint( void* addr );
+    __lart_export bool __lart_test_taint( void* addr, size_t bytes );
 
     __lart_export void __lart_entry_frame();
 

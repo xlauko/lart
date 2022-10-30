@@ -50,12 +50,20 @@ namespace lart
         if ( llvm::isa< llvm::AllocaInst >(val) ) {
             return shadow_op_kind::memory;
         } else if ( auto store = llvm::dyn_cast< llvm::StoreInst >(val) ) {
+            auto abstract_value = [&] (auto v) {
+                return types.count(v) && dfa::is_abstract( types[v] );
+            };
+
+            auto abstract_content = [&] (auto v) {
+                return types.count(v) && dfa::is_abstract( types[v].peel() );
+            };
+
             auto p = store->getPointerOperand();
             auto v = store->getValueOperand();
 
-            if ( types.count(p) ) {
+            if ( types.count(p) && dfa::is_abstract_pointer( types[p] ) ) {
                 return shadow_op_kind::store;
-            } else if ( types.count(v) && dfa::is_abstract( types[v] ) ) {
+            } else if (abstract_value(v) || abstract_content(p)) {
                 return shadow_op_kind::freeze;
             } else {
                 return std::nullopt;
@@ -195,20 +203,17 @@ namespace lart
     sc::value shadow_map::process_melt( shadow_operation op ) {
         auto load = llvm::cast< llvm::LoadInst >( op.value );
         auto test = module.getFunction( "__lart_test_taint" );
-        // TODO size?
+
+        auto ptr  = load->getPointerOperand();
+        auto elem = ptr->getType()->getPointerElementType();
+        auto dl   = sc::data_layout( load );
+
         return sc::stack_builder( load )
-            | sc::action::call( test, { load->getPointerOperand() } )
+            | sc::action::call( test, { load->getPointerOperand(), sc::i64( sc::bytes( elem, dl ) ) } )
             | sc::action::last();
     }
 
-    sc::value shadow_map::process_freeze( shadow_operation op ) {
-        auto store = llvm::cast< llvm::StoreInst >( op.value );
-
-        auto bld = sc::stack_builder( store );
-        auto val = store->getValueOperand();
-        auto ptr = store->getPointerOperand();
-
-        std::move(bld) | sc::action::store{ process(val), process(ptr) };
+    sc::value shadow_map::process_freeze( shadow_operation /* op */ ) {
         return nullptr; // store does not return any value
     }
 

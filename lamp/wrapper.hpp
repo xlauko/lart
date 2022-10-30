@@ -289,13 +289,19 @@ extern "C"
 
     std::string __lamp_trace( void *concrete )
     {
-        if ( __lart_test_taint( concrete ) ) {
+        if ( __lart_test_taint( concrete, 1 ) ) {
             auto abstract = lamp::detail::melt( concrete, 0 );
             ref value( abstract.ptr );
             return dom::trace( value );
         } else {
             return "concrete";
         }
+    }
+
+    std::string __lamp_value_trace( __lamp_ptr abstract )
+    {
+        ref value( abstract.ptr );
+        return dom::trace( value );
     }
 
 extern "C" {
@@ -305,6 +311,11 @@ extern "C" {
         std::fprintf( stdout, "%s\n", __lamp_trace( concrete ).c_str() );
     }
 
+    void __lamp_value_dump( __lamp_ptr abstract )
+    {
+        std::fprintf( stdout, "%s\n", __lamp_value_trace( abstract ).c_str() );
+    }
+
 } // extern "C"
 
 
@@ -312,22 +323,24 @@ extern "C" {
 
 namespace lamp::detail
 {
-    size_t offset( __lart::rt::shadow_label_info meta, void *addr )
-    {
-        return uintptr_t(addr) - uintptr_t(meta.origin);
-    }
-
     void freeze( __lamp_ptr val, void *addr, size_t bytes )
     {
+        // TODO if has value addr call destructor
         __lart::rt::poke( addr, bytes, val.ptr );
     }
 
     __lamp_ptr melt( void *addr, size_t bytes )
     {
-        for (auto meta : __lart::rt::peek( addr )) {
-            auto off = offset( meta, addr );
+        __lamp_ptr result = { nullptr };
 
-            if (off == 0) {
+        auto append_result = [&] (__lamp_ptr value) {
+            result = result.ptr ? __lamp_concat( value, result ) : value;
+        };
+
+        size_t offset = 0;
+        for (auto meta : __lart::rt::peek( addr, (bytes ? bytes : 1) )) {
+            if (meta.value) {
+                // abstract meta
                 if (meta.bytes == bytes || bytes == 0) {
                     // trivial case
                     return { meta.value };
@@ -338,13 +351,15 @@ namespace lamp::detail
                     return __lamp_trunc( { meta.value }, bw(bytes * 8) );
                 }
 
-                // todo concat multiple values
-                __builtin_unreachable();
+                offset += meta.bytes;
+                append_result( __lamp_ptr{ meta.value } );
+            } else {
+                // concrete meta
+                append_result( __lamp_wrap_i8( *(static_cast< i8* >(addr) + offset) ) );
+                offset += 1;
             }
-            // todo deal with concrete prefix
-            __builtin_unreachable();
         }
 
-        __builtin_unreachable();
+        return result;
     }
 } // namespace lamp::detail

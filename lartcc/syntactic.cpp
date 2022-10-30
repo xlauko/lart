@@ -77,12 +77,20 @@ namespace lart
                     result = op::melt{ val };
             },
             [&] ( llvm::StoreInst *store ) {
+                auto abstract_value = [&] (auto v) {
+                    return types.count(v) && dfa::is_abstract( types[v] );
+                };
+
+                auto abstract_content = [&] (auto v) {
+                    return types.count(v) && dfa::is_abstract( types[v].peel() );
+                };
+
                 auto p = store->getPointerOperand();
                 auto v = store->getValueOperand();
 
                 if ( types.count(p) && dfa::is_abstract_pointer( types[p] ) ) {
                     result = op::store{ val };
-                } else if ( types.count(v) &&  dfa::is_abstract( types[v] ) ) {
+                } else if (abstract_value(v) || abstract_content(p)) {
                     result = op::freeze{ val };
                 }
             },
@@ -216,7 +224,7 @@ namespace lart
         for (auto arg : op::duplicated_arguments(op, lift.shadows)) {
             args.push_back(arg);
         }
-        auto name = "lart." + op::name(op);
+        auto name = "lart." + op::name(op) + op::unique_name_suffix(op);
         return { op::make_call( op, args, name ), op };
     }
 

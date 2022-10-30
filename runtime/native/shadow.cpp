@@ -85,24 +85,25 @@ namespace __lart::rt {
                 current_frame().addrs.push_back(byte);
                 allocated[byte] = &current_frame();
             }
-
             shadow[byte] = label;
         }
     }
 
-    void poke(void *addr, size_t bytes, void *value) {
-        auto label = create_shadow_label(shadow_label_info{
-            .value = value, .origin = addr, .bytes = bytes
-        });
-        set_shadow_label( label, addr, bytes );
+    void erase_shadow(void *addr, size_t size) {
+        for (auto offset = 0; offset < size; ++offset) {
+            shadow.erase(uintptr_t(addr) + offset);
+        }
     }
 
-    // TODO use size
-    sc::generator< shadow_label_t > read_shadow_label(const void *addr, size_t size) {
-        if (auto label = shadow.find(uintptr_t(addr)); label != shadow.end()) {
-            co_yield label->second;
+    void poke(void *addr, size_t bytes, void *value) {
+        if (value) {
+            auto label = create_shadow_label(shadow_label_info{
+                .value = value, .origin = addr, .bytes = bytes
+            });
+            set_shadow_label( label, addr, bytes );
         } else {
-            fprintf( stderr, "[lart fault] missing shadow\n" );
+            // erase shadow when storing nullptr value
+            erase_shadow( addr, bytes );
         }
     }
 
@@ -110,20 +111,40 @@ namespace __lart::rt {
         return shadow_info[label];
     }
 
-    sc::generator< shadow_label_info > peek( const void *addr )
-    {
-        for (auto label : read_shadow_label( addr, 1 )) {
-            if ( !shadow_info.count(label) ) {
-                fprintf( stderr, "[lart fault] missing shadow info\n" );
+    sc::generator< shadow_label_t > read_shadow_label(const void *addr, size_t bytes) {
+        for (auto offset = 0; offset < bytes;) {
+            auto byte = uintptr_t(addr) + offset;
+            if (auto label = shadow.find(byte); label != shadow.end()) {
+                co_yield label->second;
+                offset += get_shadow_label_info( label->second ).bytes;
             } else {
-                co_yield get_shadow_label_info( label );
+                co_yield shadow_label_t{ 0 };
+                offset += 1;
             }
         }
     }
 
-    bool test_taint( void *addr )
+    sc::generator< shadow_label_info > peek(const void *addr, size_t bytes)
     {
-        return shadow.find( uintptr_t(addr) ) != shadow.end();
+        for (auto label : read_shadow_label( addr, bytes )) {
+            if ( label ) {
+                co_yield get_shadow_label_info( label );
+            } else {
+                co_yield shadow_label_info{ .value = nullptr, .origin = nullptr, .bytes = 1 };
+            }
+        }
+    }
+
+    bool test_taint(void *addr, size_t bytes)
+    {
+        // TODO use interval map
+        for (auto offset = 0; offset < bytes; ++offset) {
+            if (shadow.find( uintptr_t(addr) + offset ) != shadow.end()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 } // namespace __lart::rt

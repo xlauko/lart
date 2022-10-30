@@ -36,7 +36,7 @@ namespace __lart::rt
     // assigns value to shadow of memory range [addr, addr + bytes)
     void poke( void *addr, std::size_t bytes, void *value );
 
-    sc::generator< shadow_label_info > peek( const void *addr );
+    sc::generator< shadow_label_info > peek( const void *addr, size_t bytes );
 
-    bool test_taint( void *addr );
+    bool test_taint( void *addr, size_t bytes );
 }

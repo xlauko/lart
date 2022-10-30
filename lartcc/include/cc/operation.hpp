@@ -159,12 +159,12 @@ namespace lart::op
             return {
                 { load, argtype::test },
                 { ptr, argtype::concrete },
-                { sc::i32( sc::bytes( elem, dl ) ), argtype::concrete }
+                { sc::i64( sc::bytes( elem, dl ) ), argtype::concrete }
             };
         }
     };
 
-    struct freeze : with_test_taints_base
+    struct freeze : with_taints_base< false /* do not emit test taint */ >
     {
         std::string name() const { return "freeze"; }
         std::string impl() const { return "__lamp_freeze"; }
@@ -178,7 +178,7 @@ namespace lart::op
             return {
                 { store->getValueOperand(), argtype::with_taint },
                 { ptr, argtype::concrete },
-                { sc::i32( sc::bytes( elem, dl ) ), argtype::concrete }
+                { sc::i64( sc::bytes( elem, dl ) ), argtype::concrete }
             };
         }
 

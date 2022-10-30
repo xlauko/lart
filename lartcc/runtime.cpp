@@ -112,8 +112,13 @@ namespace lart::runtime
 
         runtime.register_lart_api("unstash", sc::i8p(), {});
         runtime.register_lart_api("unstash_taint", sc::i1(), {});
-        runtime.register_lart_api("stash", sc::void_t(), { sc::i1(), sc::i8p() });
-        runtime.register_lart_api("test_taint", sc::i1(), { sc::i8p() });
+        runtime.register_lart_api("stash", sc::void_t(), {
+            sc::i1(), runtime.abstract_type()
+        });
+
+        runtime.register_lart_api("test_taint", sc::i1(), {
+            sc::i8p(), runtime.bitwidth()
+        });
 
         runtime.register_lart_api("entry_frame", sc::void_t(), {});
         runtime.register_lart_api("exit_frame", sc::void_t(), {});
