@@ -178,6 +178,10 @@ namespace __lava
         }
         // static term op_zfit( tr t, bw ) { return {}; }
 
+        static term op_concat( tr a, tr b ) {
+            return z3::concat( a.get(), b.get() );
+        }
+
         static std::string trace( tr t )
         {
             return Z3_ast_to_string( __term_state->ctx, t.get() );
