@@ -9,7 +9,7 @@ trace_file="trace.out"
 export LART_NO_FAIL_MODE=ON
 export LART_TRACE_FILE=$trace_file
 
-lartcc interval $file -o abstracted
+lartcc term $file -lz3 -o abstracted
 
 ./abstracted 2>&1
 
