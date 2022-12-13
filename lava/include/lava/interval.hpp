@@ -56,7 +56,7 @@ namespace __lava
 
     interval_config_t *__interval_cfg;
     //interval_state_t *__interval_states_array;
-    interval_states_t *__interval_states;
+    //interval_states_t *__interval_states;
 
     template< template< typename > typename storage >
     struct interval : storage< interval_t >
@@ -552,16 +552,17 @@ namespace __lava
     */
     };
 
-    /*
+
     [[gnu::constructor]] void interval_setup()
     {
-        __interval_cfg = (interval_config_t*)mmap(NULL, sizeof(interval_config_t), PROT_READ |
-                                                PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        __interval_cfg = static_cast<interval_config_t*>(mmap(NULL, sizeof(interval_config_t), PROT_READ |
+                                                PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
 
         if ( auto opt = std::getenv( "INTERVAL_CHOOSE_BOUND" ); opt ) {
             fprintf( stderr, "[interval config] choose bound = %s\n", opt );
             __interval_cfg->choose_bound = std::atoi( opt );
         }
+        /*
         //Najprv nainicializujem informacie o vsetkych stavoch
         __interval_states = (interval_states_t*)mmap(NULL, sizeof(interval_states_t),
                                         PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
@@ -575,6 +576,6 @@ namespace __lava
                                         PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
         //new ( __interval_state ) interval_state_t;
+        */
     }
-    */
 }
