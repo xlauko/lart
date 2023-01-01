@@ -23,6 +23,9 @@
 
 namespace lart::backend
 {
+    using function_callee = llvm::FunctionCallee;
+    using args_t = std::vector< sc::value >;
+
     void native::lower_test_taint( ir::intrinsic i )
     {
         spdlog::debug("[native] lower {}", sc::fmt::llvm_to_string(i.call));
@@ -30,50 +33,53 @@ namespace lart::backend
         if ( !fn->empty() )
             return; // already synthesized
 
-        llvm::Value *tainted = sc::i1( false );
+        sc::value tainted = sc::i1( false );
 
         auto bld = sc::stack_builder()
             | sc::action::function{ fn }
             | sc::action::create_block{ "entry" };
 
-        std::vector< llvm::Value* > args;
-        // skip lifter argument
-        unsigned pos = 1;
+        args_t args;
 
-        for ( auto arg : op::arguments( i.op ) ) {
-            switch (arg.type) {
-                case op::argtype::unpack:
-                case op::argtype::with_taint: {
-                    auto taint    = fn->getArg(pos);
-                    auto concrete = fn->getArg(pos + 1);
-                    auto abstract = fn->getArg(pos + 2);
+        {
+            // skip lifter argument
+            unsigned pos = 1;
 
-                    bld = std::move(bld) | sc::action::or_{ tainted, taint };
-                    tainted = bld.stack.back();
+            for ( auto arg : op::arguments( i.op ) ) {
+                switch (arg.type) {
+                    case op::argtype::unpack:
+                    case op::argtype::with_taint: {
+                        auto taint    = fn->getArg(pos);
+                        auto concrete = fn->getArg(pos + 1);
+                        auto abstract = fn->getArg(pos + 2);
 
-                    args.push_back( taint );
-                    args.push_back( concrete );
-                    args.push_back( abstract );
-                    pos += 3;
-                    break;
-                }
-                case op::argtype::test: {
-                    auto taint = fn->getArg(pos);
-                    bld = std::move(bld) | sc::action::or_{ tainted, taint };
-                    tainted = bld.stack.back();
-                    pos += 1;
-                    break;
-                }
-                case op::argtype::concrete: {
-                    args.push_back( fn->getArg(pos) );
-                    pos += 1;
-                    break;
-                }
-                case op::argtype::abstract: {
-                    // skip concrete argument
-                    args.push_back( fn->getArg(pos + 1) );
-                    pos += 2;
-                    break;
+                        bld = std::move(bld) | sc::action::or_{ tainted, taint };
+                        tainted = bld.stack.back();
+
+                        args.push_back( taint );
+                        args.push_back( concrete );
+                        args.push_back( abstract );
+                        pos += 3;
+                        break;
+                    }
+                    case op::argtype::test: {
+                        auto taint = fn->getArg(pos);
+                        bld = std::move(bld) | sc::action::or_{ tainted, taint };
+                        tainted = bld.stack.back();
+                        pos += 1;
+                        break;
+                    }
+                    case op::argtype::concrete: {
+                        args.push_back( fn->getArg(pos) );
+                        pos += 1;
+                        break;
+                    }
+                    case op::argtype::abstract: {
+                        // skip concrete argument
+                        args.push_back( fn->getArg(pos + 1) );
+                        pos += 2;
+                        break;
+                    }
                 }
             }
         }
@@ -89,22 +95,83 @@ namespace lart::backend
         auto cbb = bld.block( concrete_block );
 
         auto fty = bld.function_type_from_value( fn->getArg(0) );
-        auto callee = llvm::FunctionCallee( fty, fn->getArg(0) );
+        auto callee = function_callee( fty, fn->getArg(0) );
 
         bld = std::move(bld)
             | sc::action::set_block{ "entry" }
             | sc::action::condbr( tainted, abb, cbb )
             /* abstract path */
             | sc::action::set_block{ abstract_block }
-            | sc::action::call( callee, args )
-            | sc::action::ret()
-            /* concrete path */
-            | sc::action::set_block{ concrete_block };
+            | sc::action::call( callee, args );
 
-        if ( auto def = op::default_value(i.op); def.has_value() ) {
-            std::move(bld) | sc::action::ret{ extract_default( def.value(), args ) };
+        auto lifter = bld.back();
+        auto def = op::default_value(i.op);
+        std::optional def_value = def.has_value()
+            ? std::optional(extract_default( def.value(), args ))
+            : std::nullopt;
+
+        if (op::faultable(i.op)) {
+            auto stash = function_callee(stash_fn);
+            auto rty = fn->getReturnType();
+
+            bld = std::move(bld)
+                | sc::action::call( stash, { sc::i1(true), lifter } )
+                | sc::action::ret{ llvm::Constant::getNullValue(rty) }
+                /* concrete path */
+                | sc::action::set_block{ concrete_block };
+
+            auto inst = llvm::cast< sc::instruction >( op::value(i.op) )->clone();
+
+            if (def_value.has_value()) {
+                bld = std::move(bld) | sc::action::call( stash, { sc::i1(false), def_value } );
+
+                inst->insertAfter( llvm::cast< sc::instruction >(bld.back()) );
+
+                unsigned int idx = 0;
+                unsigned int pos = 1;
+                for ( auto &arg : op::arguments( i.op ) ) {
+                    switch (arg.type) {
+                        case op::argtype::unpack:
+                        case op::argtype::with_taint: {
+                            auto concrete = fn->getArg(pos + 1);
+                            inst->setOperand(idx++, concrete);
+                            pos += 3;
+                            break;
+                        }
+                        case op::argtype::test: {
+                            pos += 1;
+                            break;
+                        }
+                        case op::argtype::concrete: {
+                            auto concrete = fn->getArg(pos);
+                            inst->setOperand(idx++, concrete);
+                            pos += 1;
+                            break;
+                        }
+                        case op::argtype::abstract: {
+                            auto concrete = fn->getArg(pos);
+                            inst->setOperand(idx++, concrete);
+                            pos += 2;
+                            break;
+                        }
+                    }
+                }
+
+                bld = std::move(bld) | sc::action::ret{ inst };
+            } else {
+                bld = std::move(bld) | sc::action::ret();
+            }
         } else {
-            std::move(bld) | sc::action::ret();
+            bld = std::move(bld)
+                | sc::action::ret()
+                /* concrete path */
+                | sc::action::set_block{ concrete_block };
+
+            if (def_value.has_value()) {
+                bld = std::move(bld) | sc::action::ret{ def_value };
+            } else {
+                bld = std::move(bld) | sc::action::ret();
+            }
         }
     }
 

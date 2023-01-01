@@ -46,7 +46,7 @@ namespace lart::taint
         for (auto arg : detail::arguments( lift )) {
             args.push_back(arg);
         }
-        return op::make_call( lift.op, args, detail::name( lift.op ) );
+        return op::make_call( lift.op, args, detail::name( lift.op ), true /* test taint */ );
     }
 
     sc::generator< ir::argument > paired_view( const ir::intrinsic &intr )

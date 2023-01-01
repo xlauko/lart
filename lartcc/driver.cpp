@@ -113,6 +113,12 @@ namespace lart
             backend.lower( intr );
         }
 
+        for ( auto intr : intrinsics ) {
+            if (op::faultable(intr.op)) {
+                llvm::cast< sc::instruction >(op::replaces(intr.op).value())->eraseFromParent();
+            }
+        }
+
         for (auto fn : seen) {
             make_shadow_frame(fn);
         }

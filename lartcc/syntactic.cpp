@@ -152,6 +152,13 @@ namespace lart
                 co_yield op::unstash_taint(call);
             }
         }
+
+        for (auto o : toprocess()) {
+            if ( op::returns_value(o) && op::faultable(o) ) {
+                co_yield op::unstash(op::value(o));
+                co_yield op::unstash_taint(op::value(o));
+            }
+        }
     }
 
     sc::generator< operation > syntactic::toprocess()
@@ -253,7 +260,6 @@ namespace lart
                 std::visit( util::overloaded {
                     [&] (ir::arg::with_taint arg) {
                         arg.abstract.set( abs );
-
                     },
                     [&] (ir::arg::without_taint_abstract arg) {
                         arg.abstract.set( abs );
@@ -313,11 +319,18 @@ namespace lart
         }
 
         // update places of abstract values, i.e., skip taint returning operations
-        if ( op::returns_value(o) && !std::holds_alternative< op::unstash_taint >( o ) ) {
+        if ( op::returns_value(o) && !std::holds_alternative< op::unstash_taint >( o ) && !op::faultable(o) ) {
             auto concrete = op::value(o);
             abstract[concrete] = intr.call;
             update_places( concrete );
             propagate_identity( concrete );
+        }
+
+        // link faultable value with pregenerated unstash taints
+        if ( op::returns_value(o) && op::faultable(o) ) {
+            auto original_concrete = op::value(o);
+            abstract[ intr.call ] = abstract[original_concrete];
+            shadows.ops[ intr.call ] = shadows.ops[original_concrete];
         }
 
         if ( op::with_taints( intr.op ) || op::with_abstract_arg( intr.op ) ) {

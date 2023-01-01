@@ -77,6 +77,8 @@ namespace lart::op
             return abstract_pointer_default();
         }
 
+        bool faultable() const { return false; }
+
         sc::value _what;
         llvm::Instruction *_where;
 
@@ -190,6 +192,22 @@ namespace lart::op
 
     struct binary : with_test_taints_base
     {
+        explicit binary( sc::value what )
+            : with_test_taints_base( what, get_insertion_point( what ) )
+        {
+            if (faultable()) {
+                replaces = what;
+            }
+        }
+
+        binary( sc::value what, llvm::Instruction *where )
+            : with_test_taints_base( what, where )
+        {
+            if (faultable()) {
+                replaces = what;
+            }
+        }
+
         std::string name() const
         {
             auto bin = llvm::cast< llvm::BinaryOperator >( _what );
@@ -204,6 +222,10 @@ namespace lart::op
                 { bin->getOperand( 0 ), argtype::with_taint },
                 { bin->getOperand( 1 ), argtype::with_taint },
             };
+        }
+
+        bool faultable() const {
+            return llvm::cast< llvm::BinaryOperator >( _what )->isIntDivRem();
         }
     };
 
@@ -451,6 +473,7 @@ namespace lart::op
     static auto name      = detail::invoke( [] (const auto &o) { return o.name(); } );
     static auto impl      = detail::invoke( [] (const auto &o) { return o.impl(); } );
     static auto arguments = detail::invoke( [] (const auto &o) { return o.arguments(); } );
+    static auto faultable = detail::invoke( [] (const auto &o) { return o.faultable(); } );
     static auto default_value = detail::invoke( [] (const auto &o) { return o.default_value(); } );
     static auto with_taints = detail::invoke( [] (const auto &o) { return o.with_taints(); } );
     static auto emit_test_taint = detail::invoke( [] (const auto &o) { return o.emit_test_taint(); } );
@@ -488,9 +511,17 @@ namespace lart::op
         return types[ idx ];
     }
 
-    inline auto extract_return_type( const operation &op, const std::vector< llvm::Type* > &types )
-        -> llvm::Type*
+    inline auto extract_return_type(
+          const operation &op
+        , const std::vector< sc::type > &types
+        , bool test_taint = false
+    )
+        -> sc::type
     {
+        if (test_taint && op::faultable(op)) {
+            return op::value(op)->getType();
+        }
+
         auto out = op::default_value(op);
         return out.has_value() ? extract_default( out.value(), types ) : sc::void_t();
     }
@@ -530,12 +561,13 @@ namespace lart::op
 
     inline llvm::CallInst* make_call( const operation &op
                                     , const std::vector< llvm::Value * > &args
-                                    , const std::string &intr_name )
+                                    , const std::string &intr_name
+                                    , bool test_taint = false )
     {
         llvm::IRBuilder<> irb( op::location(op) );
         auto mod = irb.GetInsertBlock()->getModule();
         auto arg_types = sc::query::types( args ).freeze();
-        auto rty = extract_return_type( op, arg_types );
+        auto rty = extract_return_type( op, arg_types, test_taint );
 
         spdlog::debug("[cc] make call: {} :: {} -> {}", intr_name, sc::fmt::llvm_to_string(arg_types), sc::fmt::llvm_to_string(rty));
         return irb.CreateCall( function(mod, rty, arg_types, intr_name), args );
