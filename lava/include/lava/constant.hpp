@@ -83,10 +83,14 @@ namespace __lava
             return callu( con->bw, lift, con->value );
         }
 
-        template< typename > static constant any()
+        template< typename type > static constant any()
         {
-            __builtin_unreachable();
-            // UNREACHABLE( "Constant domain does not provide 'any' operation" );
+            mixin::fail("unsupported any operation");
+        }
+
+        template< typename type > static constant any(type /* from */, type /* to */)
+        {
+            mixin::fail("unsupported range any operation");
         }
 
         template< bool signedness, typename F, typename... val_t  >

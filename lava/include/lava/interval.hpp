@@ -110,9 +110,16 @@ namespace __lava
             );
         }
 
-        template< typename type > static iv any()
+        template< typename type >
+        static iv any()
         {
             return { minus_infinity(), plus_infinity() };
+        }
+
+        template< typename type >
+        static iv any(type from, type to)
+        {
+            return { from, to };
         }
 
         void intersect( const interval_value &other )

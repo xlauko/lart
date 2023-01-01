@@ -73,6 +73,9 @@ namespace __lava
         template< typename type >
         static self any() { return base::template any< type >(); }
 
+        template< typename type >
+        static self any(type from, type to) { return base::any(from, to); }
+
         static void assume( self &a, bool expected )
         {
             base::assume( a, expected );

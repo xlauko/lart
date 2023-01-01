@@ -56,6 +56,9 @@ namespace __lava
         template< typename type > static scalar lift( type val ) { return { dom::lift( val ) }; }
         template< typename type > static scalar any() { return { dom::template any< type >() }; }
 
+        template< typename type >
+        static scalar any(type from, type to) { return { dom::any(from, to) }; }
+
         template< typename type > static scalar concat( type l, type r ) { return { dom::op_concat( l, r ) }; }
 
         static constexpr auto bv_div = _signed ? dom::op_sdiv : dom::op_udiv;

@@ -82,11 +82,17 @@ namespace __lava
 
         static expr lift( __lava::array_ref ) { mixin::fail("unsupported array lift"); }
 
-        template< typename T >
+        template< typename type >
         static expr any()
         {
-            constexpr auto op = smt_match_op< smt_op_var, T >;
+            constexpr auto op = smt_match_op< smt_op_var, type >;
             return { smt_atom_t< smt_varid_t >( op, counter() ) };
+        }
+
+        template< typename type >
+        static expr any(type from, type to)
+        {
+            mixin::fail("unsupported range any operation");
         }
 
         static ev cast( er arg, bw w, op o )

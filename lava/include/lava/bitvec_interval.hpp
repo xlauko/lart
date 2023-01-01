@@ -31,6 +31,7 @@ namespace __lava
 
         template< typename type > static bitvec_interval lift( const type& ) { return {}; }
         template< typename type > static bitvec_interval any() { return {}; }
+        template< typename type > static bitvec_interval any(type /* from */, type /* to */) { return {}; }
 
         template< typename size >
         static bitvec_interval op_alloca( const size&, uint8_t ) { return {}; }

@@ -105,6 +105,11 @@ namespace __lava
             __builtin_unreachable();
         }
 
+        template< typename type >
+        static term any(type from, type to) {
+            mixin:fail("unsupported range any"):
+        }
+
         static cvc::Term tobool( const cvc::Term &e )
         {
             assert( e.isBitVectorValue() );
