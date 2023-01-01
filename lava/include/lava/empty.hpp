@@ -40,6 +40,7 @@ namespace __lava
 
         template< typename type > static ev lift( const type& ) { return {}; }
         template< typename type > static ev any() { return {}; }
+        template< typename type > static ev any( type from, type to) { return {}; }
 
         static void assume( er, bool ) {}
 

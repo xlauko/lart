@@ -195,6 +195,12 @@ namespace __lava
 
         template< typename type > static floats any() { return { fl::top }; }
 
+        template< typename type >
+        static floats any(type /* from */, type /* to */)
+        {
+            mixin::fail("unsupported range any operation");
+        }
+
         fl::value_type  value() const { return this->get().value; }
         fl::value_type &value()       { return this->get().value; }
 

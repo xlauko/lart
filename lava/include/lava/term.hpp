@@ -110,6 +110,11 @@ namespace __lava
             __builtin_unreachable();
         }
 
+        template< typename type >
+        static term any(type /* from */, type /* to */) {
+            mixin::fail("unsupported range any operation");
+        }
+
         static z3::expr tobool( const z3::expr &e )
         {
             assert( e.is_bv() );

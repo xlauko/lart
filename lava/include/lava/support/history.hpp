@@ -60,6 +60,11 @@ namespace __lava
         template< typename type >
         static self any() { return domain::template any< type >(); }
 
+        template< typename type >
+        static self any(type from, type to) {
+            return domain::template any< type >(from, to);
+        }
+
         static void assume( self &a, bool expected ) { domain::assume( value(a), expected ); }
 
         static tristate to_tristate( sref a )

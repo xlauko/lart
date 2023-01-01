@@ -154,6 +154,11 @@ namespace __lava
             return { A::template any< type >(), B::template any< type >() };
         }
 
+        template< typename type > static pv any(type from, type to)
+        {
+            return { A::any(from, to), B::any(from, to) };
+        }
+
         // template< typename op_t >
         // static constant lower( op_t op, pr v )
         // {

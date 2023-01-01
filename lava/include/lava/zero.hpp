@@ -41,11 +41,17 @@ namespace __lava
             if constexpr ( std::is_integral_v< type > || std::is_pointer_v< type > )
                 return v ? ze::nonzero : ze::zero;
             else
-                mixin::fail( "null pointer dereference" );
+                mixin::fail( "unsupported type to lift to zero domain" );
             return ze::unknown;
         }
 
         template< typename type > static zero any() { return ze::unknown; }
+
+        template< typename type >
+        static zero any(type from, type to)
+        {
+            mixin::fail("unsupported range any operation");
+        }
 
         /* TODO: implement */
         template< typename size >

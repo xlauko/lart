@@ -59,16 +59,20 @@ namespace __lava
 
         using av = arithmetic;
         using ar = const arithmetic &;
-        
+
         using pv = pointer_arith;
         using pr = const pointer_arith &;
-        
+
         using ref = domain_ref< pv >;
         using aref = scalar_domain_ref< av >;
 
         using ptr = void*;
 
-        template< typename type > static pv any() { return mixin::fail(); }
+        template< typename type >
+        static pv any() { return mixin::fail(); }
+
+        template< typename type >
+        static pv any(type from, type to) { return mixin::fail(); }
 
         static pv lift( const constant< storage >& con )
         {
@@ -109,7 +113,7 @@ namespace __lava
 
             auto obj = abstract_objid( vp.obj );
             auto off = av::lift( uintptr_t( vp.off ) );
-            
+
             assume_add_no_overflow( obj, off );
             return { ptr, av::op_add( obj, off ) };
         }
@@ -121,10 +125,10 @@ namespace __lava
             if ( auto it = st->map.find( obj ); it != st->map.end() ) {
                 return it->second;
             }
-            
+
             auto abstract = av::template any< uintptr_t >();
             auto null     = av::lift( uintptr_t( 0 ) );
-            
+
             // ensure that abstract objid is unique and nonnull
             aref::assume( aref( abstract ) != aref( null ) );
             for ( auto &[key, val] : st->map )
