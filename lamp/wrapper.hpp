@@ -99,6 +99,13 @@ static arg_t lift( op_t op, arg_t arg, args_t... args )
 }
 
 template< typename dom, typename type >
+static auto any(type from, type to)
+{
+    __lart_stash( true, dom::template any(from, to).disown() );
+    return defualt_tainted_value< type >();
+}
+
+template< typename dom, typename type >
 static auto any()
 {
     __lart_stash( true, dom::template any< type >().disown() );
@@ -166,6 +173,11 @@ extern "C"
     i16   __lamp_any_i16()   { return any< dom, i16 >(); }
     i32   __lamp_any_i32()   { return any< dom, i32 >(); }
     i64   __lamp_any_i64()   { return any< dom, i64 >(); }
+
+    i8    __lamp_any_range_i8(i8 from, i8 to)      { return any< dom, i8  >(from, to); }
+    i16   __lamp_any_range_i16(i16 from, i16 to)   { return any< dom, i16 >(from, to); }
+    i32   __lamp_any_range_i32(i32 from, i32 to)   { return any< dom, i32 >(from, to); }
+    i64   __lamp_any_range_i64(i64 from, i64 to)   { return any< dom, i64 >(from, to); }
 
     f32   __lamp_any_f32()   { return any< dom, f32 >(); }
     f64   __lamp_any_f64()   { return any< dom, f64 >(); }
