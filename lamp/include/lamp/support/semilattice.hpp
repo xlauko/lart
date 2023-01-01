@@ -265,14 +265,17 @@ namespace __lamp
             return cast( [&]( const auto &v ) -> self { return v.clone(); }, *this );
         }
 
-        template< typename val_t >
-        static self lift( const val_t &val ) { return sl::scalar_lift_dom::lift( val ); }
+        template< typename type >
+        static self lift( const type &val ) { return sl::scalar_lift_dom::lift( val ); }
         static self lift( __lava::array_ref arr ) { return sl::array_lift_dom::lift( arr ); }
 
         // static constant lower( sref a ) { return cast( wrap( op::lower ), a ); }
 
-        template< typename val_t >
-        static self any() { return sl::scalar_any_dom::template any< val_t >(); }
+        template< typename type >
+        static self any() { return sl::scalar_any_dom::template any< type >(); }
+
+        template< typename type >
+        static self any(type from, type to) { return sl::scalar_any_dom::any(from, to); }
 
         static void assume( self &a, bool c ) { cast_void( wrap( op::assume, c ), a  ); }
         static tristate to_tristate( sref a )

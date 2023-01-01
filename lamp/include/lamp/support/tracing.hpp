@@ -137,11 +137,24 @@ namespace __lamp
 
         #define TRACE(...) trace(__FUNCTION__, __VA_ARGS__);
 
-        template< typename val_t >
-        static self lift( const val_t &val ) { return TRACE( domain::lift, val ); }
+        template< typename type >
+        static self lift( const type &val ) { return TRACE( domain::lift, val ); }
 
-        template< typename val_t >
-        static self any() { return TRACE( domain::template any< val_t > ); }
+        template< typename type >
+        static self any() {
+            auto s = stream();
+            auto res = domain::template any< type >();
+            s << traced_result( "any", res ) << "\n";
+            return res;
+        }
+
+        template< typename type >
+        static self any(type from, type to) {
+            auto s = stream();
+            auto res = domain::any(from, to);
+            s << traced_result( "any< range >", res ) << "\n";
+            return res;
+        }
 
         static void assume( self &a, bool expected ) { TRACE( domain::assume, a, expected ); }
 
