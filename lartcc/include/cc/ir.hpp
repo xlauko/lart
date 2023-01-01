@@ -43,7 +43,7 @@ namespace lart::ir
 
         struct without_taint_concrete
         {
-            llvm::Use &value;
+            llvm::Use &concrete;
         };
 
         struct without_taint_abstract

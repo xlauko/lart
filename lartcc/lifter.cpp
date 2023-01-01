@@ -39,7 +39,7 @@ namespace lart
 
         struct without_taint_concrete
         {
-            llvm::Value *value;
+            llvm::Value *concrete;
         };
 
         struct without_taint_abstract
@@ -83,7 +83,7 @@ namespace lart
         {
             return std::visit( util::overloaded {
                 [] ( arg::with_taint a ) { return a.abstract; },
-                [] ( arg::without_taint_concrete a ) { return a.value; },
+                [] ( arg::without_taint_concrete a ) { return a.concrete; },
                 [] ( arg::without_taint_abstract a ) { return a.abstract; }
             }, arg );
         };
@@ -128,7 +128,7 @@ namespace lart
 
         auto aptr = op::abstract_pointer()->getType();
 
-        std::vector< llvm::Type * > args;
+        std::vector< sc::type > args;
         for ( auto arg : op::arguments(op) ) {
             switch ( arg.type ) {
             case op::argtype::test:
@@ -228,7 +228,7 @@ namespace lart
 
         auto impl = module.getFunction( op::impl(op) );
         if (!impl) {
-            spdlog::error("missing: {}",op::impl(op));
+            spdlog::error("missing: {}", op::impl(op));
         }
 
         auto types = impl->getFunctionType()->params();
