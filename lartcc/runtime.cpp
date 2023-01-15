@@ -41,6 +41,10 @@ namespace lart::runtime
             runtime.register_any(name, to);
         });
 
+        register_for_primitives([&] (const auto &name, auto to) {
+            runtime.register_range_any(name, to);
+        });
+
         register_for_primitives([&] (const auto &name, auto from) {
             runtime.register_lift(name, from);
         });
