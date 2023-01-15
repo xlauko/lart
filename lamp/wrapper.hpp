@@ -99,6 +99,13 @@ static arg_t lift( op_t op, arg_t arg, args_t... args )
 }
 
 template< typename dom, typename type >
+static auto any(const variadic_list &args)
+{
+    __lart_stash( true, dom::template any< type >(args).disown() );
+    return defualt_tainted_value< type >();
+}
+
+template< typename dom, typename type >
 static auto any(type from, type to)
 {
     __lart_stash( true, dom::template any(from, to).disown() );
@@ -178,6 +185,40 @@ extern "C"
     i16   __lamp_any_range_i16(i16 from, i16 to)   { return any< dom, i16 >(from, to); }
     i32   __lamp_any_range_i32(i32 from, i32 to)   { return any< dom, i32 >(from, to); }
     i64   __lamp_any_range_i64(i64 from, i64 to)   { return any< dom, i64 >(from, to); }
+
+
+    i8    __lamp_any_varg_i8(int count, ...) {
+        va_list args;
+        va_start(args, count);
+        auto res = any< dom, i8  >(variadic_list(count, args));
+        va_end(args);
+        return res;
+    }
+
+    i16   __lamp_any_varg_i16(int count, ...) {
+        va_list args;
+        va_start(args, count);
+        auto res = any< dom, i16 >(variadic_list(count, args));
+        va_end(args);
+        return res;
+    }
+
+    i32   __lamp_any_varg_i32(int count, ...) {
+        va_list args;
+        va_start(args, count);
+        auto res = any< dom, i32 >(variadic_list(count, args));
+        fprintf(stderr, "here\n");
+        va_end(args);
+        return res;
+    }
+
+    i64   __lamp_any_varg_i64(int count, ...)   {
+        va_list args;
+        va_start(args, count);
+        auto res = any< dom, i64 >(variadic_list(count, args));
+        va_end(args);
+        return res;
+    }
 
     f32   __lamp_any_f32()   { return any< dom, f32 >(); }
     f64   __lamp_any_f64()   { return any< dom, f64 >(); }
