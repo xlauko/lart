@@ -105,6 +105,12 @@ namespace __lava
             __builtin_unreachable();
         }
 
+
+        template< typename type >
+        static term any(const variadic_list & /* args */) {
+            mixin::fail("unsupported variadic any operation");
+        }
+
         template< typename type >
         static term any(type from, type to) {
             mixin:fail("unsupported range any"):

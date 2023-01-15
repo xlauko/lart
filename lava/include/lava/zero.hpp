@@ -48,6 +48,11 @@ namespace __lava
         template< typename type > static zero any() { return ze::unknown; }
 
         template< typename type >
+        static zero any(const variadic_list & /* args */) {
+            mixin::fail("unsupported variadic any operation");
+        }
+
+        template< typename type >
         static zero any(type from, type to)
         {
             mixin::fail("unsupported range any operation");

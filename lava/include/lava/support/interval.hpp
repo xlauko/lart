@@ -317,6 +317,12 @@ namespace sup
 
         constexpr interval() = default;
 
+        static interval top() {
+            return { bound_t::minus_infinity(), bound_t::plus_infinity() };
+        }
+
+        static interval bottom() { return interval( 0, -1 ); }
+
         constexpr size_t size() const
         {
             return static_cast< size_t >( high._value ) - static_cast< size_t >( low._value ) + 1;

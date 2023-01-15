@@ -38,6 +38,10 @@ namespace __lava
         template< typename type > static unit lift( const type& ) { return {}; }
         template< typename type > static unit any() { return {}; }
 
+
+        template< typename type >
+        static unit any(const variadic_list & /* args */) { return {}; }
+
         template< typename type >
         static unit any(type /* from */, type /* to */) { return {}; }
 
