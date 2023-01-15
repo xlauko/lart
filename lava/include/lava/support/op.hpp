@@ -48,6 +48,9 @@ namespace __lava
         template< typename type > static optag any() { return tag::any; }
 
         template< typename type >
+        static optag any(const variadic_list & /* args */) { return tag::any; }
+
+        template< typename type >
         static optag any(type /* from */, type /* to */) { return tag::any; }
 
         template< typename size >

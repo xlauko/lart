@@ -57,6 +57,9 @@ namespace __lava
         template< typename type > static scalar any() { return { dom::template any< type >() }; }
 
         template< typename type >
+        static scalar any(const variadic_list &args) { return { dom::any(args) }; }
+
+        template< typename type >
         static scalar any(type from, type to) { return { dom::any(from, to) }; }
 
         template< typename type > static scalar concat( type l, type r ) { return { dom::op_concat( l, r ) }; }

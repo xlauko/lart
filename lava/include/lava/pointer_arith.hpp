@@ -72,6 +72,11 @@ namespace __lava
         static pv any() { return mixin::fail(); }
 
         template< typename type >
+        static pv any(const variadic_list & /* args */) {
+            mixin::fail("unsupported variadic any operation");
+        }
+
+        template< typename type >
         static pv any(type from, type to) { return mixin::fail(); }
 
         static pv lift( const constant< storage >& con )

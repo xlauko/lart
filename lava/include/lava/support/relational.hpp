@@ -74,6 +74,11 @@ namespace __lava
         static self any() { return base::template any< type >(); }
 
         template< typename type >
+        static self any(const variadic_list & args) {
+            return base::template any< type >(args);
+        }
+
+        template< typename type >
         static self any(type from, type to) { return base::any(from, to); }
 
         static void assume( self &a, bool expected )

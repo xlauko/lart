@@ -61,6 +61,11 @@ namespace __lava
         static self any() { return domain::template any< type >(); }
 
         template< typename type >
+        static self any(const variadic_list & args) {
+            return domain::template any< type >(args);
+        }
+
+        template< typename type >
         static self any(type from, type to) {
             return domain::template any< type >(from, to);
         }

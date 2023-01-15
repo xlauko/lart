@@ -20,10 +20,13 @@
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
+#include <cstdarg>
 
 #include <string>
 #include <memory>
 #include <limits>
+
+#include <sc/generator.hpp>
 
 namespace __lava
 {
@@ -44,6 +47,23 @@ namespace __lava
 
         ~domain_ref() { this->disown(); }
     };
+
+    struct variadic_list {
+        variadic_list(int c, va_list &list)
+            : count(c), args(list)
+        {}
+
+        template< typename type >
+        sc::generator< type > range() const {
+            for (int i = 0; i < count; ++i) {
+                co_yield type(va_arg(args, int));
+            }
+        }
+
+        int count;
+        va_list &args;
+    };
+
 
     using i1  = bool;
     using i8  = uint8_t;

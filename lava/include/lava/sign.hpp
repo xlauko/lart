@@ -79,8 +79,23 @@ namespace __lava
         static sign any() { return top(); }
 
         template< typename type >
-        static sign any(type /* from */, type /* to */) {
-            mixin::fail("unsupported range any");
+        static sign any(const variadic_list & /* args */) {
+            mixin::fail("unsupported variadic any operation");
+        }
+
+        template< typename type >
+        static sign any(type from, type to) {
+            if (to < from)
+                return bottom();
+            else if (from == 0)
+                return to == 0 ? se::eqz : se::gez;
+            else if (to == 0)
+                return se::lez;
+            else if (to < 0)
+                return se::ltz;
+            else if (from > 0)
+                return se::gtz;
+            return top();
         }
 
         template< typename size >

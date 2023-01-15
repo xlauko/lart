@@ -116,6 +116,16 @@ namespace __lava
             return { minus_infinity(), plus_infinity() };
         }
 
+
+        template< typename type >
+        static iv any(const variadic_list &args) {
+            auto res = interval_value::bottom();
+            for (auto v : args.range< type >()) {
+                res = join(res, interval_value(v, v));
+            }
+            return res;
+        }
+
         template< typename type >
         static iv any(type from, type to)
         {

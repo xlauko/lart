@@ -154,6 +154,11 @@ namespace __lava
             return { A::template any< type >(), B::template any< type >() };
         }
 
+        template< typename type > static pv any(const variadic_list &args)
+        {
+            return { A::template any< type >(args), B::template any< type >(args) };
+        }
+
         template< typename type > static pv any(type from, type to)
         {
             return { A::any(from, to), B::any(from, to) };
