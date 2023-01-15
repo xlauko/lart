@@ -388,11 +388,19 @@ namespace sup
 
         friend constexpr interval meet( const interval &l, const interval &r ) // intersection
         {
+            if (l.is_bottom())
+                return l;
+            if (r.is_bottom())
+                return r;
             return { std::max( l.low, r.low ), std::min( l.high, r.high ) };
         }
 
         friend constexpr interval join( const interval &l, const interval &r ) // union
         {
+            if (l.is_bottom())
+                return r;
+            if (r.is_bottom())
+                return l;
             return { std::min( l.low, r.low ), std::max( l.high, r.high ) };
         }
 
