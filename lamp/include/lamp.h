@@ -93,6 +93,11 @@ __lamp_i16  __lamp_any_i16( void );
 __lamp_i32  __lamp_any_i32( void );
 __lamp_i64  __lamp_any_i64( void );
 
+__lamp_i8    __lamp_any_range_i8(__lamp_i8 from, __lamp_i8 to);
+__lamp_i16   __lamp_any_range_i16(__lamp_i16 from, __lamp_i16 to);
+__lamp_i32   __lamp_any_range_i32(__lamp_i32 from, __lamp_i32 to);
+__lamp_i64   __lamp_any_range_i64(__lamp_i64 from, __lamp_i64 to);
+
 float    __lamp_any_f32  ( void );
 double   __lamp_any_f64  ( void );
 void    *__lamp_any_ptr  ( void );

@@ -48,7 +48,7 @@ namespace __lava
         template< typename type > static optag any() { return tag::any; }
 
         template< typename type >
-        static optag any(type /* from */, type /* to */) { return mixin::fail("unsupported"); }
+        static optag any(type /* from */, type /* to */) { return tag::any; }
 
         template< typename size >
         static optag op_alloca( const size&, uint8_t ) { return tag::alloca; }

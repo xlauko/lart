@@ -32,7 +32,7 @@
 #define __lart_noalias         __lart_noalias_return __lart_noalias_args
 #define __lart_unused          __attribute__((unused))
 #define __lart_used            __attribute__((used))
-#define __lart_export          __attribute__((weak))
+#define __lart_export
 #define __lart_stub       { __builtin_unreachable(); }
 
 #define __lart_ignore_diagnostic \

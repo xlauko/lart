@@ -87,6 +87,11 @@ namespace lart::runtime
             return insert_and_annotate_operation("any_" + name, fty);
         }
 
+        sc::function register_range_any(const std::string &name, sc::type to) {
+            auto fty = llvm::FunctionType::get( to, std::vector(2, to), false );
+            return insert_and_annotate_operation("any_range_" + name, fty);
+        }
+
         sc::function register_lift(const std::string &name, sc::type from) {
             auto fty = llvm::FunctionType::get( from, { from }, false );
             return insert_and_annotate_operation("lift_" + name, fty);
