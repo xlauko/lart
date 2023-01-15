@@ -20,11 +20,14 @@
 #include <runtime/stream.hpp>
 #include <runtime/config.hpp>
 #include <lava/support/tristate.hpp>
+#include <lava/support/base.hpp>
 
 #include <array>
 
 namespace __lamp
 {
+    using __lava::variadic_list;
+
     using namespace std::literals;
 
     template< typename domain >
@@ -145,6 +148,14 @@ namespace __lamp
             auto s = stream();
             auto res = domain::template any< type >();
             s << traced_result( "any", res ) << "\n";
+            return res;
+        }
+
+        template< typename type >
+        static self any(const variadic_list &args) {
+            auto s = stream();
+            auto res = domain::template any< type >(args);
+            s << traced_result( "any< range >", res ) << "\n";
             return res;
         }
 

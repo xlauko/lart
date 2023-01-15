@@ -29,7 +29,9 @@
 namespace __lamp
 {
     using bw = __lava::bitwidth_t;
-    using tristate = __lava::tristate;
+
+    using __lava::tristate;
+    using __lava::variadic_list;
 
     template< typename type, typename tag >
     struct tagged_value : type, tag
@@ -272,10 +274,19 @@ namespace __lamp
         // static constant lower( sref a ) { return cast( wrap( op::lower ), a ); }
 
         template< typename type >
-        static self any() { return sl::scalar_any_dom::template any< type >(); }
+        static self any() {
+            return sl::scalar_any_dom::template any< type >();
+        }
 
         template< typename type >
-        static self any(type from, type to) { return sl::scalar_any_dom::any(from, to); }
+        static self any(const variadic_list &args) {
+            return sl::scalar_any_dom::template any< type >(args);
+        }
+
+        template< typename type >
+        static self any(type from, type to) {
+            return sl::scalar_any_dom::any(from, to);
+        }
 
         static void assume( self &a, bool c ) { cast_void( wrap( op::assume, c ), a  ); }
         static tristate to_tristate( sref a )
